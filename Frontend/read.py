@@ -1,0 +1,1 @@
+#eta only for sona jonno. gui.py file ta del kore tui ei folder e kaj kor. 
