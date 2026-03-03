@@ -1,31 +1,38 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Login</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FileShare | Login</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  
-<button class="toggle-btn" onclick="toggleMode()">Switch Mode</button>
+
+<header class="main-header">
+    <h1 class="project-title">Online File Sharing System</h1>
+    <button class="toggle-btn" onclick="toggleMode()">✨ Switch Mode</button>
+</header>
 
 <div class="container">
     <div class="login-box">
+        <h2>Welcome Back</h2>
+        <p class="subtitle">Securely access your cloud storage</p>
         
-        <input type="text" id="email" placeholder="Email or phone number">
-      <br>
-        <input type="password" id="password" placeholder="Password">
-      <br>
+        <div class="input-group">
+            <input type="text" id="email" placeholder="Email address" required>
+            <input type="password" id="password" placeholder="Password" required>
+        </div>
 
-        <button id="loginBtn" class="login-btn">Login</button>
-      <br>
-        <button id="signupBtn" class="login-btn">Sign Up</button>
-
+        <button id="loginBtn" class="login-btn">Sign In</button>
         <a href="#" class="forgot">Forgot password?</a>
+        
+        <div class="divider"><span>OR</span></div>
 
-        <hr>
-
+        <p class="signup-text">New to the platform?</p>
+        <button id="signupBtn" class="signup-secondary-btn">Create Account</button>
+        
         <p id="message"></p>
-
     </div>
 </div>
 
