@@ -1,75 +1,44 @@
-let loginButton = document.getElementById("loginBtn");
-let emailInput = document.getElementById("email");
-let passwordInput = document.getElementById("password");
-let message = document.getElementById("message");
+const loginButton = document.getElementById("loginBtn");
+const emailInput = document.getElementById("email");
+const passwordInput = document.getElementById("password");
+const message = document.getElementById("message");
 
 loginButton.addEventListener("click", function() {
-
-    let email = emailInput.value;
-    let password = passwordInput.value;
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
 
     if(email === "" || password === "") {
-        message.textContent = "Please fill all fields";
-        message.style.color = "red";
+        showMessage("Please fill all fields", "red");
     }
     else if(!email.includes("@")) {
-        message.textContent = "Enter valid email";
-        message.style.color = "red";
+        showMessage("Enter valid email", "red");
     }
     else if(password.length < 6) {
-        message.textContent = "Password must be at least 6 characters";
-        message.style.color = "red";
+        showMessage("Password must be at least 6 characters", "red");
     }
     else {
-        message.textContent = "Login Successful";
-        message.style.color = "green";
+        showMessage("Login Successful", "#10b981");
     }
 });
-// Start in dark mode
-document.body.classList.add("dark");
 
-function toggleMode() {
-    if (document.body.classList.contains("dark")) {
-        document.body.classList.remove("dark");
-        document.body.classList.add("light");
-    } else {
-        document.body.classList.remove("light");
-        document.body.classList.add("dark");
-    }
+function showMessage(text, color) {
+    message.textContent = text;
+    message.style.color = color;
+    message.style.marginTop = "15px";
+    message.style.fontWeight = "bold";
 }
-// Start in dark mode
-document.body.classList.add("dark");
 
+// Dark/Light Mode Logic
 function toggleMode() {
-    if (document.body.classList.contains("dark")) {
-        document.body.classList.remove("dark");
-        document.body.classList.add("light");
+    const body = document.body;
+    if (body.classList.contains("dark")) {
+        body.classList.replace("dark", "light");
     } else {
-        document.body.classList.remove("light");
-        document.body.classList.add("dark");
-    }
-}
-// Start in dark mode
-document.body.classList.add("dark");
-
-function toggleMode() {
-    if (document.body.classList.contains("dark")) {
-        document.body.classList.remove("dark");
-        document.body.classList.add("light");
-    } else {
-        document.body.classList.remove("light");
-        document.body.classList.add("dark");
+        body.classList.replace("light", "dark");
     }
 }
 
-document.body.classList.add("dark");
-
-function toggleMode() {
-    if (document.body.classList.contains("dark")) {
-        document.body.classList.remove("dark");
-        document.body.classList.add("light");
-    } else {
-        document.body.classList.remove("light");
-        document.body.classList.add("dark");
-    }
-}
+// Set default mode on load
+document.addEventListener("DOMContentLoaded", () => {
+    document.body.classList.add("dark");
+});
