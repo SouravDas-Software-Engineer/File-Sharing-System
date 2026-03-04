@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // If someone tries to access this page directly without an OTP, send them back
     if (!email || !otp) {
         alert("Unauthorized access. Please verify your email first.");
-        window.location.href = "index.html";
+        window.location.href = "index.html"; 
     }
 
     modeBtn.addEventListener("click", function () {
