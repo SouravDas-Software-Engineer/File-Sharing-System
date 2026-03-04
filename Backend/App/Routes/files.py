@@ -44,3 +44,39 @@ The Online File Sharing System Team
         print(f"Failed to send email to {to_email}. Error: {e}")
 
 # end
+
+#user greetings
+
+def send_welcome_email(to_email: str):
+    smtp_server = os.getenv("SMTP_SERVER")
+    smtp_port = int(os.getenv("SMTP_PORT"))
+    sender_email = os.getenv("SENDER_EMAIL")
+    sender_password = os.getenv("SENDER_PASSWORD") 
+    
+    msg = MIMEMultipart()
+    msg['From'] = sender_email
+    msg['To'] = to_email
+    msg['Subject'] = "Welcome to Online File Sharing System!"
+    
+    body = f"""Hello!
+
+Welcome to the Online File Sharing System. We are excited to have you on board.
+
+Your account has been successfully created. You can now log in to securely store, manage, and share your files.
+
+If you ever forget your password, you can easily reset it from the login page.
+
+Best regards,
+The Online File Sharing System Team
+"""
+    
+    msg.attach(MIMEText(body, 'plain'))
+    
+    try:
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls()
+        server.login(sender_email, sender_password)
+        server.send_message(msg)
+        server.quit()
+    except Exception as e:
+        print(f"Failed to send welcome email to {to_email}. Error: {e}")

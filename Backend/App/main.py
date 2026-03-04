@@ -9,8 +9,8 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from dotenv import load_dotenv, find_dotenv
 
 
-from Routes.user import check_email_exists, update_user_password, create_user
-from Routes.files import send_password_reset_email
+from Routes.user import check_email_exists, update_user_password, create_user, authenticate_user
+from Routes.files import send_password_reset_email, send_welcome_email
 
 load_dotenv(find_dotenv())
 
@@ -37,6 +37,11 @@ app.add_middleware(
 )
 
 # --- Pydantic Models for incoming data ---
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+
 class RegisterRequest(BaseModel):
     email: str
     password: str
@@ -53,16 +58,33 @@ class ResetRequest(BaseModel):
     otp: str
     new_password: str
 
+# Add the login route 
+@app.post("/login")
+async def login(request: LoginRequest):
+    is_authenticated = await authenticate_user(app.db, request.email, request.password)
+    
+    if not is_authenticated:
+        # Returning a 401 Unauthorized status is standard for failed logins
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    BackgroundTasks.add_task(send_welcome_email, request.email)
+    return {"message": "Login successful", "status": "success"}
 
+#added signup route
 @app.post("/register")
-async def register(request: RegisterRequest):
+# 1. Look right here at the end of this line:
+async def register(request: RegisterRequest, background_tasks: BackgroundTasks):
+    
     success = await create_user(app.db, request.email, request.password)
     
     if not success:
         raise HTTPException(status_code=400, detail="Email is already registered")
         
+    # 2. Now the spelling matches exactly what is in the parentheses above
+    background_tasks.add_task(send_welcome_email, request.email)
+        
     return {"message": "User created successfully", "status": "success"}
 
+# added forgot passord route
 # Temporary storage for OTPs
 otp_storage = {}
 
