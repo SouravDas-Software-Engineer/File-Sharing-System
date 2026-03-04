@@ -11,7 +11,7 @@ body {
     min-height: 100vh;
 }
 
-/* 🌑 DARK MODE BACKGROUND */
+/* 🌑 DARK MODE */
 body.dark {
     background: linear-gradient(-45deg, #1f1c2c, #928dab, #232526, #414345);
     background-size: 400% 400%;
@@ -19,7 +19,7 @@ body.dark {
     color: white;
 }
 
-/* ☀ LIGHT MODE BACKGROUND */
+/* ☀ LIGHT MODE */
 body.light {
     background: linear-gradient(-45deg, #e3f2fd, #ffffff, #fce4ec, #e8f5e9);
     background-size: 400% 400%;
@@ -27,7 +27,7 @@ body.light {
     color: black;
 }
 
-/* Animated gradient */
+/* Gradient Animation */
 @keyframes gradientBG {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
@@ -42,7 +42,7 @@ body.light {
     padding: 20px 50px;
 }
 
-/* Toggle button */
+/* Toggle Button */
 .toggle-btn {
     border: none;
     background: rgba(255,255,255,0.2);
@@ -58,7 +58,7 @@ body.light {
     transform: scale(1.1);
 }
 
-/* Center container */
+/* Center Container */
 .container {
     display: flex;
     justify-content: center;
@@ -78,12 +78,11 @@ body.light {
     transition: 0.4s;
 }
 
-/* Light box override */
 body.light .login-box {
     background: rgba(255, 255, 255, 0.7);
 }
 
-/* Title */
+/* Text */
 .login-box h2 {
     margin-bottom: 10px;
 }
