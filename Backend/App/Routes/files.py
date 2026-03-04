@@ -16,7 +16,7 @@ def send_password_reset_email(to_email: str, otp: str):
     msg = MIMEMultipart()
     msg['From'] = sender_email
     msg['To'] = to_email
-    msg['Subject'] = "Your OTP Code"
+    msg['Subject'] = "Online File Sharing- OTP for Password Change"
     
     # Add the OTP to the email body
     body = f"""Hello,
