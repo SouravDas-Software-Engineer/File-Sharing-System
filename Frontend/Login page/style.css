@@ -11,7 +11,7 @@ body {
     min-height: 100vh;
 }
 
-/* 🌑 DARK MODE BACKGROUND */
+/* 🌑 DARK MODE */
 body.dark {
     background: linear-gradient(-45deg, #1f1c2c, #928dab, #232526, #414345);
     background-size: 400% 400%;
@@ -19,7 +19,7 @@ body.dark {
     color: white;
 }
 
-/* ☀ LIGHT MODE BACKGROUND */
+/* ☀ LIGHT MODE */
 body.light {
     background: linear-gradient(-45deg, #e3f2fd, #ffffff, #fce4ec, #e8f5e9);
     background-size: 400% 400%;
@@ -27,7 +27,7 @@ body.light {
     color: black;
 }
 
-/* Animated gradient */
+/* Gradient Animation */
 @keyframes gradientBG {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
@@ -42,7 +42,13 @@ body.light {
     padding: 20px 50px;
 }
 
-/* Toggle button */
+/* Project Title */
+.project-title {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+/* Toggle Button */
 .toggle-btn {
     border: none;
     background: rgba(255,255,255,0.2);
@@ -58,7 +64,7 @@ body.light {
     transform: scale(1.1);
 }
 
-/* Center container */
+/* Center Container */
 .container {
     display: flex;
     justify-content: center;
@@ -78,16 +84,16 @@ body.light {
     transition: 0.4s;
 }
 
-/* Light box override */
 body.light .login-box {
     background: rgba(255, 255, 255, 0.7);
 }
 
-/* Title */
+/* Heading */
 .login-box h2 {
     margin-bottom: 10px;
 }
 
+/* Subtitle */
 .subtitle {
     font-size: 14px;
     margin-bottom: 20px;
@@ -102,9 +108,10 @@ body.light .login-box {
     border: none;
     margin-bottom: 20px;
     outline: none;
+    font-size: 14px;
 }
 
-/* Button */
+/* Login Button */
 .login-btn {
     width: 100%;
     padding: 12px;
@@ -114,6 +121,7 @@ body.light .login-box {
     color: white;
     cursor: pointer;
     transition: 0.3s;
+    font-size: 15px;
 }
 
 .login-btn:hover {
@@ -128,9 +136,14 @@ body.light .login-box {
     opacity: 0.7;
 }
 
-/* Link */
+/* Links */
 .forgot {
     text-decoration: none;
     font-size: 14px;
     color: #4CAF50;
+    transition: 0.3s;
+}
+
+.forgot:hover {
+    text-decoration: underline;
 }
