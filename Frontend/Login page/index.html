@@ -23,27 +23,29 @@
         </p>
 
         <div class="input-group">
-            <input type="email" placeholder="Enter your email">
+            <input type="email" id="email" placeholder="Enter your email">
         </div>
 
         <div class="input-group">
-            <input type="password" placeholder="Enter your password">
+            <input type="password" id="password" placeholder="Enter your password">
         </div>
 
-        <button class="login-btn">Login</button>
+        <button id="loginBtn" class="login-btn">Login</button>
+        
+        <p id="message"></p>
 
-        <!-- Forgot password right side -->
         <div style="text-align: right; margin-top: 10px;">
-            <a href="/Frontend/forgot-password/"class="forgot">Forgot Password?</a>
+            <a href="/Frontend/forgot-password/" class="forgot">Forgot Password?</a>
         </div>
 
-        <div class="divider"><span>OR</span></div>
+        <div class="divider"><span>-------------------OR---------------------</span></div>
 
-        <!-- Sign up button -->
-        <a href="signup.html" class="forgot">   Sign Up</a>
+        <a href="/Frontend/Dashboard/index.html" class="login-btn" style="display: block; text-decoration: none; text-align: center;">Sign Up</a>
 
     </div>
 </div>
+
+<script src="script.js"></script>
 
 <script>
     const modeBtn = document.getElementById("modeBtn");
