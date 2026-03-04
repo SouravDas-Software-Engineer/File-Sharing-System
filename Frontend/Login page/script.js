@@ -59,7 +59,7 @@ loginButton.addEventListener("click", async function () {
 
             // Redirect after login
             setTimeout(() => {
-                window.location.href = "dashboard.html";
+                window.location.href = "/Frontend/Dashboard/index.html";
             }, 1000);
 
         } else {
