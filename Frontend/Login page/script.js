@@ -58,7 +58,7 @@ loginButton.addEventListener("click", async function () {
             }
 
             setTimeout(() => {
-                window.location.href = "dashboard.html";
+                window.location.href = "/Frontend/Dashboard/index.html";
             }, 1000);
 
         } else {
