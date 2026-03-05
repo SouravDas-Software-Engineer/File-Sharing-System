@@ -64,12 +64,14 @@ async def login(request: LoginRequest):
     is_authenticated = await authenticate_user(app.db, request.email, request.password)
     
     if not is_authenticated:
-        # Returning a 401 Unauthorized status is standard for failed logins
         raise HTTPException(status_code=401, detail="Invalid email or password")
-    BackgroundTasks.add_task(send_welcome_email, request.email)
+    
+    # 2. Removed the add_task line so no email is sent on login
+    
     return {"message": "Login successful", "status": "success"}
-
 #added signup route
+
+
 @app.post("/register")
 # 1. Look right here at the end of this line:
 async def register(request: RegisterRequest, background_tasks: BackgroundTasks):

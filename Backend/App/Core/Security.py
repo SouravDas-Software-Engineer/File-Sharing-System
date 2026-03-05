@@ -13,11 +13,6 @@ SECRET_KEY = "AOLvPp]Y_I?0xWg0&NeiYLd-AmLAl6c8>gV/(|YFQl," #jwt key
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-
-SECRET_KEY = "your-secret-key"  # use .env in production
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
-
 # PASSWORD HASHING SETUP
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
