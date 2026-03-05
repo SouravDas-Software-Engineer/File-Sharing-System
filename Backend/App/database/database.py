@@ -6,3 +6,5 @@ client = AsyncIOMotorClient(MONGODB_URL)
 db = client.auth_db
 users_collection = db.get_collection("users")
 #end
+
+#hi
