@@ -60,14 +60,13 @@ signupButton.addEventListener("click", async function () {
         const data = await response.json();
 
         // ✅ Signup Success
+        
         if (response.ok) {
-
             showMessage("Signup Successful ✅", "#10b981");
-
             setTimeout(() => {
-                window.location.href = "index.html";
+        // Redirect them to the actual login page
+            window.location.href = "/Frontend/Login page/index.html"; 
             }, 1200);
-
         } else {
             showMessage(data.detail || "Signup Failed", "red");
         }
