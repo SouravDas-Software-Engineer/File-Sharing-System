@@ -1,10 +1,13 @@
+from pymongo import MongoClient
 
-from motor.motor_asyncio import AsyncIOMotorClient
-#for loginpage api -start
-MONGODB_URL = "mongodb://localhost:27017"  # Replace with your actual URL
-client = AsyncIOMotorClient(MONGODB_URL)
-db = client.auth_db
-users_collection = db.get_collection("users")
-#end
+# MongoDB connection
+MONGO_URL = "mongodb://localhost:27017/"
 
-#hi
+client = MongoClient(MONGO_URL)
+
+# Database name
+db = client["file_sharing_app"]
+
+# Collections
+files_collection = db["files"]
+users_collection = db["users"]
