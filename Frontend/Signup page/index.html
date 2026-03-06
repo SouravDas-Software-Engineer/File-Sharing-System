@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sign Up | Online File Sharing System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="dark">
+
+<header class="main-header">
+    <h1 class="project-title">Online File Sharing System</h1>
+    <button class="toggle-btn" id="modeBtn">🌙</button>
+</header>
+
+<div class="container">
+    <div class="login-box">
+
+        <h2>Create Account</h2>
+
+        <p class="subtitle">
+            Sign up to share files securely.
+        </p>
+
+        <!-- Username -->
+        <div class="input-group">
+            <input type="text" id="username" placeholder="Enter username" required>
+        </div>
+
+        <!-- Email -->
+        <div class="input-group">
+            <input type="email" id="email" placeholder="Enter your email" required>
+        </div>
+
+        <!-- Password -->
+        <div class="input-group">
+            <input type="password" id="password" placeholder="Create password" required>
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="input-group">
+            <input type="password" id="confirmPassword" placeholder="Confirm password" required>
+        </div>
+
+        <!-- Signup Button -->
+        <button class="login-btn" id="signupBtn">Sign Up</button>
+
+        <!-- Message -->
+        <p id="message"></p>
+
+        <div class="divider"><span>OR</span></div>
+
+        <!-- Back to Login -->
+        <a href="/Frontend/Login page" class="forgot">
+            Already have an account? Login
+        </a>
+        <a href="/Frontend/forgot-password/script.js" class="forgot">Sign Up</a>
+
+
+    </div>
+</div>
+
+<!-- Dark Mode Script -->
+<script>
+const modeBtn = document.getElementById("modeBtn");
+
+modeBtn.addEventListener("click", function () {
+
+    document.body.classList.toggle("dark");
+    document.body.classList.toggle("light");
+
+    if (document.body.classList.contains("dark")) {
+        modeBtn.textContent = "🌙";
+    } else {
+        modeBtn.textContent = "☀️";
+    }
+
+});
+</script>
+
+<!-- Signup Script -->
+<script src="signup.js"></script>
+
+
+</body>
+</html>

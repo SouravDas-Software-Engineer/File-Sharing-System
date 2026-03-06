@@ -1,4 +1,5 @@
-// Get Elements
+document.addEventListener("DOMContentLoaded", () => {
+
 const loginButton = document.getElementById("loginBtn");
 const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
@@ -11,13 +12,13 @@ loginButton.addEventListener("click", async function () {
     const email = emailInput.value.trim();
     const password = passwordInput.value;
 
-    // ✅ 1. Empty Field Check
+    // 1️⃣ Empty Field Check
     if (email === "" || password === "") {
         showMessage("Please fill all fields", "red");
         return;
     }
 
-    // ✅ 2. Email Validation
+    // 2️⃣ Email Validation
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!emailPattern.test(email)) {
@@ -25,7 +26,7 @@ loginButton.addEventListener("click", async function () {
         return;
     }
 
-    // ✅ 3. Password Validation
+    // 3️⃣ Password Validation
     if (password.length < 6) {
         showMessage("Password must be at least 6 characters", "red");
         return;
@@ -52,12 +53,10 @@ loginButton.addEventListener("click", async function () {
 
             showMessage("Login Successful ✅", "#10b981");
 
-            // Save JWT Token (if backend sends it)
             if (data.access_token) {
                 localStorage.setItem("token", data.access_token);
             }
 
-            // Redirect after login
             setTimeout(() => {
                 window.location.href = "/Frontend/Dashboard/index.html";
             }, 1000);
@@ -67,29 +66,27 @@ loginButton.addEventListener("click", async function () {
         }
 
     } catch (error) {
+
         console.error("Error:", error);
         showMessage("Server connection failed ❌", "red");
+
     }
+
 });
 
 
 // ================= MESSAGE FUNCTION =================
 function showMessage(text, color) {
+
     message.textContent = text;
     message.style.color = color;
     message.style.marginTop = "15px";
     message.style.fontWeight = "bold";
-}
 
-
-// ================= DARK / LIGHT MODE =================
-function toggleMode() {
-    document.body.classList.toggle("dark");
-    document.body.classList.toggle("light");
 }
 
 
 // ================= DEFAULT MODE =================
-document.addEventListener("DOMContentLoaded", () => {
-    document.body.classList.add("dark");
+document.body.classList.add("dark");
+
 });
