@@ -1,7 +1,7 @@
 from pymongo import MongoClient
-
+import os
 # MongoDB connection
-MONGO_URL = "mongodb://localhost:27017/"
+MONGO_URL = os.getenv("MONGO_URL")
 
 client = MongoClient(MONGO_URL)
 
