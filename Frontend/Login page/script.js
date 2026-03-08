@@ -1,92 +1,113 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-const loginButton = document.getElementById("loginBtn");
-const emailInput = document.getElementById("email");
-const passwordInput = document.getElementById("password");
-const message = document.getElementById("message");
+    const loginButton = document.getElementById("loginBtn");
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+    const message = document.getElementById("message");
 
+    // ================= LOGIN FUNCTION =================
+    loginButton.addEventListener("click", async function () {
 
-// ================= LOGIN FUNCTION =================
-loginButton.addEventListener("click", async function () {
+        const email = emailInput.value.trim();
+        const password = passwordInput.value;
 
-    const email = emailInput.value.trim();
-    const password = passwordInput.value;
-
-    // 1️⃣ Empty Field Check
-    if (email === "" || password === "") {
-        showMessage("Please fill all fields", "red");
-        return;
-    }
-
-    // 2️⃣ Email Validation
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!emailPattern.test(email)) {
-        showMessage("Enter a valid email address", "red");
-        return;
-    }
-
-    // 3️⃣ Password Validation
-    if (password.length < 6) {
-        showMessage("Password must be at least 6 characters", "red");
-        return;
-    }
-
-    // ================= API CONNECTION =================
-    try {
-
-        const response = await fetch("http://127.0.0.1:8000/login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                email: email,
-                password: password
-            })
-        });
-
-        const data = await response.json();
-
-        // ✅ Login Success
-        if (response.ok) {
-
-            showMessage("Login Successful ✅", "#10b981");
-
-            if (data.access_token) {
-                localStorage.setItem("token", data.access_token);
-            }
-
-            setTimeout(() => {
-                window.location.href = "/Frontend/Dashboard/index.html";
-            }, 1000);
-
-        } else {
-            showMessage(data.detail || "Login Failed", "red");
+        // 1. Empty Field Check
+        if (email === "" || password === "") {
+            showMessage("Please fill all fields", "red");
+            return;
         }
 
-    } catch (error) {
+        // 2. Email Validation
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(email)) {
+            showMessage("Enter a valid email address", "red");
+            return;
+        }
 
-        console.error("Error:", error);
-        showMessage("Server connection failed ❌", "red");
+        // 3. Password Validation
+        if (password.length < 6) {
+            showMessage("Password must be at least 6 characters", "red");
+            return;
+        }
 
+        // ================= API CONNECTION =================
+        try {
+            const response = await fetch("http://127.0.0.1:8000/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password
+                })
+            });
+
+            const data = await response.json();
+
+            // Login Success
+            if (response.ok && data.status === "success") {
+                showMessage("Login Successful ✅", "#10b981");
+
+                // Save the username to unlock the dashboard
+                if (data.username) {
+                    localStorage.setItem("username", data.username);
+                }
+
+                // Redirect to dashboard
+                setTimeout(() => {
+                        // Step back one folder, then enter the Dashboard folder
+                        window.location.href = '../Dashboard/index.html';
+                 }, 1000);
+            } else {
+                // Show specific error from backend if available
+                showMessage(data.detail || "Login Failed", "red");
+            }
+
+        } catch (error) {
+            console.error("Error:", error);
+            showMessage("Server connection failed ❌", "red");
+        }
+    });
+
+    // ================= MESSAGE FUNCTION =================
+    function showMessage(text, color) {
+        message.textContent = text;
+        message.style.color = color;
+        message.style.marginTop = "15px";
+        message.style.fontWeight = "bold";
     }
 
-});
+   // ================= THEME MEMORY LOGIC =================
+  const modeBtn = document.getElementById("modeBtn");
+  
+  // 1. Check memory for a saved theme (default to dark if none exists)
+  const savedTheme = localStorage.getItem("fileShareTheme") || "dark";
+  
+  // 2. Apply the saved theme immediately on load
+  if (savedTheme === "dark") {
+      document.body.classList.add("dark");
+      document.body.classList.remove("light");
+      if(modeBtn) modeBtn.textContent = "🌙";
+  } else {
+      document.body.classList.add("light");
+      document.body.classList.remove("dark");
+      if(modeBtn) modeBtn.textContent = "☀️";
+  }
 
+  // 3. Toggle button clicks update the screen AND the memory
+  if(modeBtn) {
+      modeBtn.addEventListener("click", function () {
+          document.body.classList.toggle("dark");
+          document.body.classList.toggle("light");
 
-// ================= MESSAGE FUNCTION =================
-function showMessage(text, color) {
-
-    message.textContent = text;
-    message.style.color = color;
-    message.style.marginTop = "15px";
-    message.style.fontWeight = "bold";
-
-}
-
-
-// ================= DEFAULT MODE =================
-document.body.classList.add("dark");
-
-});
+          if (document.body.classList.contains("dark")) {
+              modeBtn.textContent = "🌙";
+              localStorage.setItem("fileShareTheme", "dark"); // Save to memory
+          } else {
+              modeBtn.textContent = "☀️";
+              localStorage.setItem("fileShareTheme", "light"); // Save to memory
+          }
+      });
+  }
+}); // <--- THIS WAS THE MISSING PIECE!

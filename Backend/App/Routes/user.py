@@ -28,20 +28,21 @@ async def create_user(db, email: str, password: str, username: str = None) -> bo
     return result.inserted_id is not None
 
 # Updated to patch older users with a random username
-async def authenticate_user(db, email: str, password: str) -> bool:
+# In user.py - update the authenticate_user function
+async def authenticate_user(db, email: str, password: str):
     user_document = await db.users.find_one({"email": email})
     
     if not user_document:
-        return False
+        return None
         
     if user_document.get("password") == password:
-        # If this is an older user missing a username, give them one now
         if "username" not in user_document:
             new_username = f"User{random.randint(10000, 99999)}"
             await db.users.update_one(
                 {"email": email}, 
                 {"$set": {"username": new_username}}
             )
-        return True
+            return new_username
+        return user_document.get("username")
         
-    return False
+    return None
