@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Online File Sharing System</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+</head>
+
+<body>
+
+<div class="container">
+
+<!-- Sidebar -->
+
+<div class="sidebar">
+
+<h2>📦 FileShare</h2>
+
+<ul>
+<li>🏠 Dashboard</li>
+<li>📁 My Files</li>
+<li>📤 Upload Files</li>
+<li>🔗 Shared With Me</li>
+<li>🕒 Recent Files</li>
+<li>💾 Storage</li>
+<li>🗑 Trash</li>
+<li>⚙ Settings</li>
+</ul>
+
+</div>
+
+<!-- Main -->
+
+<div class="main">
+
+<h1>Online File Sharing System</h1>
+
+<!-- Top Bar -->
+
+<div class="topbar">
+
+<input type="text" id="searchInput" placeholder="Search files..." onkeyup="searchFiles()">
+
+<div>
+<button class="toggle-btn" onclick="toggleDarkMode()">
+Dark Mode
+</button>
+<span class="bell">🔔</span>
+<span class="user">User</span>
+</div>
+
+</div>
+
+<!-- Stats -->
+
+<div class="stats">
+
+<div class="card">
+<p>Files Uploaded</p>
+<h2>128</h2>
+</div>
+
+<div class="card">
+<p>Storage Used</p>
+<h2>6.8GB</h2>
+</div>
+
+<div class="card">
+<p>Shared Links</p>
+<h2>24</h2>
+</div>
+
+<div class="card">
+<p>Total Downloads</p>
+<h2>542</h2>
+</div>
+
+</div>
+
+<!-- Send / Receive -->
+
+<div class="transfer">
+
+<div class="circle" onclick="sendFile()">
+<i class="fas fa-upload"></i>
+Send
+</div>
+
+<div class="circle" onclick="receiveFile()">
+<i class="fas fa-download"></i>
+Receive
+</div>
+
+</div>
+</div>
+
+</div>
+
+<!-- Upload -->
+
+<div class="upload-box">
+
+<h3>Upload File</h3>
+
+<p>Drag & Drop files here</p>
+
+<input type="file" id="fileInput">
+
+<div class="progress-bar">
+<div id="progress"></div>
+</div>
+
+</div>
+
+<!-- Storage -->
+
+<div class="storage-box">
+
+<h3>Storage Usage</h3>
+
+<div class="storage-bar">
+<div class="storage-fill"></div>
+</div>
+
+<p>6.8GB of 10GB used</p>
+
+</div>
+
+<!-- Recent Files -->
+
+<h2>Recent Files</h2>
+
+<table id="fileTable">
+
+<tr>
+<th>File</th>
+<th>Size</th>
+<th>Uploaded</th>
+<th>Actions</th>
+</tr>
+
+<tr>
+<td onclick="previewFile('files/report.pdf')">📄 report.pdf</td>
+<td>2.5 MB</td>
+<td>Today</td>
+<td>
+<button onclick="downloadFile()">⬇</button>
+<button onclick="shareFile()">🔗</button>
+<button onclick="deleteFile(this)">🗑</button>
+</td>
+</tr>
+
+<tr>
+<td onclick="previewFile('files/video.mp4')">🎬 video.mp4</td>
+<td>1.8 GB</td>
+<td>Yesterday</td>
+<td>
+<button onclick="downloadFile()">⬇</button>
+<button onclick="shareFile()">🔗</button>
+<button onclick="deleteFile(this)">🗑</button>
+</td>
+</tr>
+
+<tr>
+<td onclick="previewFile('files/project.zip')">🗜 project.zip</td>
+<td>450 MB</td>
+<td>Mar 10</td>
+<td>
+<button onclick="downloadFile()">⬇</button>
+<button onclick="shareFile()">🔗</button>
+<button onclick="deleteFile(this)">🗑</button>
+</td>
+</tr>
+
+</table>
+
+</div>
+
+</div>
+
+<!-- Upload Message -->
+
+<div id="uploadMessage" class="upload-message">
+File Uploaded Successfully
+</div>
+
+<!-- Preview Modal -->
+
+<div id="previewModal" class="modal">
+
+<div class="modal-content">
+
+<span class="close" onclick="closePreview()">×</span>
+
+<iframe id="previewFrame"></iframe>
+
+</div>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
