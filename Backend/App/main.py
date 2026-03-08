@@ -61,17 +61,18 @@ class ResetRequest(BaseModel):
 # Add the login route 
 @app.post("/login")
 async def login(request: LoginRequest):
-    is_authenticated = await authenticate_user(app.db, request.email, request.password)
+    username = await authenticate_user(app.db, request.email, request.password)
     
-    if not is_authenticated:
+    if not username:
         raise HTTPException(status_code=401, detail="Invalid email or password")
     
-    # 2. Removed the add_task line so no email is sent on login
-    
-    return {"message": "Login successful", "status": "success"}
+    return {
+        "message": "Login successful", 
+        "status": "success",
+        "username": username # Sending the username back
+    }
+
 #added signup route
-
-
 @app.post("/register")
 async def register(request: RegisterRequest, background_tasks: BackgroundTasks):
     # Pass the username to the database function

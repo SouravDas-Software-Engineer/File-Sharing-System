@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Profile specific styles */
+    .profile-card { background: var(--bg-card); padding: 40px; border-radius: 12px; display: flex; gap: 30px; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.03); margin-top: 20px;}
+    .profile-avatar { width: 100px; height: 100px; border-radius: 50%; background: #eff6ff; color: #3b82f6; display: flex; align-items: center; justify-content: center; font-size: 40px; }
+    .profile-details h2 { margin-bottom: 5px; color: var(--text-main); }
+    .profile-details p { color: var(--text-muted); margin-bottom: 15px; }
+    .btn-primary { background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 500; }
+  </style>
+<script>
+  const currentUser = localStorage.getItem('username');
+  
+  if (!currentUser) {
+    // Step back one folder, then enter the Login page folder
+    window.location.href = '../Login page/index.html'; 
+  }
+</script>
+</head>
+<body>
+    <script>
+        const earlyTheme = localStorage.getItem('fileShareTheme') || 'dark';
+    if (earlyTheme === 'dark') {
+      document.body.classList.add('dark-mode');
+    } else {
+      document.body.classList.remove('dark-mode');
+    }
+    </script>
+<div class="dashboard">
+  <div class="sidebar">
+    <h2 class="logo"><i class="fa-solid fa-layer-group" style="color: #4facfe;"></i> FileShare</h2>
+    <ul>
+      <li><a href="index.html" style="text-decoration: none; color: inherit; display: flex; gap: 15px;"><i class="fa-solid fa-house"></i> Dashboard</a></li>
+      <li class="active"><i class="fa-solid fa-user"></i> My Profile</li>
+    </ul>
+  </div>
+
+  <div class="main">
+    <h2 class="section-title">My Profile</h2>
+    <div class="profile-card">
+      <div class="profile-avatar">
+        <i class="fa-solid fa-user"></i>
+      </div>
+      <div class="profile-details">
+        <h2 id="profile-page-name">User Name</h2>
+        <p>Pro Member • Member since 2024</p>
+        <button class="btn-primary">Edit Profile</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="script.js"></script>
+<script>
+  // Quick script to populate name on this specific page
+  document.addEventListener('DOMContentLoaded', () => {
+    const pageName = document.getElementById('profile-page-name');
+    const stored = localStorage.getItem('username');
+    if(pageName && stored) pageName.textContent = stored;
+  });
+</script>
+</body>
+</html>
