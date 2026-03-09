@@ -128,7 +128,7 @@ async def reset_password(request: ResetRequest):
     if not success:
         raise HTTPException(status_code=500, detail="Failed to update password")
         
-    # Clean up the OTP so it cannot be reused
+   
     del otp_storage[request.email]
     
     return {"message": "Password changed successfully"}
