@@ -41,8 +41,8 @@ class LoginRequest(BaseModel):
     email: str
     password: str
 
-
 class RegisterRequest(BaseModel):
+    username: str = None # Set to None by default so it's optional
     email: str
     password: str
 
@@ -61,27 +61,29 @@ class ResetRequest(BaseModel):
 # Add the login route 
 @app.post("/login")
 async def login(request: LoginRequest):
-    is_authenticated = await authenticate_user(app.db, request.email, request.password)
+    username = await authenticate_user(app.db, request.email, request.password)
     
-    if not is_authenticated:
+    if not username:
         raise HTTPException(status_code=401, detail="Invalid email or password")
     
-    # 2. Removed the add_task line so no email is sent on login
-    
-    return {"message": "Login successful", "status": "success"}
+    return {
+        "message": "Login successful", 
+        "status": "success",
+        "username": username # Sending the username back
+    }
+
 #added signup route
-
-
 @app.post("/register")
-# 1. Look right here at the end of this line:
 async def register(request: RegisterRequest, background_tasks: BackgroundTasks):
-    
-    success = await create_user(app.db, request.email, request.password)
+    # Pass the username to the database function
+    success = await create_user(app.db, request.email, request.password, request.username)
     
     if not success:
-        raise HTTPException(status_code=400, detail="Email is already registered")
+        raise HTTPException(
+            status_code=400, 
+            detail="Email is already registered. Please login or use forgot password."
+        )
         
-    # 2. Now the spelling matches exactly what is in the parentheses above
     background_tasks.add_task(send_welcome_email, request.email)
         
     return {"message": "User created successfully", "status": "success"}

@@ -1,4 +1,5 @@
 # Routes/user.py
+import random
 
 async def check_email_exists(db, email: str) -> bool:
     user_document = await db.users.find_one({"email": email})
@@ -11,24 +12,37 @@ async def update_user_password(db, email: str, new_password: str) -> bool:
     )
     return result.modified_count > 0
 
-# Add this new function
-async def create_user(db, email: str, password: str) -> bool:
+# Updated to accept a username
+async def create_user(db, email: str, password: str, username: str = None) -> bool:
     existing_user = await db.users.find_one({"email": email})
     if existing_user:
         return False 
     
-    user_data = {"email": email, "password": password}
+    # If no username is provided, create a random default
+    if not username:
+        username = f"User{random.randint(10000, 99999)}"
+        
+    user_data = {"email": email, "password": password, "username": username}
     result = await db.users.insert_one(user_data)
     
     return result.inserted_id is not None
 
-# Login
-async def authenticate_user(db, email: str, password: str) -> bool:
+# Updated to patch older users with a random username
+# In user.py - update the authenticate_user function
+async def authenticate_user(db, email: str, password: str):
     user_document = await db.users.find_one({"email": email})
     
-    # If no user is found with that email
     if not user_document:
-        return False
-    # Check if the passwords match 
-    # Note: In a real app, you would use a hashing library like passlib to verify this!
-    return user_document.get("password") == password
+        return None
+        
+    if user_document.get("password") == password:
+        if "username" not in user_document:
+            new_username = f"User{random.randint(10000, 99999)}"
+            await db.users.update_one(
+                {"email": email}, 
+                {"$set": {"username": new_username}}
+            )
+            return new_username
+        return user_document.get("username")
+        
+    return None
