@@ -9,6 +9,7 @@ from fastapi import HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 import os
 
+
 SECRET_KEY = "AOLvPp]Y_I?0xWg0&NeiYLd-AmLAl6c8>gV/(|YFQl," #jwt key
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
@@ -59,3 +60,4 @@ def decode_access_token(token: str):
             detail="Could not validate token",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    
