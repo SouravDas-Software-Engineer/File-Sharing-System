@@ -47,26 +47,40 @@
   <div class="main">
     <h2 class="section-title">Account Settings</h2>
     <div class="settings-container">
-      
       <div class="settings-group">
         <h3>Change Password</h3>
+        <p id="password-msg" style="display: none; margin-bottom: 15px; padding: 10px; border-radius: 6px;"></p>
         <div class="form-group">
           <label>Current Password</label>
-          <input type="password" placeholder="Enter current password">
+          <input type="password" id="current-password" placeholder="Enter current password">
         </div>
         <div class="form-group">
           <label>New Password</label>
-          <input type="password" placeholder="Enter new password">
+          <input type="password" id="new-password" placeholder="Enter new password">
         </div>
-        <button class="btn-primary" style="background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">Update Password</button>
+        <button id="update-password-btn" class="btn-primary" style="background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">Update Password</button>
       </div>
 
       <div class="settings-group">
         <h3>Danger Zone</h3>
         <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 15px;">Once you delete your account, there is no going back. Please be certain.</p>
-        <button class="btn-danger">Delete Account</button>
+        <p id="delete-msg" style="display: none; color: #ef4444; font-size: 14px; margin-bottom: 10px;"></p>
+        <button id="trigger-delete-btn" class="btn-danger">Delete Account</button>
       </div>
-
+    </div>
+  </div>
+</div>
+<div id="delete-modal" class="modal-overlay">
+  <div class="modal-content">
+    <h3>Verify Account Deletion</h3>
+    <p>A 6-digit verification code has been sent to your email. Enter it below to permanently delete your account.</p>
+    <div class="form-group">
+      <input type="text" id="delete-otp-input" placeholder="Enter 6-digit OTP" maxlength="6">
+    </div>
+    <p id="modal-error-msg" style="display: none; color: #ef4444; font-size: 14px; margin-top: 10px;"></p>
+    <div class="modal-buttons">
+      <button id="cancel-delete-btn" class="btn-cancel">Cancel</button>
+      <button id="confirm-delete-btn" class="btn-danger">Verify and Delete</button>
     </div>
   </div>
 </div>

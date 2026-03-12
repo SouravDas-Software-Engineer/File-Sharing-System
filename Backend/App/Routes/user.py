@@ -46,3 +46,21 @@ async def authenticate_user(db, email: str, password: str):
         return user_document.get("username")
         
     return None
+async def delete_user_account(db, email: str) -> bool:
+    result = await db.users.delete_one({"email": email})
+    return result.deleted_count > 0
+async def update_user_profile(db, email: str, username: str, bio: str, profile_pic_url: str = None) -> bool:
+    update_data = {
+        "username": username,
+        "bio": bio
+    }
+    
+    # Only update the picture if a new one was uploaded
+    if profile_pic_url:
+        update_data["profile_pic_url"] = profile_pic_url
+        
+    result = await db.users.update_one(
+        {"email": email},
+        {"$set": update_data}
+    )
+    return result.modified_count > 0 or result.matched_count > 0

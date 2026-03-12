@@ -53,7 +53,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (data.username) {
                     localStorage.setItem("username", data.username);
                 }
-
+                if (response.ok) {
+                        localStorage.setItem('username', data.username);
+                                localStorage.setItem('userEmail', emailInput.value); 
+                                
+                                window.location.href = '../Dashboard/index.html';
+                            }
                 // Redirect to dashboard
                 setTimeout(() => {
                         // Step back one folder, then enter the Dashboard folder
@@ -110,4 +115,4 @@ document.addEventListener("DOMContentLoaded", () => {
           }
       });
   }
-}); // <--- THIS WAS THE MISSING PIECE!
+}); 

@@ -80,3 +80,68 @@ The Online File Sharing System Team
         server.quit()
     except Exception as e:
         print(f"Failed to send welcome email to {to_email}. Error: {e}")
+
+
+def send_password_change_confirmation(to_email: str):
+    smtp_server = os.getenv("SMTP_SERVER")
+    smtp_port = int(os.getenv("SMTP_PORT"))
+    sender_email = os.getenv("SENDER_EMAIL")
+    sender_password = os.getenv("SENDER_PASSWORD") 
+    
+    msg = MIMEMultipart()
+    msg['From'] = sender_email
+    msg['To'] = to_email
+    msg['Subject'] = "Your Password Has Been Changed"
+    
+    body = """Hello,
+
+This is a confirmation that the password for your Online File Sharing System account was recently changed.
+
+If you made this change, you can safely ignore this email. If you did not make this change, please reset your password immediately or contact support.
+
+Best,
+The Online File Sharing System Team
+"""
+    msg.attach(MIMEText(body, 'plain'))
+    
+    try:
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls()
+        server.login(sender_email, sender_password)
+        server.send_message(msg)
+        server.quit()
+    except Exception as e:
+        print(f"Failed to send confirmation email to {to_email}. Error: {e}")
+
+def send_delete_account_otp(to_email: str, otp: str):
+    smtp_server = os.getenv("SMTP_SERVER")
+    smtp_port = int(os.getenv("SMTP_PORT"))
+    sender_email = os.getenv("SENDER_EMAIL")
+    sender_password = os.getenv("SENDER_PASSWORD") 
+    
+    msg = MIMEMultipart()
+    msg['From'] = sender_email
+    msg['To'] = to_email
+    msg['Subject'] = "Account Deletion Verification Code"
+    
+    body = f"""Hello,
+
+We received a request to permanently delete your account.
+
+Your verification code is: {otp}
+
+If you did not request this, please ignore this email and your account will remain secure.
+
+Best,
+The Online File Sharing System Team
+"""
+    msg.attach(MIMEText(body, 'plain'))
+    
+    try:
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls()
+        server.login(sender_email, sender_password)
+        server.send_message(msg)
+        server.quit()
+    except Exception as e:
+        print(f"Failed to send deletion OTP to {to_email}. Error: {e}")
