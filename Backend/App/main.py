@@ -7,7 +7,11 @@ from pydantic import BaseModel
 from contextlib import asynccontextmanager
 from motor.motor_asyncio import AsyncIOMotorClient
 from dotenv import load_dotenv, find_dotenv
-
+#jeet
+from App.Core.security import hash_password, verify_password, create_access_token
+from App.DB.database import db
+from App.Routes.user import router as user_router
+app.include_router(user_router)
 
 from Routes.user import check_email_exists, update_user_password, create_user, authenticate_user
 from Routes.files import send_password_reset_email, send_welcome_email
