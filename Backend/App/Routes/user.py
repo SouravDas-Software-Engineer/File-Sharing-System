@@ -49,8 +49,8 @@ async def authenticate_user(db, email: str, password: str):
 
 #jeet
 from fastapi import APIRouter, HTTPException
-from App.database.database import db
-from App.Core.Security import hash_password, verify_password, create_access_token
+from database.database import db
+from Core.Security import hash_password, verify_password, create_access_token
 
 router = APIRouter()
 
