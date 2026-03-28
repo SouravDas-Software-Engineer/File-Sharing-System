@@ -7,10 +7,18 @@ from dotenv import load_dotenv
 from fastapi import BackgroundTasks, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
+<<<<<<< HEAD
 from pydantic import BaseModel
 
 ENV_PATH = Path(__file__).with_name(".env")
 load_dotenv(dotenv_path=ENV_PATH)
+=======
+from dotenv import load_dotenv, find_dotenv
+#jeet
+from Core.Security import hash_password, verify_password, create_access_token
+from database.database import db
+from Routes.user import router as user_router
+>>>>>>> edcd18397dcf5280c842d36c1c6f655c6e059543
 
 from Routes.files import send_password_reset_email, send_welcome_email
 from Routes.user import (
@@ -34,6 +42,7 @@ async def lifespan(app: FastAPI):
     app.mongodb_client.close()
 
 app = FastAPI(lifespan=lifespan)
+app.include_router(user_router)
 
 app.add_middleware(
     CORSMiddleware,

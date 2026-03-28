@@ -46,3 +46,50 @@ async def authenticate_user(db, email: str, password: str):
         return user_document.get("username")
         
     return None
+<<<<<<< HEAD
+=======
+
+#jeet
+from fastapi import APIRouter, HTTPException
+from database.database import db
+from Core.Security import hash_password, verify_password, create_access_token
+
+router = APIRouter()
+
+@router.post("/register")
+async def register(email: str, password: str):
+
+    user = await db.users.find_one({"email": email})
+
+    if user:
+        raise HTTPException(status_code=400, detail="User already exists")
+
+    hashed_pass = hash_password(password)
+
+    await db.users.insert_one({
+        "email": email,
+        "password": hashed_pass
+    })
+
+    return {"message": "User registered"}
+
+
+@router.post("/login")
+async def login(email: str, password: str):
+
+    user = await db.users.find_one({"email": email})
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if verify_password(password, user["password"]):
+
+        token = create_access_token({"sub": email})
+
+        return {
+            "message": "Login success",
+            "token": token
+        }
+
+    raise HTTPException(status_code=401, detail="Wrong password")
+>>>>>>> edcd18397dcf5280c842d36c1c6f655c6e059543
