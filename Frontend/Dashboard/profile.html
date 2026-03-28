@@ -43,17 +43,69 @@
   </div>
 
   <div class="main">
-    <h2 class="section-title">My Profile</h2>
-    <div class="profile-card">
-      <div class="profile-avatar">
-        <i class="fa-solid fa-user"></i>
-      </div>
-      <div class="profile-details">
-        <h2 id="profile-page-name">User Name</h2>
-        <p>Pro Member • Member since 2024</p>
-        <button class="btn-primary">Edit Profile</button>
-      </div>
+    <div class="profile-header">
+  <div class="profile-avatar">
+    <img id="profile-img-display" src="https://via.placeholder.com/100" alt="Profile Picture">
+  </div>
+  <div class="profile-info">
+    <h2 id="profile-username-display">Loading...</h2>
+    <p id="profile-bio-display" class="bio-text">No bio added yet.</p>
+    <button id="open-edit-modal-btn" class="btn-primary" style="background: #3b82f6; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; margin-top: 10px;">Edit Profile</button>
+  </div>
+</div>
+
+<h3 class="section-title" style="margin-top: 40px;">Activity Overview</h3>
+<div class="stats">
+  <div class="card">
+    <div class="card-icon blue"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+    <div class="card-info">
+      <p>Uploads</p>
+      <h3>12</h3>
     </div>
+  </div>
+  <div class="card">
+    <div class="card-icon light-blue"><i class="fa-solid fa-link"></i></div>
+    <div class="card-info">
+      <p>Active Links</p>
+      <h3>5</h3>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-icon green"><i class="fa-solid fa-inbox"></i></div>
+    <div class="card-info">
+      <p>Received Files</p>
+      <h3>8</h3>
+    </div>
+  </div>
+</div>
+
+<div id="edit-profile-modal" class="modal-overlay">
+  <div class="modal-content">
+    <h3 style="margin-bottom: 20px; font-size: 20px; color: var(--text-main);">Edit Profile</h3>
+    
+    <div class="form-group">
+      <label>Profile Picture</label>
+      <input type="file" id="edit-pic-input" accept="image/*" class="file-input">
+    </div>
+    
+    <div class="form-group">
+      <label>Username</label>
+      <input type="text" id="edit-username-input" class="text-input" placeholder="Update username">
+    </div>
+    
+    <div class="form-group">
+      <label>Bio (Optional)</label>
+      <textarea id="edit-bio-input" class="text-input" placeholder="Tell us about yourself" rows="3"></textarea>
+    </div>
+    
+    <p id="edit-modal-msg" style="display: none; font-size: 14px; margin-top: 10px;"></p>
+    
+    <div class="modal-buttons">
+      <button id="cancel-edit-btn" class="btn-cancel">Cancel</button>
+      <button id="save-profile-btn" class="btn-primary">Save Changes</button>
+    </div>
+  </div>
+</div>
   </div>
 </div>
 <script src="script.js"></script>
