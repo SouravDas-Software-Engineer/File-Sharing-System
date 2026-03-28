@@ -1,11 +1,12 @@
 # email_utils.py
 import os
 import smtplib
+from pathlib import Path
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(dotenv_path=Path(__file__).resolve().parents[1] / ".env")
 # this is the forgot password needed details and verification - start
 def send_password_reset_email(to_email: str, otp: str):
     smtp_server = os.getenv("SMTP_SERVER")

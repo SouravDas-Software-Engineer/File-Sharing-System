@@ -1,22 +1,24 @@
 import os
 import random
 from pathlib import Path
-from fastapi import FastAPI, HTTPException, BackgroundTasks
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
 from contextlib import asynccontextmanager
+
+from dotenv import load_dotenv
+from fastapi import BackgroundTasks, FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
-from dotenv import load_dotenv, find_dotenv
-#jeet
-from App.Core.security import hash_password, verify_password, create_access_token
-from App.DB.database import db
-from App.Routes.user import router as user_router
-app.include_router(user_router)
+from pydantic import BaseModel
 
-from Routes.user import check_email_exists, update_user_password, create_user, authenticate_user
+ENV_PATH = Path(__file__).with_name(".env")
+load_dotenv(dotenv_path=ENV_PATH)
+
 from Routes.files import send_password_reset_email, send_welcome_email
-
-load_dotenv(find_dotenv())
+from Routes.user import (
+    authenticate_user,
+    check_email_exists,
+    create_user,
+    update_user_password,
+)
 
 # Fetch the variables
 MONGO_URL = os.getenv("MONGO_URL")
