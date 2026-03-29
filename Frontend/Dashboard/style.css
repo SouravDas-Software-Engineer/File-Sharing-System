@@ -517,13 +517,21 @@ tr:last-child td { border-bottom: none; }
 .btn-cancel:hover { background: rgba(255, 255, 255, 0.2); }
 
 /* INJECT GLASS CLASS INTO HTML COMPONENTS */
-.topbar, .card, .transfer-circle, .table-container, .profile-dropdown, .modal-content, .profile-header, .settings-container, .profile-stats-pill {
-  @extend .glass-panel;
+.topbar, .card, .transfer-circle, .table-container, .profile-dropdown, .modal-content,
+.profile-header, .settings-container, .profile-stats-pill,
+.profile-card, .stat-card, .profile-panel {
   background: var(--bg-glass);
   backdrop-filter: blur(16px) saturate(120%);
   -webkit-backdrop-filter: blur(16px) saturate(120%);
   border: 1px solid var(--border-glass);
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1), var(--reflection);
+}
+
+/* Profile card uses heavier glass to stand out above the cover banner */
+.profile-card {
+  background: var(--bg-glass-heavy);
+  backdrop-filter: blur(20px) saturate(120%);
+  -webkit-backdrop-filter: blur(20px) saturate(120%);
 }
 
 /* ================= SKELETON LOADERS ================= */

@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Files - FileShare</title>
+  <meta name="description" content="Browse, search, and manage all your uploaded files.">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <script>if (!localStorage.getItem('username')) window.location.href = '../Login page/index.html';</script>
+  <style>
+    /* ── Files page specific ── */
+    .files-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 22px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .files-title { font-size: 20px; font-weight: 700; color: var(--text-main); }
+    .files-count { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+    .files-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* Search bar inside files page */
+    .files-search {
+      position: relative;
+      width: 230px;
+    }
+    .files-search i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 13px; }
+    .files-search input {
+      width: 100%;
+      padding: 9px 9px 9px 34px;
+      border: 1px solid var(--border-glass);
+      border-radius: 10px;
+      background: var(--bg-glass);
+      backdrop-filter: blur(8px);
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 13.5px;
+      outline: none;
+      transition: all 0.25s ease;
+    }
+    .files-search input:focus {
+      border-color: #4facfe;
+      box-shadow: 0 0 0 3px rgba(79,172,254,0.15);
+    }
+
+    /* Filter tabs */
+    .filter-tabs { display: flex; gap: 6px; }
+    .filter-tab {
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border-glass);
+      background: var(--bg-glass);
+      backdrop-filter: blur(8px);
+      color: var(--text-muted);
+      transition: all 0.2s ease;
+    }
+    .filter-tab.active {
+      background: linear-gradient(135deg, #4facfe, #00f2fe);
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 4px 12px rgba(79,172,254,0.3);
+    }
+    .filter-tab:hover:not(.active) { color: var(--text-main); background: var(--hover-btn); }
+
+    /* Upload button */
+    .btn-upload {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 9px 18px; border-radius: 10px;
+      font-size: 13.5px; font-weight: 600; cursor: pointer;
+      border: none;
+      background: linear-gradient(135deg, #d946ef, #a855f7);
+      color: white;
+      box-shadow: 0 4px 14px rgba(217,70,239,0.35);
+      transition: all 0.2s ease;
+    }
+    .btn-upload:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(217,70,239,0.45); }
+
+    /* Files table container */
+    .files-table-panel {
+      background: var(--bg-glass);
+      backdrop-filter: blur(16px) saturate(120%);
+      -webkit-backdrop-filter: blur(16px) saturate(120%);
+      border: 1px solid var(--border-glass);
+      border-radius: 18px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1), var(--reflection);
+      overflow: hidden;
+    }
+
+    .files-table { width: 100%; border-collapse: collapse; }
+    .files-table th {
+      text-align: left;
+      padding: 14px 20px;
+      font-size: 11.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-glass);
+      background: rgba(255,255,255,0.03);
+    }
+    .files-table td {
+      padding: 14px 20px;
+      font-size: 13.5px;
+      color: var(--text-main);
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      vertical-align: middle;
+    }
+    .files-table tbody tr { transition: background 0.15s ease; }
+    .files-table tbody tr:hover { background: rgba(255,255,255,0.04); }
+    .files-table tbody tr:last-child td { border-bottom: none; }
+
+    /* File name cell */
+    .file-name-cell { display: flex; align-items: center; gap: 12px; }
+    .file-icon-badge {
+      width: 36px; height: 36px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; flex-shrink: 0;
+      border: 1px solid var(--border-glass);
+    }
+    .file-icon-badge.pdf      { background: rgba(239,68,68,0.12);  color: #ef4444; }
+    .file-icon-badge.image    { background: rgba(34,197,94,0.12);  color: #22c55e; }
+    .file-icon-badge.video    { background: rgba(59,130,246,0.12); color: #3b82f6; }
+    .file-icon-badge.audio    { background: rgba(168,85,247,0.12); color: #a855f7; }
+    .file-icon-badge.archive  { background: rgba(245,158,11,0.12); color: #f59e0b; }
+    .file-icon-badge.code     { background: rgba(99,102,241,0.12); color: #6366f1; }
+    .file-icon-badge.doc      { background: rgba(59,130,246,0.12); color: #3b82f6; }
+    .file-icon-badge.spreadsheet { background: rgba(34,197,94,0.12); color: #22c55e; }
+    .file-icon-badge.slides   { background: rgba(249,115,22,0.12); color: #f97316; }
+    .file-icon-badge.file     { background: rgba(148,163,184,0.12); color: #94a3b8; }
+    .file-icon-badge.text     { background: rgba(148,163,184,0.12); color: #94a3b8; }
+
+    .file-name-text { font-weight: 600; font-size: 13.5px; color: var(--text-main); }
+    .file-name-type { font-size: 11.5px; color: var(--text-muted); }
+
+    /* File Actions */
+    .file-actions { display: flex; gap: 6px; }
+    .file-action-btn {
+      width: 32px; height: 32px; border-radius: 8px;
+      border: 1px solid var(--border-glass);
+      background: var(--bg-glass);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; transition: all 0.2s ease;
+    }
+    .file-action-btn:hover { color: white; }
+    .file-action-btn.delete:hover   { background: #ef4444; border-color: #ef4444; box-shadow: 0 0 10px rgba(239,68,68,0.4); }
+
+    /* Empty state */
+    .files-empty {
+      text-align: center;
+      padding: 60px 30px;
+      color: var(--text-muted);
+    }
+    .files-empty i { font-size: 48px; margin-bottom: 16px; opacity: 0.3; display: block; }
+    .files-empty h3 { font-size: 18px; color: var(--text-main); margin-bottom: 8px; }
+    .files-empty p { font-size: 14px; }
+
+    /* Storage bar */
+    .storage-bar-wrap {
+      background: var(--bg-glass);
+      backdrop-filter: blur(16px) saturate(120%);
+      -webkit-backdrop-filter: blur(16px) saturate(120%);
+      border: 1px solid var(--border-glass);
+      border-radius: 14px;
+      padding: 16px 20px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08), var(--reflection);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .storage-bar-icon { font-size: 20px; color: #4facfe; filter: drop-shadow(0 0 6px rgba(79,172,254,0.5)); }
+    .storage-bar-info { flex: 1; min-width: 200px; }
+    .storage-bar-label { font-size: 13px; font-weight: 600; color: var(--text-main); margin-bottom: 8px; display: flex; justify-content: space-between; }
+    .storage-bar-track { height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; }
+    .storage-bar-fill  { height: 100%; border-radius: 4px; transition: width 0.8s ease; background: linear-gradient(90deg, #4facfe, #00f2fe); }
+    .storage-bar-fill.warning { background: linear-gradient(90deg, #f97316, #ef4444); }
+  </style>
+</head>
+<body>
+  <script>
+    if ((localStorage.getItem('fileShareTheme') || 'dark') === 'dark') document.body.classList.add('dark-mode');
+    else document.body.classList.remove('dark-mode');
+  </script>
+
+  <div class="dashboard">
+    <div class="sidebar">
+      <h2 class="logo"><i class="fa-solid fa-layer-group" style="color:#4facfe;"></i> FileShare</h2>
+      <ul>
+        <li><a href="index.html" style="text-decoration:none;color:inherit;display:flex;gap:15px;"><i class="fa-solid fa-house"></i> Dashboard</a></li>
+        <li><a href="profile.html" style="text-decoration:none;color:inherit;display:flex;gap:15px;"><i class="fa-solid fa-user"></i> My Profile</a></li>
+        <li class="spacer"></li>
+        <li class="active"><a href="files.html" style="text-decoration:none;color:inherit;display:flex;gap:15px;"><i class="fa-solid fa-folder"></i> My Files</a></li>
+        <li><a href="files.html" style="text-decoration:none;color:inherit;display:flex;gap:15px;"><i class="fa-solid fa-clock"></i> Recent Files</a></li>
+        <li><a href="index.html" style="text-decoration:none;color:inherit;display:flex;gap:15px;"><i class="fa-solid fa-cloud-arrow-up"></i> Upload Files</a></li>
+        <li class="spacer"></li>
+        <li><a href="settings.html" style="text-decoration:none;color:inherit;display:flex;gap:15px;"><i class="fa-solid fa-lock"></i> Account Security</a></li>
+        <li><a href="app_settings.html" style="text-decoration:none;color:inherit;display:flex;gap:15px;"><i class="fa-solid fa-sliders"></i> App Settings</a></li>
+      </ul>
+    </div>
+
+    <div class="main">
+      <div class="topbar">
+        <div class="hamburger-menu" id="hamburger-menu"><span></span><span></span><span></span></div>
+        <div class="search-bar"><i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="Search files..." id="topbar-search"></div>
+        <div class="user-area">
+          <div class="theme-toggle" id="theme-toggle" style="cursor:pointer;font-size:20px;color:var(--text-muted);"><i class="fa-solid fa-moon"></i></div>
+          <div class="notification" id="notification-bell"><i class="fa-solid fa-bell"></i><span class="badge">0</span>
+            <div class="notification-dropdown" id="notification-dropdown">
+              <div class="notification-header"><h3>Notifications</h3><div class="clear-all" id="clear-notifications">Clear All</div></div>
+              <div class="notification-list" id="notification-list"><div class="notification-empty">No notifications</div></div>
+            </div>
+          </div>
+          <div class="user-profile" id="profile-btn">
+            <span id="display-username">Loading...</span><i class="fa-solid fa-chevron-down"></i>
+            <div class="profile-dropdown" id="profile-dropdown">
+              <a href="profile.html"><i class="fa-regular fa-user"></i> My Profile</a>
+              <a href="settings.html"><i class="fa-solid fa-lock"></i> Account Security</a>
+              <a href="app_settings.html"><i class="fa-solid fa-sliders"></i> App Settings</a>
+              <div class="dropdown-divider"></div>
+              <a href="#" class="logout-text" id="logout-btn"><i class="fa-solid fa-arrow-right-from-bracket"></i> Log Out</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Storage bar -->
+      <div class="storage-bar-wrap">
+        <i class="fa-solid fa-hard-drive storage-bar-icon"></i>
+        <div class="storage-bar-info">
+          <div class="storage-bar-label">
+            <span>Storage Used</span>
+            <span id="storage-text">0 MB of 1 GB</span>
+          </div>
+          <div class="storage-bar-track">
+            <div class="storage-bar-fill" id="storage-fill" style="width:0%;"></div>
+          </div>
+        </div>
+        <div style="font-size:13px; color:var(--text-muted); white-space:nowrap;">
+          <span id="storage-pct">0%</span> used
+        </div>
+      </div>
+
+      <!-- Files header -->
+      <div class="files-header">
+        <div>
+          <h2 class="files-title">My Files</h2>
+          <p class="files-count" id="files-count-label">Loading...</p>
+        </div>
+        <div class="files-toolbar">
+          <!-- inline search -->
+          <div class="files-search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="files-search-input" placeholder="Filter files...">
+          </div>
+          <!-- type filter -->
+          <div class="filter-tabs">
+            <button class="filter-tab active" data-type="all">All</button>
+            <button class="filter-tab" data-type="image">Images</button>
+            <button class="filter-tab" data-type="pdf">PDFs</button>
+            <button class="filter-tab" data-type="video">Videos</button>
+            <button class="filter-tab" data-type="doc">Docs</button>
+          </div>
+          <a href="index.html"><button class="btn-upload"><i class="fa-solid fa-cloud-arrow-up"></i> Upload</button></a>
+        </div>
+      </div>
+
+      <!-- Files table -->
+      <div class="files-table-panel">
+        <table class="files-table">
+          <thead>
+            <tr>
+              <th>File Name</th>
+              <th>Type</th>
+              <th>Size</th>
+              <th>Uploaded</th>
+              <th>Downloads</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="files-tbody">
+            <tr><td colspan="6"><div class="files-empty"><i class="fa-solid fa-spinner fa-spin"></i><p>Loading your files...</p></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const API_URL   = 'http://127.0.0.1:8000';
+      const email     = localStorage.getItem('userEmail');
+      const tbody     = document.getElementById('files-tbody');
+      const countLbl  = document.getElementById('files-count-label');
+      const searchEl  = document.getElementById('files-search-input');
+      const topSearch = document.getElementById('topbar-search');
+
+      let allFiles    = [];
+      let activeType  = 'all';
+
+      // ── Storage bar ──────────────────────────
+      function updateStorageBar(usedMb) {
+        const QUOTA_MB = 1024;
+        const pct = Math.min((usedMb / QUOTA_MB) * 100, 100).toFixed(1);
+        const fill = document.getElementById('storage-fill');
+        const txt  = document.getElementById('storage-text');
+        const pctEl = document.getElementById('storage-pct');
+
+        fill.style.width = pct + '%';
+        if (parseFloat(pct) >= 80) fill.classList.add('warning');
+        txt.textContent  = usedMb >= 1024
+          ? `${(usedMb/1024).toFixed(2)} GB of 1 GB`
+          : `${usedMb.toFixed(1)} MB of 1 GB`;
+        pctEl.textContent = pct + '%';
+      }
+
+      const cachedMb = parseFloat(localStorage.getItem('userStorageMB') || '0');
+      updateStorageBar(cachedMb);
+
+      // ── File type icon ────────────────────────
+      const TYPE_ICONS = {
+        pdf: 'fa-file-pdf', image: 'fa-file-image', video: 'fa-file-video',
+        audio: 'fa-file-audio', archive: 'fa-file-zipper', code: 'fa-file-code',
+        doc: 'fa-file-word', spreadsheet: 'fa-file-excel', slides: 'fa-file-powerpoint',
+        text: 'fa-file-lines', file: 'fa-file'
+      };
+
+      function renderFiles(files) {
+        if (!files.length) {
+          tbody.innerHTML = `<tr><td colspan="6"><div class="files-empty">
+            <i class="fa-solid fa-folder-open"></i>
+            <h3>No files yet</h3>
+            <p>Upload your first file from the Dashboard</p>
+          </div></td></tr>`;
+          return;
+        }
+        tbody.innerHTML = files.map(f => `
+          <tr data-id="${f.id}" data-type="${f.type}" data-name="${f.name.toLowerCase()}">
+            <td>
+              <div class="file-name-cell">
+                <div class="file-icon-badge ${f.type}">
+                  <i class="fa-solid ${TYPE_ICONS[f.type] || 'fa-file'}"></i>
+                </div>
+                <div>
+                  <div class="file-name-text">${f.name}</div>
+                  <div class="file-name-type">${f.type.charAt(0).toUpperCase()+f.type.slice(1)}</div>
+                </div>
+              </div>
+            </td>
+            <td style="color:var(--text-muted);font-size:13px;">${f.type.charAt(0).toUpperCase()+f.type.slice(1)}</td>
+            <td style="color:var(--text-muted);font-size:13px;">${f.size}</td>
+            <td style="color:var(--text-muted);font-size:13px;">${f.uploaded_at}</td>
+            <td style="color:var(--text-muted);font-size:13px;">${f.download_count}</td>
+            <td>
+              <div class="file-actions">
+                <button class="file-action-btn delete" title="Delete File" onclick="deleteFile('${f.id}','${f.name}',this)"><i class="fa-solid fa-trash"></i></button>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+      }
+
+      function applyFilter() {
+        const q = (searchEl.value || topSearch.value).toLowerCase();
+        const filtered = allFiles.filter(f =>
+          (activeType === 'all' || f.type === activeType) &&
+          f.name.toLowerCase().includes(q)
+        );
+        renderFiles(filtered);
+        countLbl.textContent = `${filtered.length} of ${allFiles.length} files`;
+      }
+
+      // ── Load files from API ───────────────────
+      async function loadFiles() {
+        if (!email) { tbody.innerHTML = `<tr><td colspan="6"><div class="files-empty"><i class="fa-solid fa-lock"></i><p>Please log in first.</p></div></td></tr>`; return; }
+        try {
+          const res  = await fetch(`${API_URL}/files?email=${encodeURIComponent(email)}`);
+          const data = await res.json();
+          allFiles = data.files || [];
+          countLbl.textContent = `${allFiles.length} file${allFiles.length !== 1 ? 's' : ''}`;
+          applyFilter();
+        } catch {
+          tbody.innerHTML = `<tr><td colspan="6"><div class="files-empty"><i class="fa-solid fa-wifi-slash"></i><h3>Connection Error</h3><p>Could not reach the server</p></div></td></tr>`;
+        }
+      }
+
+      loadFiles();
+
+      // ── Filter tabs ───────────────────────────
+      document.querySelectorAll('.filter-tab').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          activeType = btn.dataset.type;
+          applyFilter();
+        });
+      });
+
+      searchEl.addEventListener('input', applyFilter);
+      if (topSearch) topSearch.addEventListener('input', applyFilter);
+    });
+
+  </script>
+</body>
+</html>

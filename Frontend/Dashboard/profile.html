@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Profile - FileShare</title>
+  <meta name="description" content="View and manage your FileShare profile, activity, and file statistics.">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="style.css">
@@ -11,198 +13,580 @@
     if (!localStorage.getItem('username')) window.location.href = '../Login page/index.html';
   </script>
   <style>
-    /* ================= NEW PROFILE UI ================= */
-    .profile-center-container {
-      max-width: 700px;
+    .main {
+      padding-top: 0;
+    }
+
+    /* ---- COVER BANNER ---- */
+    .profile-cover {
+      width: 100%;
+      height: 180px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 40%, #d946ef 100%);
+      border-radius: 0 0 24px 24px;
+      position: relative;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .profile-cover::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    .profile-cover-topbar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 15px 30px;
+    }
+
+    /* ---- PROFILE CARD (overlaps cover) ---- */
+    .profile-page-content {
+      max-width: 760px;
       margin: 0 auto;
-      padding-top: 20px;
+      padding: 0 24px 40px;
     }
 
-    /* Avatar Section */
-    .profile-header-centered {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-
-    .profile-header-centered img {
-      width: 120px;
-      height: 120px;
-      border-radius: 30px; /* Rounded square like the screenshot */
-      object-fit: cover;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.05);
-      margin-bottom: 15px;
-    }
-
-    .profile-header-centered h2 {
-      font-size: 24px;
-      color: var(--text-main);
-      margin-bottom: 5px;
-    }
-
-    .profile-header-centered p {
-      color: var(--text-muted);
-      font-size: 14px;
-    }
-
-    /* Stats Pill */
-    .profile-stats-pill {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
+    .profile-card {
+      margin-top: -60px;
+      padding: 24px 28px 20px;
       border-radius: 20px;
-      padding: 20px 40px;
-      margin-bottom: 40px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+      background: var(--bg-glass-heavy);
+      backdrop-filter: blur(20px) saturate(120%);
+      -webkit-backdrop-filter: blur(20px) saturate(120%);
+      border: 1px solid var(--border-glass);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.12), var(--reflection);
+      display: flex;
+      align-items: flex-start;
+      gap: 24px;
+      flex-wrap: wrap;
     }
 
-    .stat-box {
-      text-align: center;
+    /* Avatar */
+    .profile-avatar-wrap {
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .profile-avatar-wrap img {
+      width: 100px;
+      height: 100px;
+      border-radius: 22px;
+      object-fit: cover;
+      border: 3px solid var(--border-glass);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2), var(--reflection);
+      display: block;
+    }
+
+    .avatar-edit-btn {
+      position: absolute;
+      bottom: -6px;
+      right: -6px;
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #d946ef, #a855f7);
+      border: 2px solid var(--bg-glass);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 11px;
+      color: white;
+      transition: transform 0.2s ease;
+      box-shadow: 0 4px 12px rgba(217, 70, 239, 0.4);
+    }
+
+    .avatar-edit-btn:hover {
+      transform: scale(1.1);
+    }
+
+    /* Profile info */
+    .profile-info {
       flex: 1;
+      min-width: 180px;
     }
 
-    .stat-box .stat-label {
-      display: block;
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-bottom: 5px;
-    }
-
-    .stat-box .stat-value {
-      display: block;
-      font-size: 20px;
+    .profile-info h1 {
+      font-size: 22px;
       font-weight: 700;
       color: var(--text-main);
+      margin-bottom: 4px;
+      text-shadow: 0 0 6px rgba(255, 255, 255, 0.15);
     }
 
-    .stat-divider {
-      width: 1px;
-      height: 40px;
-      background: var(--border-color);
-    }
-
-    /* Activity Header */
-    .activity-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 30px;
-    }
-
-    .activity-title h3 {
-      font-size: 18px;
-      color: var(--text-main);
-      margin-bottom: 2px;
-    }
-
-    .activity-title p {
+    .profile-info .profile-email {
       font-size: 13px;
       color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .profile-bio-text {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 12px;
+      max-width: 380px;
+    }
+
+    .profile-meta-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .meta-tag {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      color: var(--text-muted);
+      background: var(--bg-glass);
+      backdrop-filter: blur(8px) saturate(120%);
+      -webkit-backdrop-filter: blur(8px) saturate(120%);
+      border: 1px solid var(--border-glass);
+      padding: 4px 10px;
+      border-radius: 20px;
+      box-shadow: var(--reflection);
+    }
+
+    .meta-tag i {
+      font-size: 11px;
+    }
+
+    /* Edit profile button (top right of card) */
+    .profile-card-actions {
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+
+    .btn-edit-profile {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 18px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border-glass);
+      background: var(--bg-glass);
+      color: var(--text-main);
+      transition: all 0.2s ease;
+      backdrop-filter: blur(12px) saturate(120%);
+      -webkit-backdrop-filter: blur(12px) saturate(120%);
+      box-shadow: var(--reflection);
+    }
+
+    .btn-edit-profile:hover {
+      background: linear-gradient(135deg, #d946ef, #a855f7);
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 6px 20px rgba(217,70,239,0.35), var(--reflection);
+      transform: translateY(-1px);
+    }
+
+    /* ---- STATS ROW ---- */
+    .profile-stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-top: 20px;
+    }
+
+    .stat-card {
+      background: var(--bg-glass);
+      backdrop-filter: blur(16px) saturate(120%);
+      -webkit-backdrop-filter: blur(16px) saturate(120%);
+      border: 1px solid var(--border-glass);
+      border-radius: 16px;
+      padding: 18px 14px;
+      text-align: center;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06), var(--reflection);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 28px rgba(0,0,0,0.12), var(--reflection), 0 0 20px var(--neon-glow);
+    }
+
+    .stat-card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 10px;
+      font-size: 17px;
+    }
+
+    .stat-card-icon.blue {
+      background: rgba(59, 130, 246, 0.15);
+      color: #3b82f6;
+      box-shadow: 0 0 12px rgba(59, 130, 246, 0.2);
+    }
+
+    .stat-card-icon.purple {
+      background: rgba(168, 85, 247, 0.15);
+      color: #a855f7;
+      box-shadow: 0 0 12px rgba(168, 85, 247, 0.2);
+    }
+
+    .stat-card-icon.green {
+      background: rgba(34, 197, 94, 0.15);
+      color: #22c55e;
+      box-shadow: 0 0 12px rgba(34, 197, 94, 0.2);
+    }
+
+    .stat-card-icon.orange {
+      background: rgba(249, 115, 22, 0.15);
+      color: #f97316;
+      box-shadow: 0 0 12px rgba(249, 115, 22, 0.2);
+    }
+
+    .stat-card-value {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    .stat-card-label {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      font-weight: 500;
+      display: block;
+    }
+
+    /* ---- TWO-COLUMN BELOW STATS ---- */
+    .profile-lower {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 18px;
+      margin-top: 20px;
+    }
+
+    /* ---- SHARED PANEL ---- */
+    .profile-panel {
+      background: var(--bg-glass);
+      backdrop-filter: blur(16px) saturate(120%);
+      -webkit-backdrop-filter: blur(16px) saturate(120%);
+      border: 1px solid var(--border-glass);
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1), var(--reflection);
+    }
+
+    .panel-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 4px;
+    }
+
+    .panel-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 18px;
+    }
+
+    /* ---- ACTIVITY CHART ---- */
+    .activity-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 18px;
     }
 
     .activity-toggles {
       display: flex;
-      gap: 10px;
+      gap: 8px;
     }
 
     .toggle-btn {
-      padding: 8px 20px;
+      padding: 6px 16px;
       border-radius: 8px;
-      font-size: 14px;
-      font-weight: 500;
+      font-size: 12.5px;
+      font-weight: 600;
       cursor: pointer;
-      border: 1px solid var(--border-color);
-      background: transparent;
-      color: var(--text-main);
+      border: 1px solid var(--border-glass);
+      background: var(--bg-glass);
+      backdrop-filter: blur(8px) saturate(120%);
+      -webkit-backdrop-filter: blur(8px) saturate(120%);
+      color: var(--text-muted);
       transition: all 0.2s ease;
+      box-shadow: var(--reflection);
     }
 
     .toggle-btn.active {
       background: linear-gradient(135deg, #d946ef, #a855f7);
       color: white;
-      border: none;
-      box-shadow: 0 4px 10px rgba(217, 70, 239, 0.3);
+      border-color: transparent;
+      box-shadow: 0 4px 12px rgba(217,70,239,0.3), var(--reflection);
     }
 
-    /* Bar Chart */
-    .chart-wrapper {
+    .toggle-btn:not(.active):hover {
+      background: var(--hover-btn);
+      color: var(--text-main);
+      box-shadow: 0 0 10px var(--neon-glow), var(--reflection);
+    }
+
+    /* Chart */
+    .chart-area {
       position: relative;
-      height: 220px;
-      margin-bottom: 30px;
-      padding-left: 30px; /* Room for Y-axis labels */
+      height: 190px;
+      padding-left: 32px;
     }
 
-    .chart-bg-lines {
+    .chart-grid {
       position: absolute;
-      top: 0; left: 30px; right: 0; bottom: 30px;
+      top: 0;
+      left: 32px;
+      right: 0;
+      bottom: 28px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      pointer-events: none;
       z-index: 0;
     }
 
-    .chart-line {
-      width: 100%;
-      border-bottom: 2px dashed var(--border-color);
+    .chart-grid-line {
+      border-bottom: 1px dashed var(--border-glass);
       position: relative;
+      opacity: 0.7;
     }
 
-    .chart-line span {
+    .chart-grid-line span {
       position: absolute;
-      left: -25px;
-      bottom: -7px;
-      font-size: 12px;
+      left: -28px;
+      bottom: -8px;
+      font-size: 11px;
       color: var(--text-muted);
       font-weight: 500;
     }
 
-    .chart-bars {
+    .chart-bars-wrap {
       position: absolute;
-      top: 0; left: 30px; right: 0; bottom: 0;
+      top: 0;
+      left: 32px;
+      right: 0;
+      bottom: 0;
       display: flex;
-      justify-content: space-between;
       align-items: flex-end;
+      padding-bottom: 28px;
+      gap: 0;
+      justify-content: space-around;
       z-index: 1;
-      padding: 0 10px;
-      padding-bottom: 30px; /* Room for X-axis labels */
     }
 
-    .bar-group {
+    .bar-col {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 10px;
-      width: 30px;
-      height: 100%;
-      justify-content: flex-end;
+      gap: 6px;
+      position: relative;
+      width: 32px;
+    }
+
+    .bar-col .bar {
+      width: 22px;
+      border-radius: 6px 6px 0 0;
+      background: var(--bg-glass-heavy);
+      border: 1px solid var(--border-glass);
+      border-bottom: none;
+      transition: height 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s ease, box-shadow 0.2s ease;
+      cursor: pointer;
       position: relative;
     }
 
-    .bar {
-      width: 100%;
-      border-radius: 6px 6px 0 0;
-      background: rgba(217, 70, 239, 0.2); /* Muted pink */
-      transition: height 0.3s ease;
+    .bar-col .bar.highlight {
+      background: linear-gradient(180deg, #d946ef 0%, #a855f7 100%);
+      border-color: transparent;
+      box-shadow: 0 -4px 14px rgba(217,70,239,0.45), var(--reflection);
     }
 
-    body.dark-mode .bar {
-      background: rgba(217, 70, 239, 0.15);
+    .bar-col .bar:hover {
+      background: linear-gradient(180deg, #d946ef 0%, #a855f7 100%);
+      border-color: transparent;
+      box-shadow: 0 -4px 14px rgba(217,70,239,0.45), var(--reflection);
     }
 
-    .bar.highlight {
-      background: linear-gradient(180deg, #d946ef, #a855f7);
-    }
-
-    .bar-label {
+    /* tooltip */
+    .bar-col .bar::after {
+      content: attr(data-value);
       position: absolute;
-      bottom: -25px;
-      font-size: 12px;
+      top: -30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--bg-glass-heavy);
+      backdrop-filter: blur(12px) saturate(120%);
+      -webkit-backdrop-filter: blur(12px) saturate(120%);
+      border: 1px solid var(--border-glass);
+      color: var(--text-main);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15), var(--reflection);
+    }
+
+    .bar-col .bar:hover::after {
+      opacity: 1;
+    }
+
+    .bar-col .bar-day {
+      position: absolute;
+      bottom: -22px;
+      font-size: 11px;
       color: var(--text-muted);
       font-weight: 500;
     }
+
+    /* ---- ACTIVITY FEED ---- */
+    .activity-feed {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .feed-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 13px 0;
+      border-bottom: 1px solid var(--border-glass);
+      border-radius: 8px;
+      transition: background 0.15s ease, box-shadow 0.15s ease;
+      margin: 0 -6px;
+      padding-left: 6px;
+      padding-right: 6px;
+    }
+
+    .feed-item:hover {
+      background: var(--bg-glass);
+      box-shadow: var(--reflection);
+    }
+
+    .feed-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .feed-item:first-child {
+      padding-top: 0;
+    }
+
+    .feed-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+      border: 1px solid var(--border-glass);
+      box-shadow: var(--reflection);
+    }
+
+    .feed-icon.upload {
+      background: rgba(59,130,246,0.15);
+      color: #3b82f6;
+      box-shadow: 0 0 8px rgba(59,130,246,0.2), var(--reflection);
+    }
+
+    .feed-icon.share {
+      background: rgba(168,85,247,0.15);
+      color: #a855f7;
+      box-shadow: 0 0 8px rgba(168,85,247,0.2), var(--reflection);
+    }
+
+    .feed-icon.download {
+      background: rgba(34,197,94,0.15);
+      color: #22c55e;
+      box-shadow: 0 0 8px rgba(34,197,94,0.2), var(--reflection);
+    }
+
+    .feed-icon.delete {
+      background: rgba(239,68,68,0.12);
+      color: #ef4444;
+      box-shadow: 0 0 8px rgba(239,68,68,0.15), var(--reflection);
+    }
+
+    .feed-icon.login {
+      background: rgba(245,158,11,0.15);
+      color: #f59e0b;
+      box-shadow: 0 0 8px rgba(245,158,11,0.2), var(--reflection);
+    }
+
+    .feed-body {
+      flex: 1;
+    }
+
+    .feed-title {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 2px;
+    }
+
+    .feed-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .feed-time {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    /* ---- MODAL STYLES (reuse existing) ---- */
+    .modal-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    /* Responsive */
+    @media (max-width: 720px) {
+      .profile-stats-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .profile-lower {
+        grid-template-columns: 1fr;
+      }
+
+      .profile-card {
+        gap: 16px;
+      }
+
+      .profile-card-actions {
+        width: 100%;
+      }
+
+      .btn-edit-profile {
+        width: 100%;
+        justify-content: center;
+      }
+    }
   </style>
 </head>
+
 <body>
   <script>
     if ((localStorage.getItem('fileShareTheme') || 'dark') === 'dark') document.body.classList.add('dark-mode');
@@ -210,122 +594,452 @@
   </script>
 
   <div class="dashboard">
+    <!-- SIDEBAR -->
     <div class="sidebar">
       <h2 class="logo"><i class="fa-solid fa-layer-group" style="color: #4facfe;"></i> FileShare</h2>
       <ul>
-        <li><a href="index.html" style="text-decoration:none; color:inherit; display:flex; gap:15px;"><i class="fa-solid fa-house"></i> Dashboard</a></li>
-        <li class="active"><a href="profile.html" style="text-decoration:none; color:inherit; display:flex; gap:15px;"><i class="fa-solid fa-user"></i> My Profile</a></li>
+        <li><a href="index.html" style="text-decoration:none; color:inherit; display:flex; gap:15px;"><i
+              class="fa-solid fa-house"></i> Dashboard</a></li>
+        <li class="active"><a href="profile.html"
+            style="text-decoration:none; color:inherit; display:flex; gap:15px;"><i class="fa-solid fa-user"></i> My
+            Profile</a></li>
         <li class="spacer"></li>
-        <li><a href="#" style="text-decoration:none; color:inherit; display:flex; gap:15px;"><i class="fa-solid fa-folder"></i> My Files</a></li>
-        <li><a href="#" style="text-decoration:none; color:inherit; display:flex; gap:15px;"><i class="fa-solid fa-clock"></i> Recent Files</a></li>
-        <li><a href="#" style="text-decoration:none; color:inherit; display:flex; gap:15px;"><i class="fa-solid fa-cloud-arrow-up"></i> Upload Files</a></li>
+        <li><a href="#" style="text-decoration:none; color:inherit; display:flex; gap:15px;"><i
+              class="fa-solid fa-folder"></i> My Files</a></li>
+        <li><a href="#" style="text-decoration:none; color:inherit; display:flex; gap:15px;"><i
+              class="fa-solid fa-clock"></i> Recent Files</a></li>
+        <li><a href="#" style="text-decoration:none; color:inherit; display:flex; gap:15px;"><i
+              class="fa-solid fa-cloud-arrow-up"></i> Upload Files</a></li>
         <li class="spacer"></li>
-        <li><a href="settings.html" style="text-decoration:none; color:inherit; display:flex; gap:15px;"><i class="fa-solid fa-lock"></i> Account Security</a></li>
-        <li><a href="app_settings.html" style="text-decoration:none; color:inherit; display:flex; gap:15px;"><i class="fa-solid fa-sliders"></i> App Settings</a></li>
+        <li><a href="settings.html" style="text-decoration:none; color:inherit; display:flex; gap:15px;"><i
+              class="fa-solid fa-lock"></i> Account Security</a></li>
+        <li><a href="app_settings.html" style="text-decoration:none; color:inherit; display:flex; gap:15px;"><i
+              class="fa-solid fa-sliders"></i> App Settings</a></li>
       </ul>
     </div>
 
-    <div class="main">
-      <div class="topbar">
-        <div class="search-bar"><i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="Search..."></div>
-        <div class="user-area">
-          <div class="theme-toggle" id="theme-toggle" style="cursor: pointer; font-size: 20px; color: var(--text-muted);"><i class="fa-solid fa-moon"></i></div>
-          <div class="notification"><i class="fa-solid fa-bell"></i><span class="badge">1</span></div>
-          <div class="user-profile" id="profile-btn">
-            <span id="display-username">Loading...</span><i class="fa-solid fa-chevron-down"></i>
-            <div class="profile-dropdown" id="profile-dropdown">
-              <a href="profile.html"><i class="fa-regular fa-user"></i> My Profile</a>
-              <a href="settings.html"><i class="fa-solid fa-lock"></i> Account Security</a>
-              <a href="app_settings.html"><i class="fa-solid fa-sliders"></i> App Settings</a>
-              <div class="dropdown-divider"></div>
-              <a href="#" class="logout-text" id="logout-btn"><i class="fa-solid fa-arrow-right-from-bracket"></i> Log Out</a>
+    <!-- MAIN -->
+    <div class="main" style="padding: 0; overflow-y: auto;">
+
+      <!-- Cover Banner (holds topbar inside) -->
+      <div class="profile-cover">
+        <div class="profile-cover-topbar">
+          <div class="topbar" style="margin-bottom: 0; background: rgba(255,255,255,0.08); backdrop-filter: blur(16px) saturate(120%); -webkit-backdrop-filter: blur(16px) saturate(120%); border: 1px solid var(--border-glass); box-shadow: 0 4px 20px rgba(0,0,0,0.1), var(--reflection); padding: 10px 20px; border-radius: 14px;">
+            <div class="search-bar">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" placeholder="Search...">
+            </div>
+            <div class="user-area">
+              <div class="theme-toggle" id="theme-toggle"
+                style="cursor: pointer; font-size: 20px; color: rgba(255,255,255,0.8);"><i class="fa-solid fa-moon"></i>
+              </div>
+              <div class="notification" id="notification-bell" style="color: rgba(255,255,255,0.8);">
+                <i class="fa-solid fa-bell"></i><span class="badge">1</span>
+                <div class="notification-dropdown" id="notification-dropdown">
+                  <div class="notification-header">
+                    <h3>Notifications</h3>
+                    <div class="clear-all" id="clear-notifications">Clear All</div>
+                  </div>
+                  <div class="notification-list" id="notification-list">
+                    <div class="notification-empty" id="notification-empty">No notifications</div>
+                  </div>
+                </div>
+              </div>
+              <div class="user-profile" id="profile-btn" style="color: rgba(255,255,255,0.9);">
+                <span id="display-username">Loading...</span><i class="fa-solid fa-chevron-down"></i>
+                <div class="profile-dropdown" id="profile-dropdown">
+                  <a href="profile.html"><i class="fa-regular fa-user"></i> My Profile</a>
+                  <a href="settings.html"><i class="fa-solid fa-lock"></i> Account Security</a>
+                  <a href="app_settings.html"><i class="fa-solid fa-sliders"></i> App Settings</a>
+                  <div class="dropdown-divider"></div>
+                  <a href="#" class="logout-text" id="logout-btn"><i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    Log Out</a>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
+      <!-- END Cover -->
 
-      <div class="profile-center-container">
-        
-        <div class="profile-header-centered">
-          <img id="profile-img-display" src="https://i.pravatar.cc/150?img=11" alt="Profile Picture">
-          <h2 id="profile-page-name">Loading...</h2>
-        </div>
+      <div class="profile-page-content">
 
-        <div class="profile-stats-pill">
-          <div class="stat-box">
-            <span class="stat-label">Total file</span>
-            <span class="stat-value">195</span>
+        <!-- Profile Card -->
+        <div class="profile-card">
+          <div class="profile-avatar-wrap">
+            <img id="profile-img-display" src="https://i.pravatar.cc/150?img=11" alt="Profile Picture">
+            <div class="avatar-edit-btn" id="open-edit-modal-btn" title="Edit Profile">
+              <i class="fa-solid fa-pen"></i>
+            </div>
           </div>
-          <div class="stat-divider"></div>
-          <div class="stat-box">
-            <span class="stat-label">send</span>
-            <span class="stat-value">88</span>
-          </div>
-          <div class="stat-divider"></div>
-          <div class="stat-box">
-            <span class="stat-label">Receive</span>
-            <span class="stat-value">96</span>
-          </div>
-        </div>
 
-        <div class="activity-header">
-          <div class="activity-title">
-            <h3>Activity</h3>
-            <p>Perday</p>
+          <div class="profile-info">
+            <h1 id="profile-page-name">Loading...</h1>
+            <p class="profile-email" id="profile-email-display">user@example.com</p>
+            <p class="profile-bio-text" id="profile-bio-display">No bio yet — add one to tell others about yourself.</p>
+            <div class="profile-meta-tags">
+              <span class="meta-tag"><i class="fa-solid fa-calendar-days"></i> <span id="profile-joined-tag">Joined —</span></span>
+              <span class="meta-tag"><i class="fa-solid fa-circle-check" style="color:#22c55e;"></i> Verified</span>
+              <span class="meta-tag"><i class="fa-solid fa-clock"></i> Active today</span>
+            </div>
           </div>
-          <div class="activity-toggles">
-            <button class="toggle-btn">Send</button>
-            <button class="toggle-btn active">Receive</button>
+
+          <div class="profile-card-actions">
+            <button class="btn-edit-profile" id="open-edit-modal-btn-2">
+              <i class="fa-solid fa-pen-to-square"></i> Edit Profile
+            </button>
           </div>
         </div>
 
-        <div class="chart-wrapper">
-          <div class="chart-bg-lines">
-            <div class="chart-line"><span>6+</span></div>
-            <div class="chart-line"><span>4</span></div>
-            <div class="chart-line"><span>2</span></div>
-            <div class="chart-line"><span>0</span></div>
+        <!-- Stats Row -->
+        <div class="profile-stats-row">
+          <div class="stat-card">
+            <div class="stat-card-icon blue"><i class="fa-solid fa-file-lines"></i></div>
+            <span class="stat-card-value" id="stat-total-files">—</span>
+            <span class="stat-card-label">Total Files</span>
           </div>
-          
-          <div class="chart-bars">
-            <div class="bar-group"><div class="bar" style="height: 55%;"></div><span class="bar-label">sat</span></div>
-            <div class="bar-group"><div class="bar" style="height: 40%;"></div><span class="bar-label">sun</span></div>
-            <div class="bar-group"><div class="bar" style="height: 60%;"></div><span class="bar-label">mon</span></div>
-            <div class="bar-group"><div class="bar highlight" style="height: 85%;"></div><span class="bar-label">tue</span></div>
-            <div class="bar-group"><div class="bar" style="height: 35%;"></div><span class="bar-label">wed</span></div>
-            <div class="bar-group"><div class="bar" style="height: 20%;"></div><span class="bar-label">thu</span></div>
-            <div class="bar-group"><div class="bar" style="height: 55%;"></div><span class="bar-label">fri</span></div>
+          <div class="stat-card">
+            <div class="stat-card-icon purple"><i class="fa-solid fa-paper-plane"></i></div>
+            <span class="stat-card-value" id="stat-files-sent">—</span>
+            <span class="stat-card-label">Files Sent</span>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon green"><i class="fa-solid fa-download"></i></div>
+            <span class="stat-card-value" id="stat-files-received">—</span>
+            <span class="stat-card-label">Files Received</span>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon orange"><i class="fa-solid fa-database"></i></div>
+            <span class="stat-card-value" id="stat-storage-used">—</span>
+            <span class="stat-card-label">Storage Used</span>
           </div>
         </div>
 
-        <div style="text-align: center; margin-top: 10px;">
-          <button id="open-edit-modal-btn" style="background: transparent; color: var(--text-muted); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px;">Edit Profile Info</button>
+        <!-- Lower Two-Column -->
+        <div class="profile-lower">
+
+          <!-- Activity Chart Panel -->
+          <div class="profile-panel">
+            <div class="activity-header-row">
+              <div>
+                <p class="panel-title">Activity</p>
+                <p class="panel-subtitle">Files per day this week</p>
+              </div>
+              <div class="activity-toggles">
+                <button class="toggle-btn" id="btn-send" data-mode="send">Send</button>
+                <button class="toggle-btn active" id="btn-receive" data-mode="receive">Receive</button>
+              </div>
+            </div>
+
+            <div class="chart-area" id="chart-area">
+              <!-- Grid lines -->
+              <div class="chart-grid">
+                <div class="chart-grid-line"><span>10</span></div>
+                <div class="chart-grid-line"><span>7</span></div>
+                <div class="chart-grid-line"><span>4</span></div>
+                <div class="chart-grid-line"><span>1</span></div>
+                <div class="chart-grid-line"><span>0</span></div>
+              </div>
+
+              <!-- Bars -->
+              <div class="chart-bars-wrap" id="chart-bars">
+                <!-- Injected by JS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Activity Feed -->
+          <div class="profile-panel">
+            <p class="panel-title">Recent Activity</p>
+            <p class="panel-subtitle">Your latest actions</p>
+
+            <div class="activity-feed" id="activity-feed">
+              <div class="feed-item">
+                <div class="feed-icon upload"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                <div class="feed-body">
+                  <p class="feed-title">Uploaded report.pdf</p>
+                  <p class="feed-desc">2.5 MB · Docs</p>
+                </div>
+                <span class="feed-time">Just now</span>
+              </div>
+              <div class="feed-item">
+                <div class="feed-icon share"><i class="fa-solid fa-share-nodes"></i></div>
+                <div class="feed-body">
+                  <p class="feed-title">Shared photo.jpg</p>
+                  <p class="feed-desc">With john@example.com</p>
+                </div>
+                <span class="feed-time">5 min ago</span>
+              </div>
+              <div class="feed-item">
+                <div class="feed-icon download"><i class="fa-solid fa-download"></i></div>
+                <div class="feed-body">
+                  <p class="feed-title">Downloaded video.mp4</p>
+                  <p class="feed-desc">1.8 GB · Video</p>
+                </div>
+                <span class="feed-time">1 hr ago</span>
+              </div>
+              <div class="feed-item">
+                <div class="feed-icon share"><i class="fa-solid fa-link"></i></div>
+                <div class="feed-body">
+                  <p class="feed-title">Created share link</p>
+                  <p class="feed-desc">script.js · Expires in 7d</p>
+                </div>
+                <span class="feed-time">3 hr ago</span>
+              </div>
+              <div class="feed-item">
+                <div class="feed-icon login"><i class="fa-solid fa-right-to-bracket"></i></div>
+                <div class="feed-body">
+                  <p class="feed-title">Signed in</p>
+                  <p class="feed-desc">Windows · Chrome</p>
+                </div>
+                <span class="feed-time">Yesterday</span>
+              </div>
+            </div>
+          </div>
+
         </div>
+        <!-- END lower two-column -->
 
       </div>
-
-      <div id="edit-profile-modal" class="modal-overlay">
-        <div class="modal-content">
-          <h3 style="margin-bottom: 20px; font-size: 20px; color: var(--text-main);">Edit Profile</h3>
-          <div class="form-group"><label>Profile Picture</label><input type="file" id="edit-pic-input" accept="image/*" class="file-input"></div>
-          <div class="form-group"><label>Username</label><input type="text" id="edit-username-input" class="text-input" placeholder="Update username"></div>
-          <div class="form-group"><label>Bio (Optional)</label><textarea id="edit-bio-input" class="text-input" placeholder="Tell us about yourself" rows="3"></textarea></div>
-          <p id="edit-modal-msg" style="display: none; font-size: 14px; margin-top: 10px;"></p>
-          <div class="modal-buttons">
-            <button id="cancel-edit-btn" class="btn-cancel">Cancel</button>
-            <button id="save-profile-btn" class="btn-primary" style="background: #d946ef;">Save Changes</button>
-          </div>
-        </div>
-      </div>
+      <!-- END profile-page-content -->
 
     </div>
+    <!-- END main -->
   </div>
+  <!-- END dashboard -->
+
+  <!-- Edit Profile Modal -->
+  <div id="edit-profile-modal" class="modal-overlay">
+    <div class="modal-content">
+      <h3 style="margin-bottom: 20px; font-size: 20px; color: var(--text-main);">Edit Profile</h3>
+      <div class="form-group">
+        <label style="font-size:13px; color:var(--text-muted); font-weight:600;">Profile Picture</label>
+        <input type="file" id="edit-pic-input" accept="image/*" class="file-input">
+      </div>
+      <div class="form-group">
+        <label style="font-size:13px; color:var(--text-muted); font-weight:600;">Username</label>
+        <input type="text" id="edit-username-input" class="text-input" placeholder="Update username">
+      </div>
+      <div class="form-group">
+        <label style="font-size:13px; color:var(--text-muted); font-weight:600;">Bio (Optional)</label>
+        <textarea id="edit-bio-input" class="text-input" placeholder="Tell us about yourself" rows="3"></textarea>
+      </div>
+      <p id="edit-modal-msg" style="display: none; font-size: 14px; margin-top: 10px;"></p>
+      <div class="modal-buttons">
+        <button id="cancel-edit-btn" class="btn-cancel">Cancel</button>
+        <button id="save-profile-btn" class="btn-primary"
+          style="background: linear-gradient(135deg,#d946ef,#a855f7); border:none;">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
   <script src="script.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const stored = localStorage.getItem('username');
-      if(stored) document.getElementById('profile-page-name').textContent = stored;
+
+      // ---- Populate all fields from localStorage cache immediately ----
+      const stored   = localStorage.getItem('username');
+      const email    = localStorage.getItem('userEmail');
+      const bio      = localStorage.getItem('userBio');
+      const joined   = localStorage.getItem('userJoined');
+      const rawMb    = parseFloat(localStorage.getItem('userStorageMB') || '0');
+      const storage  = rawMb >= 1024 ? `${(rawMb/1024).toFixed(1)} GB` : `${rawMb.toFixed(1)} MB`;
+      const pic      = localStorage.getItem('profilePic') || localStorage.getItem('profilePicUrl');
+
+      if (stored)  document.getElementById('profile-page-name').textContent  = stored;
+      if (email)   document.getElementById('profile-email-display').textContent = email;
+      if (bio)     document.getElementById('profile-bio-display').textContent = bio;
+      if (joined)  document.getElementById('profile-joined-tag').textContent  = `Joined ${joined}`;
+      if (pic)     document.getElementById('profile-img-display').src         = pic;
+
+      // Stats from cache
+      const tf = localStorage.getItem('userTotalFiles');
+      const fs = localStorage.getItem('userFilesSent');
+      const fr = localStorage.getItem('userFilesRecv');
+      if (tf != null) document.getElementById('stat-total-files').textContent    = tf;
+      if (fs != null) document.getElementById('stat-files-sent').textContent      = fs;
+      if (fr != null) document.getElementById('stat-files-received').textContent  = fr;
+      document.getElementById('stat-storage-used').textContent = storage;
+
+      // ---- Open modal from BOTH triggers ----
+      const modal = document.getElementById('edit-profile-modal');
+      const cancelBtn = document.getElementById('cancel-edit-btn');
+      const saveBtn = document.getElementById('save-profile-btn');
+      const modalMsg = document.getElementById('edit-modal-msg');
+
+      function openModal() {
+        document.getElementById('edit-username-input').value = localStorage.getItem('username') || '';
+        document.getElementById('edit-bio-input').value = localStorage.getItem('userBio') || '';
+        modal.classList.add('active');
+      }
+
+      document.getElementById('open-edit-modal-btn').addEventListener('click', openModal);
+      document.getElementById('open-edit-modal-btn-2').addEventListener('click', openModal);
+
+      cancelBtn.addEventListener('click', () => {
+        modal.classList.remove('active');
+        modalMsg.style.display = 'none';
+        document.getElementById('edit-pic-input').value = '';
+      });
+
+      saveBtn.addEventListener('click', async () => {
+        const newUsername = document.getElementById('edit-username-input').value.trim();
+        const newBio = document.getElementById('edit-bio-input').value.trim();
+        const picFile = document.getElementById('edit-pic-input').files[0];
+        const userEmail = localStorage.getItem('userEmail');
+
+        if (!newUsername) {
+          modalMsg.textContent = 'Username cannot be empty.';
+          modalMsg.style.color = '#ef4444';
+          modalMsg.style.display = 'block';
+          return;
+        }
+
+        saveBtn.textContent = 'Saving…';
+        saveBtn.disabled = true;
+
+        // --- Handle local profile pic preview ---
+        if (picFile) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            document.getElementById('profile-img-display').src = e.target.result;
+            localStorage.setItem('profilePic', e.target.result);
+          };
+          reader.readAsDataURL(picFile);
+        }
+
+        // --- Try API, fall back gracefully ---
+        const formData = new FormData();
+        if (userEmail) formData.append('email', userEmail);
+        formData.append('username', newUsername);
+        formData.append('bio', newBio);
+        if (picFile) formData.append('profile_pic', picFile);
+
+        try {
+          const response = await fetch('http://127.0.0.1:8000/update-profile', {
+            method: 'POST',
+            body: formData
+          });
+          const data = await response.json();
+          if (response.ok) {
+            const finalName = data.username || newUsername;
+            const finalBio = data.bio || newBio;
+            applyProfileUpdate(finalName, finalBio);
+          } else {
+            // API error — still save locally
+            applyProfileUpdate(newUsername, newBio);
+          }
+        } catch (_) {
+          // Network error — save locally anyway
+          applyProfileUpdate(newUsername, newBio);
+        }
+
+        function applyProfileUpdate(name, bio) {
+          localStorage.setItem('username', name);
+          if (bio) localStorage.setItem('userBio', bio);
+
+          document.getElementById('profile-page-name').textContent = name;
+          if (bio) document.getElementById('profile-bio-display').textContent = bio;
+          const du = document.getElementById('display-username');
+          if (du) du.textContent = name;
+
+          modal.classList.remove('active');
+          modalMsg.style.display = 'none';
+          saveBtn.textContent = 'Save Changes';
+          saveBtn.disabled = false;
+          document.getElementById('edit-pic-input').value = '';
+        }
+      });
+
+      // ---- Restore profile pic if saved locally ----
+      const savedPic = localStorage.getItem('profilePic');
+      if (savedPic) {
+        document.getElementById('profile-img-display').src = savedPic;
+      }
+
+      // ---- Activity Chart & Feed (Global functions for script.js to call) ----
+      window._chartMode = 'receive';
+      
+      window.renderActivityChart = function(chartData, mode) {
+        if (!chartData) return;
+        const barsWrap = document.getElementById('chart-bars');
+        if (!barsWrap) return;
+        
+        const data = chartData[mode];
+        if (!data) return;
+        const days = chartData.days || ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+        
+        // Find max value to calculate percentage heights
+        let maxVal = Math.max(...Object.values(data));
+        if (maxVal < 5) maxVal = 5; // keep some headroom if values are very low
+        
+        // highlight the day with the max value
+        let highlightDay = '';
+        for (const [d, v] of Object.entries(data)) {
+          if (v === Math.max(...Object.values(data)) && v > 0) highlightDay = d;
+        }
+
+        barsWrap.innerHTML = days.map((day) => {
+          const val = data[day] || 0;
+          const pct = Math.round((val / maxVal) * 100);
+          const isHL = day === highlightDay ? 'highlight' : '';
+          return `
+            <div class="bar-col">
+              <div class="bar ${isHL}" data-value="${val} files" style="height: ${pct}%;"></div>
+              <span class="bar-day">${day}</span>
+            </div>
+          `;
+        }).join('');
+      };
+
+      window.renderActivityFeed = function(events) {
+        const feedWrap = document.getElementById('activity-feed');
+        if (!feedWrap) return;
+
+        if (!events || events.length === 0) {
+          feedWrap.innerHTML = '<p style="font-size:13px; color:var(--text-muted); padding:10px 0;">No recent activity.</p>';
+          return;
+        }
+
+        const icons = {
+          upload: 'fa-cloud-arrow-up',
+          share: 'fa-share-nodes',
+          download: 'fa-download',
+          delete: 'fa-trash',
+          login: 'fa-right-to-bracket',
+          system: 'fa-gear'
+        };
+
+        feedWrap.innerHTML = events.map(ev => `
+          <div class="feed-item">
+            <div class="feed-icon ${ev.type}">
+              <i class="fa-solid ${icons[ev.type] || 'fa-bolt'}"></i>
+            </div>
+            <div class="feed-body">
+              <h4 class="feed-title">${ev.title}</h4>
+              <p class="feed-desc">${ev.description}</p>
+            </div>
+            <span class="feed-time">${ev.time}</span>
+          </div>
+        `).join('');
+      };
+
+      document.getElementById('btn-send').addEventListener('click', () => {
+        window._chartMode = 'send';
+        document.getElementById('btn-send').classList.add('active');
+        document.getElementById('btn-receive').classList.remove('active');
+        if (window._activityChart) window.renderActivityChart(window._activityChart, 'send');
+      });
+
+      document.getElementById('btn-receive').addEventListener('click', () => {
+        window._chartMode = 'receive';
+        document.getElementById('btn-receive').classList.add('active');
+        document.getElementById('btn-send').classList.remove('active');
+        if (window._activityChart) window.renderActivityChart(window._activityChart, 'receive');
+      });
+
     });
   </script>
 </body>
+
 </html>

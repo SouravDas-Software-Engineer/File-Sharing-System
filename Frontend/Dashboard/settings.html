@@ -3,94 +3,316 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Account Settings</title>
+  <title>Account Security - FileShare</title>
+  <meta name="description" content="Manage your FileShare account password and security settings.">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="style.css">
-  <style>
-    /* Settings specific styles */
-    .settings-container { background: var(--bg-card); padding: 30px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); margin-top: 20px;}
-    .settings-group { margin-bottom: 30px; }
-    .settings-group h3 { margin-bottom: 15px; color: var(--text-main); font-size: 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;}
-    .form-group { margin-bottom: 15px; display: flex; flex-direction: column; gap: 5px; }
-    .form-group label { color: var(--text-muted); font-size: 14px; }
-    .form-group input { padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-body); color: var(--text-main);}
-    .btn-danger { background: #ef4444; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 500; }
-  </style>
   <script>
-  const currentUser = localStorage.getItem('username');
-  
-  if (!currentUser) {
-    // Step back one folder, then enter the Login page folder
-    window.location.href = '../Login page/index.html'; 
-  }
-</script>
+    if (!localStorage.getItem('username')) window.location.href = '../Login page/index.html';
+    if ((localStorage.getItem('fileShareTheme') || 'dark') === 'dark') document.documentElement.classList.add('dark-init');
+  </script>
+  <style>
+    /* Settings page glass panels */
+    .settings-page-wrap {
+      max-width: 620px;
+      margin: 0 auto;
+      padding: 30px 0 50px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .settings-section {
+      background: var(--bg-glass);
+      backdrop-filter: blur(16px) saturate(120%);
+      -webkit-backdrop-filter: blur(16px) saturate(120%);
+      border: 1px solid var(--border-glass);
+      border-radius: 18px;
+      padding: 26px 28px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1), var(--reflection);
+    }
+
+    .settings-section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 22px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-glass);
+    }
+
+    .settings-section-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .settings-section-icon.blue   { background: rgba(59,130,246,0.15); color: #3b82f6; box-shadow: 0 0 10px rgba(59,130,246,0.2); }
+    .settings-section-icon.red    { background: rgba(239,68,68,0.12);  color: #ef4444; box-shadow: 0 0 10px rgba(239,68,68,0.15); }
+
+    .settings-section-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .settings-section-sub {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .form-group input {
+      padding: 11px 14px;
+      border: 1px solid var(--border-glass);
+      border-radius: 10px;
+      background: rgba(255,255,255,0.05);
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.25s ease;
+      backdrop-filter: blur(8px);
+    }
+
+    .form-group input:focus {
+      border-color: #4facfe;
+      background: rgba(255,255,255,0.1);
+      box-shadow: 0 0 0 3px rgba(79,172,254,0.15), var(--reflection);
+    }
+
+    .settings-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .btn-settings-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 22px;
+      border-radius: 10px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      color: white;
+      box-shadow: 0 4px 14px rgba(79,172,254,0.4), var(--reflection);
+      transition: all 0.2s ease;
+    }
+
+    .btn-settings-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 22px rgba(79,172,254,0.5), var(--reflection);
+    }
+
+    .btn-settings-danger {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 22px;
+      border-radius: 10px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid rgba(239,68,68,0.4);
+      background: rgba(239,68,68,0.1);
+      color: #ef4444;
+      transition: all 0.2s ease;
+    }
+
+    .btn-settings-danger:hover {
+      background: #ef4444;
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 6px 18px rgba(239,68,68,0.4);
+      transform: translateY(-1px);
+    }
+
+    /* Status message */
+    .status-msg {
+      display: none;
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin-bottom: 14px;
+      border: 1px solid transparent;
+    }
+
+    .status-msg.success {
+      background: rgba(34,197,94,0.12);
+      border-color: rgba(34,197,94,0.3);
+      color: #22c55e;
+    }
+
+    .status-msg.error {
+      background: rgba(239,68,68,0.1);
+      border-color: rgba(239,68,68,0.3);
+      color: #ef4444;
+    }
+
+    /* Danger zone warning text */
+    .danger-warning {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 18px;
+      padding: 12px 14px;
+      background: rgba(239,68,68,0.05);
+      border-radius: 10px;
+      border-left: 3px solid rgba(239,68,68,0.4);
+    }
+  </style>
 </head>
 <body>
-    <script>
-        const earlyTheme = localStorage.getItem('fileShareTheme') || 'dark';
-    if (earlyTheme === 'dark') {
-      document.body.classList.add('dark-mode');
-    } else {
-      document.body.classList.remove('dark-mode');
-    }
-    </script>
-<div class="dashboard">
-  <div class="sidebar">
+  <script>
+    if ((localStorage.getItem('fileShareTheme') || 'dark') === 'dark') document.body.classList.add('dark-mode');
+    else document.body.classList.remove('dark-mode');
+  </script>
+
+  <div class="dashboard">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
       <h2 class="logo"><i class="fa-solid fa-layer-group" style="color: #4facfe;"></i> FileShare</h2>
       <ul>
-        <li><a href="index.html" style="text-decoration:none; color:inherit; display:flex; gap:15px;"><i class="fa-solid fa-house"></i> Dashboard</a></li>
-        <li><a href="profile.html" style="text-decoration:none; color:inherit; display:flex; gap:15px;"><i class="fa-solid fa-user"></i> My Profile</a></li>
+        <li><a href="index.html" style="text-decoration:none;color:inherit;display:flex;gap:15px;"><i class="fa-solid fa-house"></i> Dashboard</a></li>
+        <li><a href="profile.html" style="text-decoration:none;color:inherit;display:flex;gap:15px;"><i class="fa-solid fa-user"></i> My Profile</a></li>
         <li class="spacer"></li>
-        <li><a href="#" style="text-decoration:none; color:inherit; display:flex; gap:15px;"><i class="fa-solid fa-folder"></i> My Files</a></li>
-        <li><a href="#" style="text-decoration:none; color:inherit; display:flex; gap:15px;"><i class="fa-solid fa-clock"></i> Recent Files</a></li>
-        <li><a href="#" style="text-decoration:none; color:inherit; display:flex; gap:15px;"><i class="fa-solid fa-cloud-arrow-up"></i> Upload Files</a></li>
+        <li><a href="files.html" style="text-decoration:none;color:inherit;display:flex;gap:15px;"><i class="fa-solid fa-folder"></i> My Files</a></li>
+        <li><a href="files.html" style="text-decoration:none;color:inherit;display:flex;gap:15px;"><i class="fa-solid fa-clock"></i> Recent Files</a></li>
+        <li><a href="index.html" style="text-decoration:none;color:inherit;display:flex;gap:15px;"><i class="fa-solid fa-cloud-arrow-up"></i> Upload Files</a></li>
         <li class="spacer"></li>
-        <li class="active"><a href="settings.html" style="text-decoration:none; color:inherit; display:flex; gap:15px;"><i class="fa-solid fa-lock"></i> Account Security</a></li>
-        <li><a href="app_settings.html" style="text-decoration:none; color:inherit; display:flex; gap:15px;"><i class="fa-solid fa-sliders"></i> App Settings</a></li>
+        <li class="active"><a href="settings.html" style="text-decoration:none;color:inherit;display:flex;gap:15px;"><i class="fa-solid fa-lock"></i> Account Security</a></li>
+        <li><a href="app_settings.html" style="text-decoration:none;color:inherit;display:flex;gap:15px;"><i class="fa-solid fa-sliders"></i> App Settings</a></li>
       </ul>
     </div>
 
-  <div class="main">
-    <h2 class="section-title">Account Settings</h2>
-    <div class="settings-container">
-      <div class="settings-group">
-        <h3>Change Password</h3>
-        <p id="password-msg" style="display: none; margin-bottom: 15px; padding: 10px; border-radius: 6px;"></p>
-        <div class="form-group">
-          <label>Current Password</label>
-          <input type="password" id="current-password" placeholder="Enter current password">
+    <!-- MAIN -->
+    <div class="main">
+      <div class="topbar">
+        <div class="hamburger-menu" id="hamburger-menu"><span></span><span></span><span></span></div>
+        <div class="search-bar"><i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="Search..."></div>
+        <div class="user-area">
+          <div class="theme-toggle" id="theme-toggle" style="cursor:pointer;font-size:20px;color:var(--text-muted);"><i class="fa-solid fa-moon"></i></div>
+          <div class="notification" id="notification-bell">
+            <i class="fa-solid fa-bell"></i><span class="badge">0</span>
+            <div class="notification-dropdown" id="notification-dropdown">
+              <div class="notification-header">
+                <h3>Notifications</h3>
+                <div class="clear-all" id="clear-notifications">Clear All</div>
+              </div>
+              <div class="notification-list" id="notification-list">
+                <div class="notification-empty">No notifications</div>
+              </div>
+            </div>
+          </div>
+          <div class="user-profile" id="profile-btn">
+            <span id="display-username">Loading...</span><i class="fa-solid fa-chevron-down"></i>
+            <div class="profile-dropdown" id="profile-dropdown">
+              <a href="profile.html"><i class="fa-regular fa-user"></i> My Profile</a>
+              <a href="settings.html"><i class="fa-solid fa-lock"></i> Account Security</a>
+              <a href="app_settings.html"><i class="fa-solid fa-sliders"></i> App Settings</a>
+              <div class="dropdown-divider"></div>
+              <a href="#" class="logout-text" id="logout-btn"><i class="fa-solid fa-arrow-right-from-bracket"></i> Log Out</a>
+            </div>
+          </div>
         </div>
-        <div class="form-group">
-          <label>New Password</label>
-          <input type="password" id="new-password" placeholder="Enter new password">
-        </div>
-        <button id="update-password-btn" class="btn-primary" style="background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">Update Password</button>
       </div>
 
-      <div class="settings-group">
-        <h3>Danger Zone</h3>
-        <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 15px;">Once you delete your account, there is no going back. Please be certain.</p>
-        <p id="delete-msg" style="display: none; color: #ef4444; font-size: 14px; margin-bottom: 10px;"></p>
-        <button id="trigger-delete-btn" class="btn-danger">Delete Account</button>
+      <div class="settings-page-wrap">
+
+        <!-- Change Password -->
+        <div class="settings-section">
+          <div class="settings-section-header">
+            <div class="settings-section-icon blue"><i class="fa-solid fa-key"></i></div>
+            <div>
+              <p class="settings-section-title">Change Password</p>
+              <p class="settings-section-sub">Update your account password</p>
+            </div>
+          </div>
+          <div id="password-msg" class="status-msg"></div>
+          <div class="form-group">
+            <label>Current Password</label>
+            <input type="password" id="current-password" placeholder="Enter current password">
+          </div>
+          <div class="form-group">
+            <label>New Password</label>
+            <input type="password" id="new-password" placeholder="Enter new password (min 6 chars)">
+          </div>
+          <div class="settings-actions">
+            <button id="update-password-btn" class="btn-settings-primary">
+              <i class="fa-solid fa-floppy-disk"></i> Update Password
+            </button>
+          </div>
+        </div>
+
+        <!-- Danger Zone -->
+        <div class="settings-section">
+          <div class="settings-section-header">
+            <div class="settings-section-icon red"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <div>
+              <p class="settings-section-title">Danger Zone</p>
+              <p class="settings-section-sub">Irreversible account actions</p>
+            </div>
+          </div>
+          <p class="danger-warning">
+            <strong>Permanently delete your account.</strong> This will remove all your files, profile data,
+            and account information. This action cannot be undone.
+          </p>
+          <p id="delete-msg" style="display:none; color:#ef4444; font-size:13px; margin-bottom:12px;"></p>
+          <div class="settings-actions">
+            <button id="trigger-delete-btn" class="btn-settings-danger">
+              <i class="fa-solid fa-trash-can"></i> Delete My Account
+            </button>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
-</div>
-<div id="delete-modal" class="modal-overlay">
-  <div class="modal-content">
-    <h3>Verify Account Deletion</h3>
-    <p>A 6-digit verification code has been sent to your email. Enter it below to permanently delete your account.</p>
-    <div class="form-group">
-      <input type="text" id="delete-otp-input" placeholder="Enter 6-digit OTP" maxlength="6">
-    </div>
-    <p id="modal-error-msg" style="display: none; color: #ef4444; font-size: 14px; margin-top: 10px;"></p>
-    <div class="modal-buttons">
-      <button id="cancel-delete-btn" class="btn-cancel">Cancel</button>
-      <button id="confirm-delete-btn" class="btn-danger">Verify and Delete</button>
+
+  <!-- Delete Confirmation Modal -->
+  <div id="delete-modal" class="modal-overlay">
+    <div class="modal-content">
+      <h3 style="margin-bottom:10px; font-size:18px; color:var(--text-main);">Verify Account Deletion</h3>
+      <p style="font-size:13.5px; color:var(--text-muted); margin-bottom:20px;">
+        A 6-digit verification code has been sent to your email. Enter it below to permanently delete your account.
+      </p>
+      <div class="form-group">
+        <label>Verification Code</label>
+        <input type="text" id="delete-otp-input" placeholder="000000" maxlength="6" style="letter-spacing:0.3em; text-align:center; font-size:18px;">
+      </div>
+      <p id="modal-error-msg" style="display:none; color:#ef4444; font-size:13px; margin-bottom:10px;"></p>
+      <div class="modal-buttons" style="display:flex;justify-content:flex-end;gap:10px;margin-top:16px;">
+        <button id="cancel-delete-btn" class="btn-cancel">Cancel</button>
+        <button id="confirm-delete-btn" class="btn-settings-danger">Verify & Delete</button>
+      </div>
     </div>
   </div>
-</div>
-<script src="script.js"></script>
+
+  <script src="script.js"></script>
 </body>
 </html>
