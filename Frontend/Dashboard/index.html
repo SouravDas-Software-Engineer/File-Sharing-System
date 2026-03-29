@@ -3,193 +3,108 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Online File Sharing System</title>
+  <title>Dashboard - FileShare</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="style.css">
- <script>
-  const currentUser = localStorage.getItem('username');
-  
-  if (!currentUser) {
-    // Step back one folder, then enter the Login page folder
-    window.location.href = '../Login page/index.html'; 
-  }
-</script>
+  <script>
+    if (!localStorage.getItem('username')) window.location.href = '../Login page/index.html';
+  </script>
 </head>
 <body>
-    <script>
-        const earlyTheme = localStorage.getItem('fileShareTheme') || 'dark';
-    if (earlyTheme === 'dark') {
-      document.body.classList.add('dark-mode');
-    } else {
-      document.body.classList.remove('dark-mode');
-    }
-    </script>
+  <script>
+    if ((localStorage.getItem('fileShareTheme') || 'dark') === 'dark') document.body.classList.add('dark-mode');
+    else document.body.classList.remove('dark-mode');
+  </script>
 
-<div class="dashboard">
-
-  <div class="sidebar">
-    <h2 class="logo">
-      <i class="fa-solid fa-layer-group" style="color: #4facfe;"></i> FileShare
-    </h2>
-    <ul>
-      <li class="active"><i class="fa-solid fa-house"></i> Dashboard</li>
-      <li><i class="fa-solid fa-folder"></i> My Files</li>
-      <li class="spacer"></li>
-      <li><i class="fa-solid fa-clock"></i> Recent Files</li>
-      <li><i class="fa-solid fa-cloud-arrow-up"></i> Upload Files</li>
-      <li class="spacer"></li>
-      <li><i class="fa-solid fa-trash"></i> Trash</li>
-      <li><i class="fa-solid fa-gear"></i> Settings</li>
-    </ul>
-  </div>
-
-  <div class="main">
-    
-    <div class="topbar">
-      <div class="search-bar">
-        <i class="fa-solid fa-magnifying-glass"></i>
-        <input type="text" placeholder="Search files...">
-      </div>
-      
-      <div class="user-area">
-  <div class="theme-toggle" id="theme-toggle" style="cursor: pointer; font-size: 20px; color: var(--text-muted);">
-    <i class="fa-solid fa-moon"></i>
-  </div>
-  
-  <div class="notification">
-    <i class="fa-solid fa-bell"></i>
-    <span class="badge">1</span>
-  </div>
-<div class="user-profile" id="profile-btn">
-  <span id="display-username">Loading...</span>
-  <i class="fa-solid fa-chevron-down"></i>
-  
-  <div class="profile-dropdown" id="profile-dropdown">
-    <a href="profile.html"><i class="fa-regular fa-user"></i> My Profile</a>
-    <a href="settings.html"><i class="fa-solid fa-gear"></i> Account Settings</a>
-    <a href="#"><i class="fa-solid fa-cloud-arrow-up"></i> Upgrade Storage</a>
-    <div class="dropdown-divider"></div>
-    <a href="#" class="logout-text" id="logout-btn"><i class="fa-solid fa-arrow-right-from-bracket"></i> Log Out</a>
-  </div>
-</div>
-</div>
+  <div class="dashboard">
+    <div class="sidebar">
+      <h2 class="logo"><i class="fa-solid fa-layer-group" style="color: #4facfe;"></i> FileShare</h2>
+      <ul>
+        <li class="active"><a href="index.html" style="text-decoration:none; color:inherit; display:flex; gap:15px;"><i class="fa-solid fa-house"></i> Dashboard</a></li>
+        <li><a href="profile.html" style="text-decoration:none; color:inherit; display:flex; gap:15px;"><i class="fa-solid fa-user"></i> My Profile</a></li>
+        <li class="spacer"></li>
+        <li><a href="#" style="text-decoration:none; color:inherit; display:flex; gap:15px;"><i class="fa-solid fa-folder"></i> My Files</a></li>
+        <li><a href="#" style="text-decoration:none; color:inherit; display:flex; gap:15px;"><i class="fa-solid fa-clock"></i> Recent Files</a></li>
+        <li><a href="#" style="text-decoration:none; color:inherit; display:flex; gap:15px;"><i class="fa-solid fa-cloud-arrow-up"></i> Upload Files</a></li>
+        <li class="spacer"></li>
+        <li><a href="settings.html" style="text-decoration:none; color:inherit; display:flex; gap:15px;"><i class="fa-solid fa-lock"></i> Account Security</a></li>
+        <li><a href="app_settings.html" style="text-decoration:none; color:inherit; display:flex; gap:15px;"><i class="fa-solid fa-sliders"></i> App Settings</a></li>
+      </ul>
     </div>
 
-    <div class="stats">
-      <div class="card">
-        <div class="card-icon blue"><i class="fa-solid fa-file-lines"></i></div>
-        <div class="card-info">
-          <p>Files Uploaded</p>
-          <h3>128</h3>
+    <div class="main">
+      <div class="topbar">
+        <div class="hamburger-menu" id="hamburger-menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <div class="search-bar">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" placeholder="Search files...">
+        </div>
+        <div class="user-area">
+          <div class="theme-toggle" id="theme-toggle" style="cursor: pointer; font-size: 20px; color: var(--text-muted);"><i class="fa-solid fa-moon"></i></div>
+          <div class="notification" id="notification-bell">
+            <i class="fa-solid fa-bell"></i><span class="badge">1</span>
+            <div class="notification-dropdown" id="notification-dropdown">
+              <div class="notification-header">
+                <h3>Notifications</h3>
+                <div class="clear-all" id="clear-notifications">Clear All</div>
+              </div>
+              <div class="notification-list" id="notification-list">
+                <!-- Notification items will be injected here -->
+                <div class="notification-empty" id="notification-empty">
+                  No notifications
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="user-profile" id="profile-btn">
+            <span id="display-username">Loading...</span><i class="fa-solid fa-chevron-down"></i>
+            <div class="profile-dropdown" id="profile-dropdown">
+              <a href="profile.html"><i class="fa-regular fa-user"></i> My Profile</a>
+              <a href="settings.html"><i class="fa-solid fa-lock"></i> Account Security</a>
+              <a href="app_settings.html"><i class="fa-solid fa-sliders"></i> App Settings</a>
+              <div class="dropdown-divider"></div>
+              <a href="#" class="logout-text" id="logout-btn"><i class="fa-solid fa-arrow-right-from-bracket"></i> Log Out</a>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div class="card">
-        <div class="card-icon green"><i class="fa-solid fa-database"></i></div>
-        <div class="card-info">
-          <p>Storage Used</p>
-          <h3>6.8GB</h3>
+      <div class="stats" id="stats-container">
+        <!-- Stats will be loaded here with skeleton loaders initially -->
+      </div>
+
+      <div class="transfer">
+        <div class="transfer-item"><div class="transfer-circle"><i class="fa-regular fa-paper-plane" style="color: #0088ff;"></i></div><p>Sent</p></div>
+        <div class="transfer-item"><div class="transfer-circle"><i class="fa-solid fa-download gradient-icon"></i></div><p>Receive</p></div>
+      </div>
+
+      <!-- Drag and Drop Upload Area -->
+      <div class="upload-dropzone" id="upload-dropzone">
+        <i class="fa-solid fa-cloud-arrow-up"></i>
+        <h3>Drag & Drop Files Here</h3>
+        <p>Or click to browse</p>
+        <input type="file" id="file-input" multiple>
+        <button class="browse-btn" id="browse-btn">Browse Files</button>
+        <div class="upload-progress" id="upload-progress" style="display: none;">
+          <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+          </div>
+          <span id="progress-text">0%</span>
         </div>
       </div>
 
-      <div class="card">
-        <div class="card-icon light-blue"><i class="fa-solid fa-link"></i></div>
-        <div class="card-info">
-          <p>Shared Links</p>
-          <h3>24</h3>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-icon purple"><i class="fa-solid fa-download"></i></div>
-        <div class="card-info">
-          <p>Total Downloads</p>
-          <h3>542</h3>
-        </div>
+      <h2 class="section-title">Recent Files</h2>
+      <div class="table-container" id="recent-files-container">
+        <!-- Recent files will be loaded here with skeleton loaders initially -->
       </div>
     </div>
-
-    <div class="transfer">
-      <div class="transfer-item">
-        <div class="transfer-circle">
-          <i class="fa-regular fa-paper-plane" style="color: #0088ff;"></i>
-        </div>
-        <p>Sent</p>
-      </div>
-
-      <div class="transfer-item">
-        <div class="transfer-circle">
-          <i class="fa-solid fa-download" style="background: -webkit-linear-gradient(#00c6ff, #0072ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
-        </div>
-        <p>Receive</p>
-      </div>
-    </div>
-
-    <h2 class="section-title">Recent Files</h2>
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>File Name</th>
-            <th>Size</th>
-            <th>Uploaded</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><i class="fa-solid fa-file-pdf" style="color: #ff4747;"></i> report.pdf</td>
-            <td>2.5 MB</td>
-            <td>Today</td>
-            <td>
-              <button class="action-btn"><i class="fa-solid fa-download"></i></button>
-              <button class="action-btn"><i class="fa-solid fa-link"></i></button>
-              <button class="action-btn"><i class="fa-solid fa-trash"></i></button>
-            </td>
-          </tr>
-          <tr>
-            <td><i class="fa-solid fa-file-video" style="color: #2b5cff;"></i> video.mp4</td>
-            <td>1.8 GB</td>
-            <td>Yesterday</td>
-            <td>
-              <button class="action-btn"><i class="fa-solid fa-download"></i></button>
-              <button class="action-btn"><i class="fa-solid fa-link"></i></button>
-              <button class="action-btn"><i class="fa-solid fa-trash"></i></button>
-            </td>
-          </tr>
-          <tr>
-            <td><i class="fa-solid fa-file-zipper" style="color: #ffb700;"></i> project.zip</td>
-            <td>450 MB</td>
-            <td>Mar 10, 2024</td>
-            <td>
-              <button class="action-btn"><i class="fa-solid fa-download"></i></button>
-              <button class="action-btn"><i class="fa-solid fa-link"></i></button>
-              <button class="action-btn"><i class="fa-solid fa-trash"></i></button>
-            </td>
-          </tr>
-          <tr>
-            <td><i class="fa-solid fa-file-image" style="color: #00d2ff;"></i> photo.jpg</td>
-            <td>5.2 MB</td>
-            <td>Mar 8, 2024</td>
-            <td>
-              <button class="action-btn"><i class="fa-solid fa-download"></i></button>
-              <button class="action-btn"><i class="fa-solid fa-link"></i></button>
-              <button class="action-btn"><i class="fa-solid fa-trash"></i></button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
   </div>
-</div>
-</div>
-</div>
 
-<script src="script.js"></script>
-
-</body>
-</html>
+  <script src="script.js"></script>
 </body>
 </html>

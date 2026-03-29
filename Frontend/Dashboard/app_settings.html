@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>App Settings - FileShare</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <script>
+    if (!localStorage.getItem('username')) window.location.href = '../Login page/index.html';
+  </script>
+  <style>
+    /* App Settings Stacked UI */
+    .app-settings-container { 
+      padding: 10px 0; 
+      margin-top: 10px;
+    }
+    
+    .setting-block { 
+      display: flex; 
+      flex-direction: column; /* Stacks items vertically */
+      align-items: flex-start; 
+      padding: 12px 0; 
+    }
+    
+    .setting-info h4 { 
+      color: var(--text-main); 
+      margin-bottom: 4px; 
+      font-size: 16px; 
+      font-weight: 700; /* Bold heading */
+    }
+    
+    .setting-info p { 
+      color: var(--text-main); /* Changed from muted to main to match your image */
+      font-size: 15px;
+      margin-bottom: 8px; /* Space between text and the input */
+    }
+
+    /* Standardized Checkbox */
+    .basic-checkbox {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: #0ea5e9; /* Light blue color when checked */
+      margin-top: 2px;
+    }
+    
+    /* Standardized Dropdown */
+    .setting-select { 
+      padding: 8px 12px; 
+      border-radius: 6px; 
+      border: 1px solid var(--border-color); 
+      background: transparent; 
+      color: var(--text-main); 
+      font-family: inherit; 
+      font-size: 14px; 
+      outline: none; 
+      cursor: pointer;
+      min-width: 160px;
+    }
+    
+    /* Match dropdown options to background for dark mode readability */
+    .setting-select option {
+      background: var(--bg-card);
+      color: var(--text-main);
+    }
+  </style>
+</head>
+<body>
+  <script>
+    if ((localStorage.getItem('fileShareTheme') || 'dark') === 'dark') document.body.classList.add('dark-mode');
+    else document.body.classList.remove('dark-mode');
+  </script>
+
+  <div class="dashboard">
+    <div class="sidebar">
+      <h2 class="logo"><i class="fa-solid fa-layer-group" style="color: #4facfe;"></i> FileShare</h2>
+      <ul>
+        <li><a href="index.html" style="text-decoration:none; color:inherit; display:flex; gap:15px;"><i class="fa-solid fa-house"></i> Dashboard</a></li>
+        <li><a href="profile.html" style="text-decoration:none; color:inherit; display:flex; gap:15px;"><i class="fa-solid fa-user"></i> My Profile</a></li>
+        <li class="spacer"></li>
+        <li><a href="#" style="text-decoration:none; color:inherit; display:flex; gap:15px;"><i class="fa-solid fa-folder"></i> My Files</a></li>
+        <li><a href="#" style="text-decoration:none; color:inherit; display:flex; gap:15px;"><i class="fa-solid fa-clock"></i> Recent Files</a></li>
+        <li><a href="#" style="text-decoration:none; color:inherit; display:flex; gap:15px;"><i class="fa-solid fa-cloud-arrow-up"></i> Upload Files</a></li>
+        <li class="spacer"></li>
+        <li><a href="settings.html" style="text-decoration:none; color:inherit; display:flex; gap:15px;"><i class="fa-solid fa-lock"></i> Account Security</a></li>
+        <li class="active"><a href="app_settings.html" style="text-decoration:none; color:inherit; display:flex; gap:15px;"><i class="fa-solid fa-sliders"></i> App Settings</a></li>
+      </ul>
+    </div>
+
+    <div class="main">
+      <div class="topbar">
+        <div class="search-bar"><i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="Search..."></div>
+        <div class="user-area">
+          <div class="theme-toggle" id="theme-toggle" style="cursor: pointer; font-size: 20px; color: var(--text-muted);"><i class="fa-solid fa-moon"></i></div>
+          <div class="notification"><i class="fa-solid fa-bell"></i><span class="badge">1</span></div>
+          <div class="user-profile" id="profile-btn">
+            <span id="display-username">Loading...</span><i class="fa-solid fa-chevron-down"></i>
+            <div class="profile-dropdown" id="profile-dropdown">
+              <a href="profile.html"><i class="fa-regular fa-user"></i> My Profile</a>
+              <a href="settings.html"><i class="fa-solid fa-lock"></i> Account Security</a>
+              <a href="app_settings.html"><i class="fa-solid fa-sliders"></i> App Settings</a>
+              <div class="dropdown-divider"></div>
+              <a href="#" class="logout-text" id="logout-btn"><i class="fa-solid fa-arrow-right-from-bracket"></i> Log Out</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h2 class="section-title">App Preferences</h2>
+      
+      <div class="app-settings-container">
+        
+        <div class="setting-block">
+          <div class="setting-info">
+            <h4>Email Notifications</h4>
+            <p>Receive updates about shared files.</p>
+          </div>
+          <input type="checkbox" class="basic-checkbox" checked>
+        </div>
+        
+        <div class="setting-block">
+          <div class="setting-info">
+            <h4>Auto-Sync Files</h4>
+            <p>Automatically sync new uploads.</p>
+          </div>
+          <input type="checkbox" class="basic-checkbox">
+        </div>
+        
+        <div class="setting-block">
+          <div class="setting-info">
+            <h4>Default View</h4>
+            <p>Choose how files are displayed.</p>
+          </div>
+          <select class="setting-select">
+            <option value="list">List View</option>
+            <option value="grid">Grid View</option>
+          </select>
+        </div>
+        
+      </div>
+
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
