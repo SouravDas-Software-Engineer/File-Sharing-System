@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>App Settings - FileShare</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <script>if (!localStorage.getItem('username')) window.location.href = '../Login page/index.html';</script>
+  <style>
+    .settings-page-wrap { max-width: 660px; margin: 0 auto; padding: 30px 0 50px; display: flex; flex-direction: column; gap: 20px; }
+    .settings-section { background: var(--bg-glass); backdrop-filter: blur(16px) saturate(120%); -webkit-backdrop-filter: blur(16px) saturate(120%); border: 1px solid var(--border-glass); border-radius: 18px; padding: 24px 28px; box-shadow: 0 8px 32px rgba(0,0,0,0.1), var(--reflection); }
+    .settings-section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--border-glass); }
+    .settings-section-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+    .settings-section-icon.blue   { background: rgba(59,130,246,0.15); color: #3b82f6; }
+    .settings-section-icon.purple { background: rgba(168,85,247,0.15); color: #a855f7; }
+    .settings-section-icon.green  { background: rgba(34,197,94,0.15);  color: #22c55e; }
+    .settings-section-icon.orange { background: rgba(249,115,22,0.15); color: #f97316; }
+    .settings-section-title { font-size: 15px; font-weight: 700; color: var(--text-main); }
+    .settings-section-sub   { font-size: 12.5px; color: var(--text-muted); margin-top: 2px; }
+    .setting-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--border-glass); }
+    .setting-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .setting-row:first-child { padding-top: 0; }
+    .setting-row-info h4 { font-size: 14px; font-weight: 600; color: var(--text-main); margin-bottom: 3px; }
+    .setting-row-info p  { font-size: 12.5px; color: var(--text-muted); }
+    .toggle-switch { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; inset: 0; background: rgba(255,255,255,0.15); border-radius: 24px; cursor: pointer; transition: background 0.25s ease; border: 1px solid var(--border-glass); }
+    .toggle-slider::before { content: ''; position: absolute; width: 18px; height: 18px; left: 2px; top: 2px; background: white; border-radius: 50%; transition: transform 0.25s ease; box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
+    .toggle-switch input:checked + .toggle-slider { background: linear-gradient(135deg, #4facfe, #00f2fe); border-color: transparent; box-shadow: 0 0 10px rgba(79,172,254,0.4); }
+    .toggle-switch input:checked + .toggle-slider::before { transform: translateX(20px); }
+    .setting-select { padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-glass); background: var(--bg-glass); color: var(--text-main); font-family: inherit; font-size: 13.5px; outline: none; cursor: pointer; min-width: 140px; backdrop-filter: blur(8px); }
+    .btn-settings-primary { display: inline-flex; align-items: center; gap: 8px; padding: 10px 22px; border-radius: 10px; font-size: 13.5px; font-weight: 600; cursor: pointer; border: none; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; box-shadow: 0 4px 14px rgba(79,172,254,0.4); transition: all 0.2s ease; }
+    .btn-settings-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(79,172,254,0.5); }
+    .saved-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 8px; background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.3); color: #22c55e; font-size: 13px; font-weight: 600; opacity: 0; transition: opacity 0.3s ease; }
+    .saved-badge.show { opacity: 1; }
+  </style>
+</head>
+<body>
+  <script>
+    if ((localStorage.getItem('fileShareTheme') || 'dark') === 'dark') document.body.classList.add('dark-mode');
+    else document.body.classList.remove('dark-mode');
+  </script>
+  <div class="dashboard">
+    <div class="sidebar">
+      <h2 class="logo"><i class="fa-solid fa-layer-group" style="color:#4facfe;"></i> FileShare</h2>
+      <ul>
+        <li><a href="index.html" style="text-decoration:none;color:inherit;display:flex;gap:15px;"><i class="fa-solid fa-house"></i> Dashboard</a></li>
+        <li><a href="profile.html" style="text-decoration:none;color:inherit;display:flex;gap:15px;"><i class="fa-solid fa-user"></i> My Profile</a></li>
+        <li class="spacer"></li>
+        <li><a href="files.html" style="text-decoration:none;color:inherit;display:flex;gap:15px;"><i class="fa-solid fa-folder"></i> My Files</a></li>
+        <li><a href="files.html" style="text-decoration:none;color:inherit;display:flex;gap:15px;"><i class="fa-solid fa-clock"></i> Recent Files</a></li>
+        <li><a href="index.html" style="text-decoration:none;color:inherit;display:flex;gap:15px;"><i class="fa-solid fa-cloud-arrow-up"></i> Upload Files</a></li>
+        <li class="spacer"></li>
+        <li><a href="settings.html" style="text-decoration:none;color:inherit;display:flex;gap:15px;"><i class="fa-solid fa-lock"></i> Account Security</a></li>
+        <li class="active"><a href="app_settings.html" style="text-decoration:none;color:inherit;display:flex;gap:15px;"><i class="fa-solid fa-sliders"></i> App Settings</a></li>
+      </ul>
+    </div>
+    <div class="main">
+      <div class="topbar">
+        <div class="hamburger-menu" id="hamburger-menu"><span></span><span></span><span></span></div>
+        <div class="search-bar"><i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="Search..."></div>
+        <div class="user-area">
+          <div class="theme-toggle" id="theme-toggle" style="cursor:pointer;font-size:20px;color:var(--text-muted);"><i class="fa-solid fa-moon"></i></div>
+          <div class="notification" id="notification-bell"><i class="fa-solid fa-bell"></i><span class="badge">0</span>
+            <div class="notification-dropdown" id="notification-dropdown">
+              <div class="notification-header"><h3>Notifications</h3><div class="clear-all" id="clear-notifications">Clear All</div></div>
+              <div class="notification-list" id="notification-list"><div class="notification-empty">No notifications</div></div>
+            </div>
+          </div>
+          <div class="user-profile" id="profile-btn">
+            <span id="display-username">Loading...</span><i class="fa-solid fa-chevron-down"></i>
+            <div class="profile-dropdown" id="profile-dropdown">
+              <a href="profile.html"><i class="fa-regular fa-user"></i> My Profile</a>
+              <a href="settings.html"><i class="fa-solid fa-lock"></i> Account Security</a>
+              <a href="app_settings.html"><i class="fa-solid fa-sliders"></i> App Settings</a>
+              <div class="dropdown-divider"></div>
+              <a href="#" class="logout-text" id="logout-btn"><i class="fa-solid fa-arrow-right-from-bracket"></i> Log Out</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-page-wrap">
+        <div class="settings-section">
+          <div class="settings-section-header">
+            <div class="settings-section-icon blue"><i class="fa-solid fa-bell"></i></div>
+            <div><p class="settings-section-title">Notifications</p><p class="settings-section-sub">Control what alerts you receive</p></div>
+          </div>
+          <div class="setting-row"><div class="setting-row-info"><h4>Email Notifications</h4><p>Receive updates about shared files and account activity</p></div><label class="toggle-switch"><input type="checkbox" id="pref-email-notif" checked><span class="toggle-slider"></span></label></div>
+          <div class="setting-row"><div class="setting-row-info"><h4>Upload Alerts</h4><p>Notify when a file upload completes</p></div><label class="toggle-switch"><input type="checkbox" id="pref-upload-alert" checked><span class="toggle-slider"></span></label></div>
+          <div class="setting-row"><div class="setting-row-info"><h4>Share Notifications</h4><p>Alert when someone downloads your shared file</p></div><label class="toggle-switch"><input type="checkbox" id="pref-share-notif"><span class="toggle-slider"></span></label></div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-section-header">
+            <div class="settings-section-icon purple"><i class="fa-solid fa-folder-open"></i></div>
+            <div><p class="settings-section-title">Files & Display</p><p class="settings-section-sub">Customize how files are shown</p></div>
+          </div>
+          <div class="setting-row"><div class="setting-row-info"><h4>Default File View</h4><p>Choose between list or grid layout</p></div><select class="setting-select" id="pref-file-view"><option value="list">List View</option><option value="grid">Grid View</option></select></div>
+          <div class="setting-row"><div class="setting-row-info"><h4>Auto-Sort Files</h4><p>Sort uploaded files by date automatically</p></div><label class="toggle-switch"><input type="checkbox" id="pref-auto-sort" checked><span class="toggle-slider"></span></label></div>
+          <div class="setting-row"><div class="setting-row-info"><h4>Show File Previews</h4><p>Display image thumbnails in file list</p></div><label class="toggle-switch"><input type="checkbox" id="pref-previews" checked><span class="toggle-slider"></span></label></div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-section-header">
+            <div class="settings-section-icon green"><i class="fa-solid fa-rotate"></i></div>
+            <div><p class="settings-section-title">Sync & Storage</p><p class="settings-section-sub">Manage syncing behaviour</p></div>
+          </div>
+          <div class="setting-row"><div class="setting-row-info"><h4>Auto-Sync After Upload</h4><p>Refresh file list automatically after upload</p></div><label class="toggle-switch"><input type="checkbox" id="pref-auto-sync" checked><span class="toggle-slider"></span></label></div>
+          <div class="setting-row"><div class="setting-row-info"><h4>Storage Warning</h4><p>Alert when storage exceeds 80% of quota</p></div><label class="toggle-switch"><input type="checkbox" id="pref-storage-warn" checked><span class="toggle-slider"></span></label></div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-section-header">
+            <div class="settings-section-icon orange"><i class="fa-solid fa-shield-halved"></i></div>
+            <div><p class="settings-section-title">Privacy</p><p class="settings-section-sub">Control data and analytics</p></div>
+          </div>
+          <div class="setting-row"><div class="setting-row-info"><h4>Activity Tracking</h4><p>Track file events for your profile activity chart</p></div><label class="toggle-switch"><input type="checkbox" id="pref-activity-track" checked><span class="toggle-slider"></span></label></div>
+          <div class="setting-row"><div class="setting-row-info"><h4>Public Profile</h4><p>Allow others to find you by username</p></div><label class="toggle-switch"><input type="checkbox" id="pref-public-profile"><span class="toggle-slider"></span></label></div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:16px;">
+          <button class="btn-settings-primary" id="save-prefs-btn"><i class="fa-solid fa-floppy-disk"></i> Save Preferences</button>
+          <span class="saved-badge" id="prefs-saved-badge"><i class="fa-solid fa-circle-check"></i> Saved!</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const KEYS = ['pref-email-notif','pref-upload-alert','pref-share-notif','pref-file-view','pref-auto-sort','pref-previews','pref-auto-sync','pref-storage-warn','pref-activity-track','pref-public-profile'];
+      KEYS.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const saved = localStorage.getItem(`appPref_${id}`);
+        if (saved === null) return;
+        if (el.type === 'checkbox') el.checked = saved === 'true'; else el.value = saved;
+      });
+      document.getElementById('save-prefs-btn').addEventListener('click', () => {
+        KEYS.forEach(id => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          localStorage.setItem(`appPref_${id}`, el.type === 'checkbox' ? el.checked : el.value);
+        });
+        const badge = document.getElementById('prefs-saved-badge');
+        badge.classList.add('show');
+        setTimeout(() => badge.classList.remove('show'), 2500);
+      });
+    });
+  </script>
+</body>
+</html>

@@ -49,21 +49,21 @@ document.addEventListener("DOMContentLoaded", () => {
             if (response.ok && data.status === "success") {
                 showMessage("Login Successful ✅", "#10b981");
 
-                // Save the username to unlock the dashboard
-                if (data.username) {
-                    localStorage.setItem("username", data.username);
+                // Cache all profile data from the login response
+                localStorage.setItem('username',       data.username      || '');
+                localStorage.setItem('userEmail',      email);
+                localStorage.setItem('userBio',        data.bio           || '');
+                localStorage.setItem('userJoined',     data.joined_date   || '');
+                localStorage.setItem('userTotalFiles', data.total_files   ?? 0);
+                localStorage.setItem('userFilesSent',  data.files_sent    ?? 0);
+                localStorage.setItem('userFilesRecv',  data.files_received ?? 0);
+                localStorage.setItem('userStorageMB',  data.storage_used_mb ?? 0);
+                if (data.profile_pic_url) {
+                    localStorage.setItem('profilePicUrl', data.profile_pic_url);
                 }
-                if (response.ok) {
-                        localStorage.setItem('username', data.username);
-                                localStorage.setItem('userEmail', emailInput.value); 
-                                
-                                window.location.href = '../Dashboard/index.html';
-                            }
-                // Redirect to dashboard
-                setTimeout(() => {
-                        // Step back one folder, then enter the Dashboard folder
-                        window.location.href = '../Dashboard/index.html';
-                 }, 1000);
+
+                // Redirect immediately (no extra timeout needed)
+                window.location.href = '../Dashboard/index.html';
             } else {
                 // Show specific error from backend if available
                 showMessage(data.detail || "Login Failed", "red");
