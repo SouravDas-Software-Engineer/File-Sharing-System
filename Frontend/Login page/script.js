@@ -91,22 +91,19 @@ document.addEventListener("DOMContentLoaded", () => {
   
   // 2. Apply the saved theme immediately on load
   if (savedTheme === "dark") {
-      document.body.classList.add("dark");
-      document.body.classList.remove("light");
+      document.body.classList.add("dark-mode");
       if(modeBtn) modeBtn.textContent = "🌙";
   } else {
-      document.body.classList.add("light");
-      document.body.classList.remove("dark");
+      document.body.classList.remove("dark-mode");
       if(modeBtn) modeBtn.textContent = "☀️";
   }
 
   // 3. Toggle button clicks update the screen AND the memory
   if(modeBtn) {
       modeBtn.addEventListener("click", function () {
-          document.body.classList.toggle("dark");
-          document.body.classList.toggle("light");
+          document.body.classList.toggle("dark-mode");
 
-          if (document.body.classList.contains("dark")) {
+          if (document.body.classList.contains("dark-mode")) {
               modeBtn.textContent = "🌙";
               localStorage.setItem("fileShareTheme", "dark"); // Save to memory
           } else {

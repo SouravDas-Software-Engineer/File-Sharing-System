@@ -24,7 +24,8 @@
       background: linear-gradient(135deg, #667eea 0%, #764ba2 40%, #d946ef 100%);
       border-radius: 0 0 24px 24px;
       position: relative;
-      overflow: hidden;
+      /* Removed overflow: hidden to allow dropdowns to show outside the banner */
+      overflow: visible;
       flex-shrink: 0;
     }
 
@@ -63,6 +64,8 @@
       align-items: flex-start;
       gap: 24px;
       flex-wrap: wrap;
+      position: relative;
+      z-index: 2; /* Ensures card stays above the banner banner */
     }
 
     /* Avatar */
@@ -553,6 +556,42 @@
       margin-top: 2px;
     }
 
+    .hidden-activity-item {
+      display: none;
+    }
+
+    .show-more-btn {
+      width: 100%;
+      padding: 12px;
+      margin-top: 15px;
+      background: var(--bg-glass);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      color: #4facfe;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: var(--reflection);
+    }
+
+    .show-more-btn:hover {
+      background: var(--hover-btn);
+      color: #4facfe;
+      box-shadow: 0 0 15px var(--neon-glow), var(--reflection);
+      transform: translateY(-1px);
+    }
+
+    .show-more-btn i {
+      font-size: 12px;
+    }
+
     /* ---- MODAL STYLES (reuse existing) ---- */
     .modal-buttons {
       display: flex;
@@ -596,26 +635,19 @@
   <div class="dashboard">
     <!-- SIDEBAR -->
     <div class="sidebar">
-      <h2 class="logo"><i class="fa-solid fa-layer-group" style="color: #4facfe;"></i> FileShare</h2>
+      <h2 class="logo"><i class="fa-solid fa-layer-group" style="color:#4facfe; filter:drop-shadow(0 0 6px rgba(79,172,254,0.6));"></i> <span style="background:linear-gradient(135deg,#4facfe,#a855f7);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;">FileShare</span></h2>
       <ul>
-        <li><a href="index.html" style="text-decoration:none; color:inherit; display:flex; gap:15px;"><i
-              class="fa-solid fa-house"></i> Dashboard</a></li>
-        <li class="active"><a href="profile.html"
-            style="text-decoration:none; color:inherit; display:flex; gap:15px;"><i class="fa-solid fa-user"></i> My
-            Profile</a></li>
-        <li class="spacer"></li>
-        <li><a href="#" style="text-decoration:none; color:inherit; display:flex; gap:15px;"><i
-              class="fa-solid fa-folder"></i> My Files</a></li>
-        <li><a href="#" style="text-decoration:none; color:inherit; display:flex; gap:15px;"><i
-              class="fa-solid fa-clock"></i> Recent Files</a></li>
-        <li><a href="#" style="text-decoration:none; color:inherit; display:flex; gap:15px;"><i
-              class="fa-solid fa-cloud-arrow-up"></i> Upload Files</a></li>
-        <li class="spacer"></li>
-        <li><a href="settings.html" style="text-decoration:none; color:inherit; display:flex; gap:15px;"><i
-              class="fa-solid fa-lock"></i> Account Security</a></li>
-        <li><a href="app_settings.html" style="text-decoration:none; color:inherit; display:flex; gap:15px;"><i
-              class="fa-solid fa-sliders"></i> App Settings</a></li>
+        <li><a href="index.html"><i class="fa-solid fa-house"></i> Dashboard</a></li>
+        <li class="active"><a href="profile.html"><i class="fa-solid fa-user"></i> My Profile</a></li>
+        <li><a href="files.html"><i class="fa-solid fa-folder"></i> My Files</a></li>
+        <li><a href="settings.html"><i class="fa-solid fa-lock"></i> Account Security</a></li>
+        <li><a href="app_settings.html"><i class="fa-solid fa-sliders"></i> App Settings</a></li>
       </ul>
+      <div class="sidebar-footer">
+        <button class="logout-btn-sidebar" id="sidebar-logout-btn">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i> Log Out
+        </button>
+      </div>
     </div>
 
     <!-- MAIN -->
@@ -996,6 +1028,10 @@
         const feedWrap = document.getElementById('activity-feed');
         if (!feedWrap) return;
 
+        // Remove existing show-more button if present
+        const oldBtn = document.getElementById('show-more-container');
+        if (oldBtn) oldBtn.remove();
+
         if (!events || events.length === 0) {
           feedWrap.innerHTML = '<p style="font-size:13px; color:var(--text-muted); padding:10px 0;">No recent activity.</p>';
           return;
@@ -1010,18 +1046,73 @@
           system: 'fa-gear'
         };
 
-        feedWrap.innerHTML = events.map(ev => `
-          <div class="feed-item">
-            <div class="feed-icon ${ev.type}">
-              <i class="fa-solid ${icons[ev.type] || 'fa-bolt'}"></i>
+        const maxActivity = 5;
+        
+        feedWrap.innerHTML = events.map((ev, index) => {
+          const isToday = !ev.time.includes('Yesterday') && !ev.time.includes('days ago');
+          const isHidden = index >= maxActivity ? 'hidden-activity-item' : '';
+          return `
+            <div class="feed-item ${isHidden}" data-is-today="${isToday}">
+              <div class="feed-icon ${ev.type}">
+                <i class="fa-solid ${icons[ev.type] || 'fa-bolt'}"></i>
+              </div>
+              <div class="feed-body">
+                <h4 class="feed-title">${ev.title}</h4>
+                <p class="feed-desc">${ev.description}</p>
+              </div>
+              <span class="feed-time">${ev.time}</span>
             </div>
-            <div class="feed-body">
-              <h4 class="feed-title">${ev.title}</h4>
-              <p class="feed-desc">${ev.description}</p>
-            </div>
-            <span class="feed-time">${ev.time}</span>
-          </div>
-        `).join('');
+          `;
+        }).join('');
+
+        const totalToday = events.filter(e => !e.time.includes('Yesterday') && !e.time.includes('days ago')).length;
+
+        if (events.length > maxActivity) {
+          const showMoreDiv = document.createElement('div');
+          showMoreDiv.id = 'show-more-container';
+          showMoreDiv.innerHTML = `
+            <button class="show-more-btn" id="btn-show-all-activity">
+              <i class="fa-solid fa-chevron-down"></i> Show More (All 1 Day Activity)
+            </button>
+          `;
+          feedWrap.after(showMoreDiv);
+
+          let isExpanded = false;
+          const btn = document.getElementById('btn-show-all-activity');
+
+          btn.addEventListener('click', function() {
+            isExpanded = !isExpanded;
+            // Get all items currently in the DOM for this feed
+            const items = feedWrap.querySelectorAll('.feed-item');
+            
+            if (isExpanded) {
+              items.forEach((el, index) => {
+                const itemIsToday = el.getAttribute('data-is-today') === 'true';
+                if (itemIsToday || index < maxActivity) {
+                  el.style.display = 'flex';
+                  // Adding a manual animation triggers for smooth reveal
+                  if (el.classList.contains('hidden-activity-item')) {
+                    el.style.opacity = '0';
+                    el.style.animation = 'fadeIn 0.3s ease forwards';
+                  }
+                } else {
+                  el.style.display = 'none'; 
+                }
+              });
+              this.innerHTML = '<i class="fa-solid fa-chevron-up"></i> Show Less';
+            } else {
+              items.forEach((el, index) => {
+                if (index < maxActivity) {
+                  el.style.display = 'flex';
+                } else {
+                  el.style.display = 'none';
+                }
+              });
+              this.innerHTML = '<i class="fa-solid fa-chevron-down"></i> Show More (All 1 Day Activity)';
+              feedWrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+          });
+        }
       };
 
       document.getElementById('btn-send').addEventListener('click', () => {

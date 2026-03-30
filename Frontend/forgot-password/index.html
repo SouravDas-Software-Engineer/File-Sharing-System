@@ -2,60 +2,65 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Forgot Password | Online File Sharing System</title>
+    <title>Forgot Password | FileShare</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../auth-shared.css">
 </head>
-<body class="dark">
+<body class="dark-mode">
 
-<header class="main-header">
-    <h1 class="project-title">Online File Sharing System</h1>
-    <button class="toggle-btn" id="modeBtn">🌙</button>
-</header>
+    <header class="main-header">
+        <h1 class="project-title">FileShare</h1>
+        <button class="mode-toggle-btn" id="modeBtn">🌙</button>
+    </header>
 
-<div class="container">
-    <div class="login-box">
-
-        <h2>Forgot Password</h2>
-        <p class="subtitle">
-            Enter your registered email to receive an OTP.
-        </p>
-
-        <!-- Email -->
-        <div class="input-group">
-            <input type="email" id="email" placeholder="Enter your registered email">
-        </div>
-
-        <button id="sendOtpBtn" class="login-btn">
-            Send OTP
-        </button>
-
-        <!-- OTP Section -->
-        <div id="otpSection" style="display:none; margin-top:20px;">
+    <div class="auth-container">
+        <div class="glass-card">
+            <h2>Reset Password</h2>
+            <p class="subtitle">Enter your registered email to reset your account.</p>
 
             <div class="input-group">
-                <input type="text" id="otpInput" placeholder="Enter 6-digit OTP">
+                <input type="email" id="email" placeholder="Registered Email" required>
             </div>
 
-            <button id="verifyOtpBtn" class="login-btn">
-                Verify OTP
-            </button>
+            <button id="sendOtpBtn" class="auth-btn">Send Recovery Code</button>
 
-            <p style="margin-top:15px; font-size:14px;">
-                Didn’t receive code?
-                <span id="resendBtn" style="color:#4CAF50; cursor:pointer;">
-                    Resend OTP
-                </span>
-            </p>
+            <!-- OTP Section -->
+            <div id="otpSection" style="display:none; margin-top:20px;">
+                <div class="input-group">
+                    <input type="text" id="otpInput" placeholder="Enter 6-digit Code" maxlength="6" style="text-align: center; letter-spacing: 0.2em;">
+                </div>
+                <button id="verifyOtpBtn" class="auth-btn">Verify & Proceed</button>
+                <div class="auth-links" style="margin-top: 15px;">
+                    Didn't receive code? <a href="#" id="resendBtn">Resend Code</a>
+                </div>
+            </div>
 
+            <p id="message"></p>
+
+            <div class="divider">OR</div>
+
+            <div class="auth-links">
+                Back to <a href="../Login page/index.html">Safe Login</a>
+            </div>
         </div>
-
-        <div class="divider"><span>OR</span></div>
-        <a href="/Frontend/Login page/index.html" class="forgot">Back to Login</a>
-
     </div>
-</div>
 
-<script src="script.js"></script>
+    <!-- Waves Background -->
+    <div class="waves-container">
+        <svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+        viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
+            <defs>
+                <path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
+            </defs>
+            <g class="parallax">
+                <use xlink:href="#gentle-wave" x="48" y="0" fill="var(--wave-color)" />
+                <use xlink:href="#gentle-wave" x="48" y="3" fill="var(--wave-color-2)" />
+                <use xlink:href="#gentle-wave" x="48" y="5" fill="var(--wave-color-3)" />
+                <use xlink:href="#gentle-wave" x="48" y="7" fill="var(--wave-color-4)" />
+            </g>
+        </svg>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>

@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from motor.motor_asyncio import AsyncIOMotorClient
-from dotenv import load_dotenv, find_dotenv
+from Core.Config import MONGO_URL, DATABASE_NAME
 
 from Routes.user import (
     check_email_exists,
@@ -33,13 +33,6 @@ from Routes.files import (
     send_delete_account_otp,
 )
 
-load_dotenv(find_dotenv())
-
-MONGO_URL     = os.getenv("MONGO_URL")
-DATABASE_NAME = os.getenv("DATABASE_NAME")
-if not MONGO_URL or not DATABASE_NAME:
-    raise ValueError("CRITICAL: Could not find MONGO_URL or DATABASE_NAME in .env")
-
 # ─── Ensure upload directories exist ───────────────────────────────────────────
 os.makedirs("uploads/profiles", exist_ok=True)
 os.makedirs("uploads/files",    exist_ok=True)
@@ -49,6 +42,19 @@ os.makedirs("uploads/files",    exist_ok=True)
 async def lifespan(app: FastAPI):
     app.mongodb_client = AsyncIOMotorClient(MONGO_URL)
     app.db = app.mongodb_client[DATABASE_NAME]
+    
+    # ─── Migration: Hash existing plaintext passwords ──────────────────────────
+    from Core.Security import is_hashed, hash_password
+    users_cursor = app.db.users.find({})
+    async for user in users_cursor:
+        pwd = user.get("password")
+        if pwd and not is_hashed(pwd):
+            hashed = hash_password(pwd)
+            await app.db.users.update_one(
+                {"_id": user["_id"]},
+                {"$set": {"password": hashed}}
+            )
+            
     yield
     app.mongodb_client.close()
 
