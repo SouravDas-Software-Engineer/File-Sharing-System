@@ -54,21 +54,26 @@ async def check_email_exists(db, email: str) -> bool:
 
 
 async def update_user_password(db, email: str, new_password: str) -> bool:
+    from Core.Security import hash_password
+    hashed_password = hash_password(new_password)
     result = await db.users.update_one(
         {"email": email},
-        {"$set": {"password": new_password}}
+        {"$set": {"password": hashed_password}}
     )
     return result.modified_count > 0
 
 
 async def create_user(db, email: str, password: str, username: str = None) -> bool:
+    from Core.Security import hash_password
     if await db.users.find_one({"email": email}):
         return False
     if not username:
         username = f"User{random.randint(10000, 99999)}"
+        
+    hashed_password = hash_password(password)
     result = await db.users.insert_one({
         "email": email,
-        "password": password,
+        "password": hashed_password,
         "username": username,
         "bio": "",
         "profile_pic_url": None,
@@ -85,10 +90,13 @@ async def create_user(db, email: str, password: str, username: str = None) -> bo
 
 
 async def authenticate_user(db, email: str, password: str):
+    from Core.Security import verify_password
     doc = await db.users.find_one({"email": email})
     if not doc:
         return None
-    if doc.get("password") != password:
+        
+    db_password = doc.get("password")
+    if not db_password or not verify_password(password, db_password):
         return None
 
     updates = {}

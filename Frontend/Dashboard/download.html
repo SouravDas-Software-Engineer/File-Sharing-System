@@ -14,10 +14,46 @@
       justify-content: center;
       min-height: 100vh;
       margin: 0;
-      background: var(--bg-main);
+      background: linear-gradient(-45deg, #0f172a, #1e1b4b, #082f49);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
       color: var(--text-main);
       font-family: 'Inter', sans-serif;
       padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      width: 450px; height: 450px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(79,172,254,0.15), transparent 70%);
+      top: -100px; left: -100px;
+      filter: blur(70px);
+      pointer-events: none;
+      animation: floatOrb 20s ease-in-out infinite alternate;
+      z-index: 0;
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      width: 350px; height: 350px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(168,85,247,0.13), transparent 70%);
+      bottom: -80px; right: -80px;
+      filter: blur(70px);
+      pointer-events: none;
+      animation: floatOrb2 25s ease-in-out infinite alternate;
+      z-index: 0;
+    }
+    @keyframes floatOrb  { from { transform: translate(0,0); } to { transform: translate(50px, 35px); } }
+    @keyframes floatOrb2 { from { transform: translate(0,0); } to { transform: translate(-40px, -25px); } }
+    @keyframes gradientBG {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
 
     .download-card {
@@ -25,13 +61,16 @@
       backdrop-filter: blur(20px) saturate(120%);
       -webkit-backdrop-filter: blur(20px) saturate(120%);
       border: 1px solid var(--border-glass);
+      border-top: 2px solid rgba(79,172,254,0.5);
       border-radius: 20px;
       padding: 40px;
       width: 100%;
       max-width: 420px;
       text-align: center;
-      box-shadow: 0 16px 40px rgba(0,0,0,0.1), var(--reflection);
-      animation: fadeIn 0.4s ease forwards;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.25), 0 0 0 1px rgba(79,172,254,0.08), var(--reflection);
+      animation: fadeIn 0.5s cubic-bezier(0.16,1,0.3,1) forwards;
+      position: relative;
+      z-index: 1;
     }
 
     @keyframes fadeIn {
@@ -63,6 +102,11 @@
       background: rgba(255,255,255,0.05);
       border: 1px solid var(--border-glass);
       box-shadow: var(--reflection);
+      animation: iconPulse 3s ease-in-out infinite;
+    }
+    @keyframes iconPulse {
+      0%, 100% { box-shadow: var(--reflection), 0 0 0 0 rgba(79,172,254,0); }
+      50%       { box-shadow: var(--reflection), 0 0 22px 7px rgba(79,172,254,0.2); }
     }
 
     .file-icon.pdf { color: #ef4444; background: rgba(239,68,68,0.1); }
@@ -151,7 +195,7 @@
   </script>
 
   <div class="download-card" id="download-card">
-    <div class="logo"><i class="fa-solid fa-layer-group" style="color: #4facfe;"></i> FileShare</div>
+    <div class="logo"><i class="fa-solid fa-layer-group" style="color: #4facfe; filter: drop-shadow(0 0 6px rgba(79,172,254,0.6));"></i> <span style="background:linear-gradient(135deg,#4facfe,#a855f7);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;">FileShare</span></div>
     
     <div id="loading-state" style="padding: 20px 0;">
       <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 32px; color: var(--text-muted); margin-bottom: 16px;"></i>

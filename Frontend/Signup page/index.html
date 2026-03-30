@@ -2,85 +2,71 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Sign Up | Online File Sharing System</title>
+    <title>Sign Up | FileShare</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../auth-shared.css">
 </head>
+<body class="dark-mode">
 
-<body class="dark">
+    <header class="main-header">
+        <h1 class="project-title">FileShare</h1>
+        <button class="mode-toggle-btn" id="modeBtn">🌙</button>
+    </header>
 
-<header class="main-header">
-    <h1 class="project-title">Online File Sharing System</h1>
-    <button class="toggle-btn" id="modeBtn">🌙</button>
-</header>
+    <div class="auth-container">
+        <div class="glass-card">
+            <h2>Create Account</h2>
+            <p class="subtitle">Join the secure cloud sharing community.</p>
 
-<div class="container">
-    <div class="login-box">
+            <div class="input-group">
+                <input type="text" id="username" placeholder="Full Name" required>
+            </div>
 
-        <h2>Create Account</h2>
+            <div class="input-group">
+                <input type="email" id="email" placeholder="Email Address" required>
+            </div>
 
-        <p class="subtitle">
-            Sign up to share files securely.
-        </p>
+            <div class="input-group">
+                <input type="password" id="password" placeholder="Create Password" required>
+            </div>
 
-        <!-- Username -->
-        <div class="input-group">
-            <input type="text" id="username" placeholder="Enter username" required>
-        </div>
+            <div class="input-group">
+                <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+            </div>
 
-        <!-- Email -->
-        <div class="input-group">
-            <input type="email" id="email" placeholder="Enter your email" required>
-        </div>
+            <button id="signupBtn" class="auth-btn">Start Sharing Now</button>
 
-        <!-- Password -->
-        <div class="input-group">
-            <input type="password" id="password" placeholder="Create password" required>
-        </div>
+            <p id="message"></p>
 
-        <!-- Confirm Password -->
-        <div class="input-group">
-            <input type="password" id="confirmPassword" placeholder="Confirm password" required>
-        </div>
-
-        <!-- Signup Button -->
-        <button class="login-btn" id="signupBtn">Sign Up</button>
-
-        <!-- Message -->
-        <p id="message"></p>
-
-        <div class="divider"><span>OR</span></div>
-
+            <div class="divider">OR</div>
         <!-- Back to Login -->
         <a href="/Frontend/Login page" class="forgot">
             Already have an account? Login
         </a>
        
 
+            <div class="auth-links">
+                Already have an account? <a href="../Login page/index.html">Login here</a>
+            </div>
+        </div>
     </div>
-</div>
 
-<!-- Dark Mode Script -->
-<script>
-const modeBtn = document.getElementById("modeBtn");
+    <!-- Waves Background -->
+    <div class="waves-container">
+        <svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+        viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
+            <defs>
+                <path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
+            </defs>
+            <g class="parallax">
+                <use xlink:href="#gentle-wave" x="48" y="0" fill="var(--wave-color)" />
+                <use xlink:href="#gentle-wave" x="48" y="3" fill="var(--wave-color-2)" />
+                <use xlink:href="#gentle-wave" x="48" y="5" fill="var(--wave-color-3)" />
+                <use xlink:href="#gentle-wave" x="48" y="7" fill="var(--wave-color-4)" />
+            </g>
+        </svg>
+    </div>
 
-modeBtn.addEventListener("click", function () {
-
-    document.body.classList.toggle("dark");
-    document.body.classList.toggle("light");
-
-    if (document.body.classList.contains("dark")) {
-        modeBtn.textContent = "🌙";
-    } else {
-        modeBtn.textContent = "☀️";
-    }
-
-});
-</script>
-
-<!-- Signup Script -->
-<script src="script.js"></script>
-
-
+    <script src="script.js"></script>
 </body>
 </html>

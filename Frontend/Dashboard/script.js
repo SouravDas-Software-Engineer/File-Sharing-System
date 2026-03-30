@@ -83,16 +83,17 @@ document.addEventListener('DOMContentLoaded', () => {
       link.addEventListener('click', (e) => {
         const targetUrl = link.getAttribute('href');
 
-        if (!targetUrl || targetUrl === '#' || link.id === 'logout-btn' || link.id === 'topbar-logout-btn') {
+        if (!targetUrl || targetUrl === '#' || link.id === 'logout-btn' || link.id === 'topbar-logout-btn' || link.id === 'sidebar-logout-btn') {
             return;
         }
 
         e.preventDefault();
         dashboardContainer.classList.add('fade-out');
 
+        // Slightly faster transition for perceived performance
         setTimeout(() => {
           window.location.href = targetUrl;
-        }, 300);
+        }, 250); 
       });
     });
   }
@@ -245,6 +246,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ================= LOGOUT LOGIC =================
   const logoutBtn = document.getElementById('logout-btn');
   const topbarLogoutBtn = document.getElementById('topbar-logout-btn');
+  const sidebarLogoutBtn = document.getElementById('sidebar-logout-btn');
 
   function handleLogout(e) {
     e.preventDefault();
@@ -262,6 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
   if (topbarLogoutBtn) topbarLogoutBtn.addEventListener('click', handleLogout);
+  if (sidebarLogoutBtn) sidebarLogoutBtn.addEventListener('click', handleLogout);
 
   // ================= SETTINGS PAGE LOGIC =================
   const userEmail = localStorage.getItem('userEmail');
