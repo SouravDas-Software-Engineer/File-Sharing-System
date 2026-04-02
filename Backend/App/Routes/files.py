@@ -81,10 +81,6 @@ The Online File Sharing System Team
         server.quit()
     except Exception as e:
         print(f"Failed to send welcome email to {to_email}. Error: {e}")
-<<<<<<< HEAD
-=======
-
-
 def send_password_change_confirmation(to_email: str):
     smtp_server = os.getenv("SMTP_SERVER")
     smtp_port = int(os.getenv("SMTP_PORT"))
@@ -148,4 +144,3 @@ The Online File Sharing System Team
         server.quit()
     except Exception as e:
         print(f"Failed to send deletion OTP to {to_email}. Error: {e}")
->>>>>>> dev
