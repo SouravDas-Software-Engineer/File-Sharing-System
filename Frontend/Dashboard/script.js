@@ -495,6 +495,80 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // ================= UPLOAD MODAL LOGIC =================
+  const sendFilesBtn = document.getElementById('send-files-btn');
+  const uploadModal = document.getElementById('upload-modal');
+  const closeUploadModal = document.getElementById('close-upload-modal');
+
+  if (sendFilesBtn && uploadModal && closeUploadModal) {
+    sendFilesBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      uploadModal.classList.add('active');
+    });
+
+    const closeModal = () => {
+      uploadModal.classList.remove('active');
+      const successList = document.getElementById('upload-success-list');
+      if (successList) successList.innerHTML = '';
+      const uploadProgress = document.getElementById('upload-progress');
+      if (uploadProgress) uploadProgress.style.display = 'none';
+    };
+
+    closeUploadModal.addEventListener('click', closeModal);
+
+    uploadModal.addEventListener('click', (e) => {
+      if (e.target === uploadModal) closeModal();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && uploadModal.classList.contains('active')) {
+        closeModal();
+      }
+    });
+  }
+
+  // ================= RECEIVE MODAL LOGIC =================
+  const receiveFilesBtn = document.getElementById('receive-files-btn');
+  const receiveModal = document.getElementById('receive-modal');
+  const closeReceiveModal = document.getElementById('close-receive-modal');
+  const confirmReceiveBtn = document.getElementById('confirm-receive-btn');
+
+  if (receiveFilesBtn && receiveModal && closeReceiveModal) {
+    receiveFilesBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      receiveModal.classList.add('active');
+    });
+
+    const closeRecvModal = () => {
+      receiveModal.classList.remove('active');
+      const input = document.getElementById('receive-link-input');
+      if (input) input.value = '';
+    };
+
+    closeReceiveModal.addEventListener('click', closeRecvModal);
+
+    receiveModal.addEventListener('click', (e) => {
+      if (e.target === receiveModal) closeRecvModal();
+    });
+
+    if (confirmReceiveBtn) {
+      confirmReceiveBtn.addEventListener('click', () => {
+        showToast({
+          title: 'Coming Soon',
+          message: 'The direct receive feature is currently under development.',
+          type: 'info'
+        });
+        setTimeout(closeRecvModal, 1500);
+      });
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && receiveModal.classList.contains('active')) {
+        closeRecvModal();
+      }
+    });
+  }
+
   // ================= DRAG AND DROP UPLOAD =================
   const uploadDropzone = document.getElementById('upload-dropzone');
   const fileInput = document.getElementById('file-input');
@@ -524,24 +598,60 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  let pendingUploadData = null;
+
   function handleFiles(files) {
     if (!files || files.length === 0) return;
 
-    uploadProgress.style.display = 'block';
-    progressFill.style.width = '0%';
-    progressText.textContent = '0%';
+    // Show files list early
+    const successList = document.getElementById('upload-success-list');
+    if (successList) {
+      successList.innerHTML = '';
+      for (let i = 0; i < files.length; i++) {
+        const f = files[i];
+        const sizeMb = f.size / (1024 * 1024);
+        const sizeStr = sizeMb >= 1 ? `${sizeMb.toFixed(1)} MB` : `${(f.size/1024).toFixed(0)} KB`;
+        const item = document.createElement('div');
+        item.className = 'upload-success-item';
+        item.innerHTML = `
+          <i class="fa-solid fa-file" style="color: var(--text-muted); opacity: 0.6;"></i>
+          <span>${f.name}</span>
+          <span class="file-size">${sizeStr}</span>
+        `;
+        successList.appendChild(item);
+      }
+    }
 
     const formData = new FormData();
-
-    // Backend expects the key 'files' (not 'files[]')
     for (let i = 0; i < files.length; i++) {
       formData.append('files', files[i]);
     }
-
     const userEmail = localStorage.getItem('userEmail');
     if (userEmail) formData.append('email', userEmail);
 
-    uploadFiles(formData, files);
+    pendingUploadData = { formData, files };
+    
+    // Switch browse button for send button
+    const startUploadBtn = document.getElementById('start-upload-btn');
+    const bBtn = document.getElementById('browse-btn');
+    if (startUploadBtn) {
+      startUploadBtn.style.display = 'flex';
+      if (bBtn) bBtn.style.display = 'none';
+    }
+  }
+
+  // Handle the manual Send button click
+  const startUploadBtn = document.getElementById('start-upload-btn');
+  if (startUploadBtn) {
+    startUploadBtn.addEventListener('click', () => {
+      if (pendingUploadData) {
+        uploadFiles(pendingUploadData.formData, pendingUploadData.files);
+        startUploadBtn.style.display = 'none';
+        const bBtn = document.getElementById('browse-btn');
+        if (bBtn) bBtn.style.display = 'flex';
+        pendingUploadData = null;
+      }
+    });
   }
 
   function uploadFiles(formData, files) {
@@ -753,12 +863,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const actRes  = await fetch(`${API_URL}/activity?email=${encodeURIComponent(localStorage.getItem('userEmail'))}`);
         if (actRes.ok) {
           const actData = await actRes.json();
-          // Store chart data globally so the toggle buttons can re-render
           window._activityChart = actData.chart;
           renderActivityChart(actData.chart, window._chartMode || 'receive');
           renderActivityFeed(actData.events);
+        } else {
+          // No accurate data from API — user requested no dummy data/blank chart
+          renderActivityChart({receive:{sun:0,mon:0,tue:0,wed:0,thu:0,fri:0,sat:0}, send:{sun:0,mon:0,tue:0,wed:0,thu:0,fri:0,sat:0}}, 'receive');
+          renderActivityFeed([]);
         }
-      } catch { /* use demo data already rendered */ }
+      } catch { 
+        renderActivityChart({receive:{sun:0,mon:0,tue:0,wed:0,thu:0,fri:0,sat:0}, send:{sun:0,mon:0,tue:0,wed:0,thu:0,fri:0,sat:0}}, 'receive');
+        renderActivityFeed([]);
+      }
     }
 
   }

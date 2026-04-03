@@ -553,6 +553,43 @@ tr:last-child td { border-bottom: none; }
   max-width: 90%;
 }
 
+.upload-modal-content {
+  background: var(--bg-glass-heavy);
+  backdrop-filter: blur(25px) saturate(120%);
+  -webkit-backdrop-filter: blur(25px) saturate(120%);
+  border: 1px solid var(--border-glass);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.2), var(--reflection);
+  padding: 40px 30px 30px;
+  border-radius: 24px;
+  width: 480px;
+  max-width: 95%;
+  position: relative;
+  transform: scale(0.9) translateY(20px);
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal-overlay.active .upload-modal-content {
+  transform: scale(1) translateY(0);
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.modal-close-btn:hover {
+  color: #ef4444;
+  transform: rotate(90deg);
+}
+
 /* ================= GLOBAL FORM STYLES ================= */
 .form-group {
   margin-bottom: 20px;
@@ -1212,3 +1249,5 @@ body.dark-mode .upload-progress {
   -webkit-backdrop-filter: blur(25px) saturate(150%);
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2), var(--reflection);
 }
+#receive-link-input { text-align: center; background: rgba(255, 255, 255, 0.08); border-color: var(--border-glass); font-weight: 500; margin-top: 10px; }
+#receive-link-input:focus { background: rgba(255, 255, 255, 0.15); box-shadow: 0 0 20px var(--neon-glow), var(--reflection); }
