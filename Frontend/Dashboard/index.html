@@ -141,26 +141,41 @@
       <!-- Transfer circles -->
       <div class="transfer">
         <div class="transfer-item">
-          <a href="#" style="text-decoration:none;" title="Send functionality coming soon">
+          <a href="#" style="text-decoration:none;" id="send-files-btn">
             <div class="transfer-circle"><i class="fa-regular fa-paper-plane" style="color:#0088ff;"></i></div>
           </a>
           <p>Sent</p>
         </div>
         <div class="transfer-item">
-          <a href="#" style="text-decoration:none;" title="Receive functionality coming soon">
+          <a href="#" style="text-decoration:none;" id="receive-files-btn">
             <div class="transfer-circle"><i class="fa-solid fa-download" style="color:#4facfe;"></i></div>
           </a>
           <p>Receive</p>
         </div>
       </div>
 
-      <!-- Drag & Drop Upload -->
-      <div class="upload-dropzone" id="upload-dropzone">
+
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:15px;margin-top:10px;">
+        <h2 class="section-title" style="margin-bottom:0;">Recent Files</h2>
+        <a href="files.html" style="text-decoration:none;font-size:13px;color:#4facfe;font-weight:600;">View all →</a>
+      </div>
+      <div class="table-container" id="recent-files-container"></div>
+    </div>
+  </div>
+
+  <!-- Upload Modal (Popup) -->
+  <div class="modal-overlay" id="upload-modal">
+    <div class="modal-content upload-modal-content">
+      <button class="modal-close-btn" id="close-upload-modal"><i class="fa-solid fa-xmark"></i></button>
+      <div class="upload-dropzone" id="upload-dropzone" style="margin-top:0;">
         <i class="fa-solid fa-cloud-arrow-up"></i>
         <h3>Drag & Drop Files Here</h3>
         <p>Or click to browse your device</p>
         <input type="file" id="file-input" multiple>
         <button class="browse-btn" id="browse-btn"><i class="fa-solid fa-folder-open"></i> Browse Files</button>
+        <button class="browse-btn" id="start-upload-btn" style="display:none; background:linear-gradient(135deg, #a855f7, #6366f1); margin-top: 10px;">
+          <i class="fa-solid fa-paper-plane"></i> Send Files
+        </button>
         <div class="upload-progress" id="upload-progress" style="display:none;">
           <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
           <span id="progress-text">0%</span>
@@ -168,12 +183,24 @@
         <!-- Success file list appears here -->
         <div class="upload-success-list" id="upload-success-list"></div>
       </div>
+    </div>
+  </div>
 
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:15px;margin-top:10px;">
-        <h2 class="section-title" style="margin-bottom:0;">Recent Files</h2>
-        <a href="files.html" style="text-decoration:none;font-size:13px;color:#4facfe;font-weight:600;">View all →</a>
+  <!-- Receive Modal (Popup) -->
+  <div class="modal-overlay" id="receive-modal">
+    <div class="modal-content upload-modal-content">
+      <button class="modal-close-btn" id="close-receive-modal"><i class="fa-solid fa-xmark"></i></button>
+      <div style="text-align:center;">
+        <i class="fa-solid fa-file-import" style="font-size:48px; color:var(--text-muted); margin-bottom:16px;"></i>
+        <h3 style="margin-bottom:8px; font-size:18px; color:var(--text-main); font-weight:600;">Receive Files</h3>
+        <p style="margin-bottom:20px; font-size:14px; color:var(--text-muted);">Paste the shared link below to receive files</p>
+        <div class="form-group">
+          <input type="url" id="receive-link-input" class="text-input" placeholder="https://fileshare.com/download?id=...">
+        </div>
+        <button class="browse-btn" id="confirm-receive-btn" style="width:100%; justify-content:center; margin-top:10px;">
+          <i class="fa-solid fa-download"></i> Receive File
+        </button>
       </div>
-      <div class="table-container" id="recent-files-container"></div>
     </div>
   </div>
 
