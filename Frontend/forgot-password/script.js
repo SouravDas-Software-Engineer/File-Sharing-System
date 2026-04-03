@@ -8,11 +8,29 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const API_BASE_URL = "http://127.0.0.1:8000";
 
-    modeBtn.addEventListener("click", function () {
-        document.body.classList.toggle("dark");
-        document.body.classList.toggle("light");
-        modeBtn.textContent = document.body.classList.contains("dark") ? "🌙" : "☀️";
-    });
+  // ================= THEME MEMORY LOGIC =================
+  const savedTheme = localStorage.getItem("fileShareTheme") || "dark";
+  
+  if (savedTheme === "dark") {
+      document.body.classList.add("dark-mode");
+      if(modeBtn) modeBtn.textContent = "🌙";
+  } else {
+      document.body.classList.remove("dark-mode");
+      if(modeBtn) modeBtn.textContent = "☀️";
+  }
+
+  if(modeBtn) {
+      modeBtn.addEventListener("click", function () {
+          document.body.classList.toggle("dark-mode");
+          if (document.body.classList.contains("dark-mode")) {
+              modeBtn.textContent = "🌙";
+              localStorage.setItem("fileShareTheme", "dark");
+          } else {
+              modeBtn.textContent = "☀️";
+              localStorage.setItem("fileShareTheme", "light");
+          }
+      });
+  }
 
     sendOtpBtn.addEventListener("click", async function () {
         const email = emailInput.value.trim();

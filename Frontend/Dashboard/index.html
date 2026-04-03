@@ -66,18 +66,19 @@
 
   <div class="dashboard">
     <div class="sidebar">
-      <h2 class="logo"><i class="fa-solid fa-layer-group" style="color:#4facfe;"></i> FileShare</h2>
+      <h2 class="logo"><i class="fa-solid fa-layer-group" style="color:#4facfe; filter:drop-shadow(0 0 6px rgba(79,172,254,0.6));"></i> <span style="background:linear-gradient(135deg,#4facfe,#a855f7);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;">FileShare</span></h2>
       <ul>
-        <li class="active"><a href="index.html" style="text-decoration:none;color:inherit;display:flex;gap:15px;"><i class="fa-solid fa-house"></i> Dashboard</a></li>
-        <li><a href="profile.html" style="text-decoration:none;color:inherit;display:flex;gap:15px;"><i class="fa-solid fa-user"></i> My Profile</a></li>
-        <li class="spacer"></li>
-        <li><a href="files.html" style="text-decoration:none;color:inherit;display:flex;gap:15px;"><i class="fa-solid fa-folder"></i> My Files</a></li>
-        <li><a href="files.html" style="text-decoration:none;color:inherit;display:flex;gap:15px;"><i class="fa-solid fa-clock"></i> Recent Files</a></li>
-        <li><a href="index.html" style="text-decoration:none;color:inherit;display:flex;gap:15px;"><i class="fa-solid fa-cloud-arrow-up"></i> Upload Files</a></li>
-        <li class="spacer"></li>
-        <li><a href="settings.html" style="text-decoration:none;color:inherit;display:flex;gap:15px;"><i class="fa-solid fa-lock"></i> Account Security</a></li>
-        <li><a href="app_settings.html" style="text-decoration:none;color:inherit;display:flex;gap:15px;"><i class="fa-solid fa-sliders"></i> App Settings</a></li>
+        <li class="active"><a href="index.html"><i class="fa-solid fa-house"></i> Dashboard</a></li>
+        <li><a href="profile.html"><i class="fa-solid fa-user"></i> My Profile</a></li>
+        <li><a href="files.html"><i class="fa-solid fa-folder"></i> My Files</a></li>
+        <li><a href="settings.html"><i class="fa-solid fa-lock"></i> Account Security</a></li>
+        <li><a href="app_settings.html"><i class="fa-solid fa-sliders"></i> App Settings</a></li>
       </ul>
+      <div class="sidebar-footer">
+        <button class="logout-btn-sidebar" id="sidebar-logout-btn">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i> Log Out
+        </button>
+      </div>
     </div>
 
     <div class="main">
@@ -140,26 +141,41 @@
       <!-- Transfer circles -->
       <div class="transfer">
         <div class="transfer-item">
-          <a href="#" style="text-decoration:none;" title="Send functionality coming soon">
+          <a href="#" style="text-decoration:none;" id="send-files-btn">
             <div class="transfer-circle"><i class="fa-regular fa-paper-plane" style="color:#0088ff;"></i></div>
           </a>
           <p>Sent</p>
         </div>
         <div class="transfer-item">
-          <a href="#" style="text-decoration:none;" title="Receive functionality coming soon">
+          <a href="#" style="text-decoration:none;" id="receive-files-btn">
             <div class="transfer-circle"><i class="fa-solid fa-download" style="color:#4facfe;"></i></div>
           </a>
           <p>Receive</p>
         </div>
       </div>
 
-      <!-- Drag & Drop Upload -->
-      <div class="upload-dropzone" id="upload-dropzone">
+
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:15px;margin-top:10px;">
+        <h2 class="section-title" style="margin-bottom:0;">Recent Files</h2>
+        <a href="files.html" style="text-decoration:none;font-size:13px;color:#4facfe;font-weight:600;">View all →</a>
+      </div>
+      <div class="table-container" id="recent-files-container"></div>
+    </div>
+  </div>
+
+  <!-- Upload Modal (Popup) -->
+  <div class="modal-overlay" id="upload-modal">
+    <div class="modal-content upload-modal-content">
+      <button class="modal-close-btn" id="close-upload-modal"><i class="fa-solid fa-xmark"></i></button>
+      <div class="upload-dropzone" id="upload-dropzone" style="margin-top:0;">
         <i class="fa-solid fa-cloud-arrow-up"></i>
         <h3>Drag & Drop Files Here</h3>
         <p>Or click to browse your device</p>
         <input type="file" id="file-input" multiple>
         <button class="browse-btn" id="browse-btn"><i class="fa-solid fa-folder-open"></i> Browse Files</button>
+        <button class="browse-btn" id="start-upload-btn" style="display:none; background:linear-gradient(135deg, #a855f7, #6366f1); margin-top: 10px;">
+          <i class="fa-solid fa-paper-plane"></i> Send Files
+        </button>
         <div class="upload-progress" id="upload-progress" style="display:none;">
           <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
           <span id="progress-text">0%</span>
@@ -167,12 +183,24 @@
         <!-- Success file list appears here -->
         <div class="upload-success-list" id="upload-success-list"></div>
       </div>
+    </div>
+  </div>
 
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:15px;margin-top:10px;">
-        <h2 class="section-title" style="margin-bottom:0;">Recent Files</h2>
-        <a href="files.html" style="text-decoration:none;font-size:13px;color:#4facfe;font-weight:600;">View all →</a>
+  <!-- Receive Modal (Popup) -->
+  <div class="modal-overlay" id="receive-modal">
+    <div class="modal-content upload-modal-content">
+      <button class="modal-close-btn" id="close-receive-modal"><i class="fa-solid fa-xmark"></i></button>
+      <div style="text-align:center;">
+        <i class="fa-solid fa-file-import" style="font-size:48px; color:var(--text-muted); margin-bottom:16px;"></i>
+        <h3 style="margin-bottom:8px; font-size:18px; color:var(--text-main); font-weight:600;">Receive Files</h3>
+        <p style="margin-bottom:20px; font-size:14px; color:var(--text-muted);">Paste the shared link below to receive files</p>
+        <div class="form-group">
+          <input type="url" id="receive-link-input" class="text-input" placeholder="https://fileshare.com/download?id=...">
+        </div>
+        <button class="browse-btn" id="confirm-receive-btn" style="width:100%; justify-content:center; margin-top:10px;">
+          <i class="fa-solid fa-download"></i> Receive File
+        </button>
       </div>
-      <div class="table-container" id="recent-files-container"></div>
     </div>
   </div>
 

@@ -17,11 +17,29 @@ document.addEventListener("DOMContentLoaded", function () {
         window.location.href = "index.html"; 
     }
 
-    modeBtn.addEventListener("click", function () {
-        document.body.classList.toggle("dark");
-        document.body.classList.toggle("light");
-        modeBtn.textContent = document.body.classList.contains("dark") ? "🌙" : "☀️";
-    });
+  // ================= THEME MEMORY LOGIC =================
+  const savedTheme = localStorage.getItem("fileShareTheme") || "dark";
+  
+  if (savedTheme === "dark") {
+      document.body.classList.add("dark-mode");
+      if(modeBtn) modeBtn.textContent = "🌙";
+  } else {
+      document.body.classList.remove("dark-mode");
+      if(modeBtn) modeBtn.textContent = "☀️";
+  }
+
+  if(modeBtn) {
+      modeBtn.addEventListener("click", function () {
+          document.body.classList.toggle("dark-mode");
+          if (document.body.classList.contains("dark-mode")) {
+              modeBtn.textContent = "🌙";
+              localStorage.setItem("fileShareTheme", "dark");
+          } else {
+              modeBtn.textContent = "☀️";
+              localStorage.setItem("fileShareTheme", "light");
+          }
+      });
+  }
 
     resetBtn.addEventListener("click", async function () {
         const newPassword = newPasswordInput.value.trim();

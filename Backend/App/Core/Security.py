@@ -4,7 +4,7 @@
 from datetime import datetime, timedelta
 from typing import Optional
 from jose import JWTError, jwt
-from passlib.context import CryptContext
+import bcrypt
 from fastapi import HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 import os
@@ -14,13 +14,23 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 # PASSWORD HASHING SETUP
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
+# We use bcrypt directly to avoid passlib bugs with bcrypt 4.0+
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    # bcrypt limits passwords to 72 bytes.
+    pwd_bytes = password.encode('utf-8')[:72]
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(pwd_bytes, salt).decode('utf-8')
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+    pwd_bytes = plain_password.encode('utf-8')[:72]
+    try:
+        return bcrypt.checkpw(pwd_bytes, hashed_password.encode('utf-8'))
+    except ValueError:
+        return False
+
+def is_hashed(password: str) -> bool:
+    """Check if the password string appears to be a bcrypt hash."""
+    return password.startswith(("$2b$", "$2a$", "$2y$")) and len(password) == 60
 
 # OAUTH2 SCHEME
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
