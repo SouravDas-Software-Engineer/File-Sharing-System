@@ -11,3 +11,4 @@ db = client["file_sharing_app"]
 # Collections
 files_collection = db["files"]
 users_collection = db["users"]
+friendships_collection = db["friendships"]

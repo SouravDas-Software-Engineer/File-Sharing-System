@@ -63,10 +63,12 @@ async def update_user_password(db, email: str, new_password: str) -> bool:
     return result.modified_count > 0
 
 
-async def create_user(db, email: str, password: str, username: str = None) -> bool:
+async def create_user(db, email: str, password: str, username: str = None) -> bool | str:
     from Core.Security import hash_password
     if await db.users.find_one({"email": email}):
         return False
+    if username and await db.users.find_one({"username": username}):
+        return "Username already taken"
     if not username:
         username = f"User{random.randint(10000, 99999)}"
         
@@ -87,6 +89,36 @@ async def create_user(db, email: str, password: str, username: str = None) -> bo
     if result.inserted_id:
         await log_user_event(db, email, "login", "Account created", "Welcome to FileShare!")
     return result.inserted_id is not None
+
+async def create_guest_user(db) -> dict:
+    import uuid
+    import random
+    
+    # Generate unique guest username
+    while True:
+        num = random.randint(10000, 99999)
+        username = f"Guest_{num}"
+        if not await db.users.find_one({"username": username}):
+            break
+            
+    guest_email = f"guest_{uuid.uuid4().hex[:8]}@guest.local"
+    
+    doc = {
+        "email": guest_email,
+        "password": "", # No password for guests
+        "username": username,
+        "bio": "I am a guest user.",
+        "profile_pic_url": None,
+        "joined_date": _now().strftime("%B %Y"),
+        "total_files": 0,
+        "files_sent": 0,
+        "files_received": 0,
+        "storage_used_mb": 0.0,
+        "is_guest": True,
+        "last_active": _now()
+    }
+    await db.users.insert_one(doc)
+    return doc
 
 
 async def authenticate_user(db, email: str, password: str):
@@ -109,6 +141,8 @@ async def authenticate_user(db, email: str, password: str):
 
     # Log login event
     await log_user_event(db, email, "login", "Signed in", "New session started")
+    # Update last_active
+    await db.users.update_one({"email": email}, {"$set": {"last_active": _now()}})
     return doc.get("username") or updates.get("username")
 
 
@@ -119,7 +153,19 @@ async def delete_user_account(db, email: str) -> bool:
 
 async def update_user_profile(
     db, email: str, username: str, bio: str, profile_pic_url: str = None
-) -> bool:
+) -> bool | str:
+    # Check if guest
+    user = await db.users.find_one({"email": email})
+    if not user:
+        return False
+    if user.get("is_guest") or "@guest.local" in email:
+        return "Guests cannot modify their profile."
+
+    # Check if username is taken by another user
+    existing = await db.users.find_one({"username": username})
+    if existing and existing["email"] != email:
+        return "Username already taken"
+        
     update_data = {"username": username, "bio": bio}
     if profile_pic_url:
         update_data["profile_pic_url"] = profile_pic_url
@@ -137,6 +183,9 @@ async def get_user_profile(db, email: str) -> dict | None:
         joined = _now().strftime("%B %Y")
         await db.users.update_one({"email": email}, {"$set": {"joined_date": joined}})
         doc["joined_date"] = joined
+    # Sync last_active on profile fetch
+    await db.users.update_one({"email": email}, {"$set": {"last_active": _now()}})
+    
     return {
         "username":        doc.get("username", ""),
         "email":           doc.get("email", ""),
@@ -147,6 +196,7 @@ async def get_user_profile(db, email: str) -> dict | None:
         "files_sent":      doc.get("files_sent", 0),
         "files_received":  doc.get("files_received", 0),
         "storage_used_mb": doc.get("storage_used_mb", 0.0),
+        "is_guest":        doc.get("is_guest", False),
     }
 
 
@@ -276,3 +326,9 @@ async def get_user_activity_chart(db, email: str) -> dict:
         })
 
     return {"days": day_labels, "send": send_data, "receive": receive_data}
+
+
+async def clear_user_events(db, email: str) -> bool:
+    """Delete all activity events for a user."""
+    result = await db.user_events.delete_many({"email": email})
+    return result.deleted_count >= 0

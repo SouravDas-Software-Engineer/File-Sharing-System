@@ -7,6 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style_friends.css">
   <script>if (!localStorage.getItem('username')) window.location.href = '../Login page/index.html';</script>
   <style>
     /* Storage usage bar on dashboard */
@@ -27,7 +28,8 @@
     .storage-icon { font-size: 22px; color: #4facfe; filter: drop-shadow(0 0 6px rgba(79,172,254,0.5)); }
     .storage-info { flex: 1; min-width: 180px; }
     .storage-label { font-size: 13px; font-weight: 600; color: var(--text-main); margin-bottom: 8px; display: flex; justify-content: space-between; }
-    .storage-track { height: 7px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; }
+    .storage-track { height: 7px; background: rgba(0,0,0,0.06); border-radius: 4px; overflow: hidden; }
+    body.dark-mode .storage-track { background: rgba(255,255,255,0.1); }
     .storage-fill  { height: 100%; border-radius: 4px; background: linear-gradient(90deg, #4facfe, #00f2fe); transition: width 0.8s ease; }
     .storage-fill.warn { background: linear-gradient(90deg, #f97316, #ef4444); }
     .storage-pct { font-size: 13px; color: var(--text-muted); white-space: nowrap; }
@@ -90,8 +92,12 @@
         </div>
         <div class="user-area">
           <div class="theme-toggle" id="theme-toggle" style="cursor:pointer;font-size:20px;color:var(--text-muted);"><i class="fa-solid fa-moon"></i></div>
+          <div class="topbar-icon-btn" id="open-friends-btn" title="Friends">
+            <i class="fa-solid fa-user-group"></i>
+            <span class="badge" id="friend-request-badge" style="display:none;">0</span>
+          </div>
           <div class="notification" id="notification-bell">
-            <i class="fa-solid fa-bell"></i><span class="badge">1</span>
+            <i class="fa-solid fa-bell"></i><span class="badge">0</span>
             <div class="notification-dropdown" id="notification-dropdown">
               <div class="notification-header">
                 <h3>Notifications</h3>
@@ -161,6 +167,26 @@
       </div>
       <div class="table-container" id="recent-files-container"></div>
     </div>
+    
+    <!-- FRIEND BAR -->
+    <div class="friend-bar" id="friend-bar">
+      <div class="friend-bar-header">
+        <h3><i class="fa-solid fa-user-group"></i> Friends</h3>
+        <button class="close-friends-btn" id="close-friends-btn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="friend-search-wrap">
+        <div class="friend-search-box">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="friend-search-input" placeholder="Search friends...">
+        </div>
+        <button class="add-friend-trigger" id="add-friend-trigger-btn">
+          <i class="fa-solid fa-user-plus"></i> Add New Friend
+        </button>
+      </div>
+      <div class="friend-list-content" id="friend-list-content">
+        <div class="friend-section-title"><i class="fa-solid fa-clock-rotate-left"></i> Loading...</div>
+      </div>
+    </div>
   </div>
 
   <!-- Upload Modal (Popup) -->
@@ -173,37 +199,102 @@
         <p>Or click to browse your device</p>
         <input type="file" id="file-input" multiple>
         <button class="browse-btn" id="browse-btn"><i class="fa-solid fa-folder-open"></i> Browse Files</button>
-        <button class="browse-btn" id="start-upload-btn" style="display:none; background:linear-gradient(135deg, #a855f7, #6366f1); margin-top: 10px;">
-          <i class="fa-solid fa-paper-plane"></i> Send Files
-        </button>
+        
+        <div id="upload-actions" style="display:none; flex-direction:column; gap:10px; margin-top: 15px;">
+          <button class="browse-btn" id="start-upload-btn" style="background:linear-gradient(135deg, #a855f7, #6366f1); width:100%;">
+            <i class="fa-solid fa-cloud-arrow-up"></i> Upload to Cloud
+          </button>
+          
+          <div style="border-top: 1px dashed var(--border-glass); margin: 5px 0;"></div>
+          
+          <select id="p2p-target-username" style="padding:10px; border-radius:8px; border:1px solid var(--border-glass); background:var(--bg-glass); color:var(--text-main); font-family: inherit; width: 100%;">
+            <option value="">Select a Friend...</option>
+          </select>
+          <input class="guest-p2p" type="text" id="p2p-target-guest" placeholder="Enter Recipient's Username" style="display:none; padding:10px; border-radius:8px; border:1px solid var(--border-glass); background:var(--bg-glass); color:var(--text-main); font-family: inherit; width: 100%;" />
+          <button class="browse-btn" id="start-p2p-btn" style="background:linear-gradient(135deg, #10b981, #059669); width:100%;">
+            <i class="fa-solid fa-bolt"></i> Send Directly (P2P)
+          </button>
+        </div>
         <div class="upload-progress" id="upload-progress" style="display:none;">
           <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
           <span id="progress-text">0%</span>
         </div>
         <!-- Success file list appears here -->
         <div class="upload-success-list" id="upload-success-list"></div>
+
+        <!-- Suggested Friends for quick sharing -->
+        <div class="suggested-friends" id="suggested-friends-container" style="display:none; margin-top:20px;">
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Receive Modal (Popup) -->
-  <div class="modal-overlay" id="receive-modal">
-    <div class="modal-content upload-modal-content">
-      <button class="modal-close-btn" id="close-receive-modal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+  </div>
+
+  <!-- Add Friend Modal -->
+  <div class="modal-overlay" id="add-friend-modal">
+    <div class="modal-content upload-modal-content" style="width:400px; padding-top:40px;">
+      <button class="modal-close-btn" id="close-add-friend-modal"><i class="fa-solid fa-xmark"></i></button>
       <div style="text-align:center;">
-        <i class="fa-solid fa-file-import" style="font-size:48px; color:var(--text-muted); margin-bottom:16px;"></i>
-        <h3 style="margin-bottom:8px; font-size:18px; color:var(--text-main); font-weight:600;">Receive Files</h3>
-        <p style="margin-bottom:20px; font-size:14px; color:var(--text-muted);">Paste the shared link below to receive files</p>
-        <div class="form-group">
-          <input type="url" id="receive-link-input" class="text-input" placeholder="https://fileshare.com/download?id=...">
+        <i class="fa-solid fa-user-plus" style="font-size:40px; color:#4facfe; margin-bottom:15px;"></i>
+        <h3 style="margin-bottom:8px; font-weight:700;">Add New Friend</h3>
+        <p style="font-size:13px; color:var(--text-muted); margin-bottom:20px;">Search for a user by their username</p>
+        <div class="form-group" style="text-align:left;">
+          <div class="greeting-container" style="display:flex; align-items:center; gap:10px;">
+            <div class="user-greeting" id="display-name" style="font-size: 20px; font-weight: 600;">Welcome</div>
+            <span id="guest-badge" style="display:none; background: #ef4444; color: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; text-transform: uppercase; font-weight: bold;">Guest</span>
+          </div>
+          <label style="font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:6px; display:block;">USERNAME</label>
+          <input type="text" id="add-friend-username-input" class="text-input" placeholder="e.g. sourav123">
         </div>
-        <button class="browse-btn" id="confirm-receive-btn" style="width:100%; justify-content:center; margin-top:10px;">
-          <i class="fa-solid fa-download"></i> Receive File
+        <div id="search-result-container" style="margin-top:15px; text-align:left;"></div>
+        <button class="btn-primary" id="confirm-search-user-btn" style="width:100%; margin-top:20px; height:45px; justify-content:center; display:flex;">
+          <i class="fa-solid fa-magnifying-glass"></i> Search User
         </button>
       </div>
     </div>
   </div>
 
+  <!-- P2P Receive Modal -->
+  <div class="modal-overlay" id="p2p-receive-modal">
+    <div class="modal-content upload-modal-content" style="width:400px; padding-top:40px; text-align:center;">
+      <i class="fa-solid fa-bolt" style="font-size:40px; color:#10b981; margin-bottom:15px;"></i>
+      <h3 style="margin-bottom:8px; font-weight:700;">Incoming File Transfer</h3>
+      <p style="font-size:13px; color:var(--text-muted); margin-bottom:20px;" id="p2p-sender-text">Someone wants to send you a file.</p>
+      
+      <div style="display:flex; gap:10px; justify-content:center;" id="p2p-action-buttons">
+        <button class="btn-primary" id="accept-p2p-btn" style="background:#10b981; flex:1;">Accept</button>
+        <button class="btn-primary" id="reject-p2p-btn" style="background:#ef4444; flex:1;">Reject</button>
+      </div>
+      
+      <div class="upload-progress" id="p2p-receive-progress" style="display:none; margin-top:20px;">
+        <div class="progress-bar"><div class="progress-fill" id="p2p-receive-fill"></div></div>
+        <span id="p2p-receive-pct">0%</span>
+        <div id="p2p-receive-status" style="font-size:12px; color:var(--text-muted); margin-top:8px;">Transferring...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Guest Upgrade Modal -->
+  <div class="modal-overlay" id="guest-upgrade-modal">
+    <div class="modal-content upload-modal-content" style="width:400px; padding-top:40px;">
+      <button class="modal-close-btn" id="close-guest-upgrade-modal"><i class="fa-solid fa-xmark"></i></button>
+      <div style="text-align:center;">
+        <i class="fa-solid fa-star" style="font-size:40px; color:#f59e0b; margin-bottom:15px;"></i>
+        <h3 style="margin-bottom:8px; font-weight:700;">File Sent Successfully!</h3>
+        <p style="font-size:13px; color:var(--text-muted); margin-bottom:20px;">You are currently using a temporary Guest Account. Upgrade to a full account to save your files permanently, add friends, and claim a personalized username!</p>
+        <button class="btn-primary" onclick="window.location.href='../Signup page/index.html'" style="width:100%; margin-top:10px; height:45px; justify-content:center; display:flex; background: linear-gradient(135deg, #d946ef, #a855f7);">
+          <i class="fa-solid fa-user-plus"></i> Create Full Account
+        </button>
+        <button id="dismiss-upgrade-btn" style="background:transparent; border:none; color:var(--text-muted); font-size:12px; margin-top:15px; cursor:pointer; text-decoration:underline;">
+          Maybe Later
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="webrtc.js"></script>
   <script src="script.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {

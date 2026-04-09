@@ -9,6 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style_friends.css">
   <script>
     if (!localStorage.getItem('username')) window.location.href = '../Login page/index.html';
   </script>
@@ -401,23 +402,25 @@
     .bar-col .bar {
       width: 22px;
       border-radius: 6px 6px 0 0;
-      background: var(--bg-glass-heavy);
-      border: 1px solid var(--border-glass);
+      background: #f1f5f9;
+      border: 1px solid rgba(0,0,0,0.05);
       border-bottom: none;
       transition: height 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s ease, box-shadow 0.2s ease;
       cursor: pointer;
       position: relative;
     }
-
-    .bar-col .bar.highlight {
-      background: linear-gradient(180deg, #d946ef 0%, #a855f7 100%);
-      border-color: transparent;
-      box-shadow: 0 -4px 14px rgba(217,70,239,0.45), var(--reflection);
+    body.dark-mode .bar-col .bar {
+      background: var(--bg-glass-heavy);
+      border: 1px solid var(--border-glass);
     }
 
-    .bar-col .bar:hover {
-      background: linear-gradient(180deg, #d946ef 0%, #a855f7 100%);
+    .bar-col .bar.highlight, .bar-col .bar:hover {
+      background: linear-gradient(180deg, #60a5fa 0%, #3b82f6 100%);
       border-color: transparent;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+    }
+    body.dark-mode .bar-col .bar.highlight, body.dark-mode .bar-col .bar:hover {
+      background: linear-gradient(180deg, #d946ef 0%, #a855f7 100%);
       box-shadow: 0 -4px 14px rgba(217,70,239,0.45), var(--reflection);
     }
 
@@ -491,47 +494,31 @@
     }
 
     .feed-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 14px;
+      font-size: 16px;
       flex-shrink: 0;
+    }
+
+    .feed-icon.upload { background: #eff6ff; color: #3b82f6; }
+    .feed-icon.share { background: #faf5ff; color: #a855f7; }
+    .feed-icon.download { background: #f0fdf4; color: #22c55e; }
+    .feed-icon.delete { background: #fef2f2; color: #ef4444; }
+    .feed-icon.login { background: #fffbeb; color: #f59e0b; }
+
+    body.dark-mode .feed-icon {
       border: 1px solid var(--border-glass);
       box-shadow: var(--reflection);
     }
-
-    .feed-icon.upload {
-      background: rgba(59,130,246,0.15);
-      color: #3b82f6;
-      box-shadow: 0 0 8px rgba(59,130,246,0.2), var(--reflection);
-    }
-
-    .feed-icon.share {
-      background: rgba(168,85,247,0.15);
-      color: #a855f7;
-      box-shadow: 0 0 8px rgba(168,85,247,0.2), var(--reflection);
-    }
-
-    .feed-icon.download {
-      background: rgba(34,197,94,0.15);
-      color: #22c55e;
-      box-shadow: 0 0 8px rgba(34,197,94,0.2), var(--reflection);
-    }
-
-    .feed-icon.delete {
-      background: rgba(239,68,68,0.12);
-      color: #ef4444;
-      box-shadow: 0 0 8px rgba(239,68,68,0.15), var(--reflection);
-    }
-
-    .feed-icon.login {
-      background: rgba(245,158,11,0.15);
-      color: #f59e0b;
-      box-shadow: 0 0 8px rgba(245,158,11,0.2), var(--reflection);
-    }
+    body.dark-mode .feed-icon.upload { background: rgba(59,130,246,0.15); box-shadow: 0 0 8px rgba(59,130,246,0.2), var(--reflection); }
+    body.dark-mode .feed-icon.share { background: rgba(168,85,247,0.15); box-shadow: 0 0 8px rgba(168,85,247,0.2), var(--reflection); }
+    body.dark-mode .feed-icon.download { background: rgba(34,197,94,0.15); box-shadow: 0 0 8px rgba(34,197,94,0.2), var(--reflection); }
+    body.dark-mode .feed-icon.delete { background: rgba(239,68,68,0.12); box-shadow: 0 0 8px rgba(239,68,68,0.15), var(--reflection); }
+    body.dark-mode .feed-icon.login { background: rgba(245,158,11,0.15); box-shadow: 0 0 8px rgba(245,158,11,0.2), var(--reflection); }
 
     .feed-body {
       flex: 1;
@@ -562,15 +549,13 @@
 
     .show-more-btn {
       width: 100%;
-      padding: 12px;
-      margin-top: 15px;
-      background: var(--bg-glass);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid var(--border-glass);
-      border-radius: 12px;
+      padding: 14px;
+      margin-top: 20px;
+      background: #fff;
+      border: 1px solid rgba(0,0,0,0.05);
+      border-radius: 14px;
       color: #4facfe;
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s ease;
@@ -578,14 +563,26 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    body.dark-mode .show-more-btn {
+      background: var(--bg-glass);
+      border: 1px solid var(--border-glass);
       box-shadow: var(--reflection);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
 
     .show-more-btn:hover {
+      background: #f8fafc;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    body.dark-mode .show-more-btn:hover {
       background: var(--hover-btn);
-      color: #4facfe;
       box-shadow: 0 0 15px var(--neon-glow), var(--reflection);
-      transform: translateY(-1px);
     }
 
     .show-more-btn i {
@@ -665,8 +662,12 @@
               <div class="theme-toggle" id="theme-toggle"
                 style="cursor: pointer; font-size: 20px; color: rgba(255,255,255,0.8);"><i class="fa-solid fa-moon"></i>
               </div>
+              <div class="topbar-icon-btn" id="open-friends-btn" title="Friends" style="background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.2); color:#fff; width:38px; height:38px; display:flex; align-items:center; justify-content:center; border-radius:10px; cursor:pointer; position:relative;">
+                <i class="fa-solid fa-user-group"></i>
+                <span class="badge" id="friend-request-badge" style="display:none; position:absolute; top:-4px; right:-4px; background:#ef4444; color:white; font-size:10px; padding:2px 6px; border-radius:10px; border:2px solid #fff;">0</span>
+              </div>
               <div class="notification" id="notification-bell" style="color: rgba(255,255,255,0.8);">
-                <i class="fa-solid fa-bell"></i><span class="badge">1</span>
+                <i class="fa-solid fa-bell"></i><span class="badge">0</span>
                 <div class="notification-dropdown" id="notification-dropdown">
                   <div class="notification-header">
                     <h3>Notifications</h3>
@@ -711,7 +712,7 @@
             <p class="profile-bio-text" id="profile-bio-display">No bio yet — add one to tell others about yourself.</p>
             <div class="profile-meta-tags">
               <span class="meta-tag"><i class="fa-solid fa-calendar-days"></i> <span id="profile-joined-tag">Joined —</span></span>
-              <span class="meta-tag"><i class="fa-solid fa-circle-check" style="color:#22c55e;"></i> Verified</span>
+              <span class="meta-tag" id="profile-verified-tag"><i class="fa-solid fa-circle-check" style="color:#22c55e;"></i> Verified</span>
               <span class="meta-tag"><i class="fa-solid fa-clock"></i> Active today</span>
             </div>
           </div>
@@ -782,8 +783,15 @@
 
           <!-- Recent Activity Feed -->
           <div class="profile-panel">
-            <p class="panel-title">Recent Activity</p>
-            <p class="panel-subtitle">Your latest actions</p>
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+              <div>
+                <p class="panel-title">Recent Activity</p>
+                <p class="panel-subtitle">Your latest actions</p>
+              </div>
+              <button id="clear-activity-btn" style="background:none; border:none; color:var(--text-muted); font-size:12px; cursor:pointer; padding:5px 10px; border-radius:6px; transition:all 0.2s;" onmouseover="this.style.background='rgba(239,68,68,0.1)'; this.style.color='#ef4444';" onmouseout="this.style.background='none'; this.style.color='var(--text-muted)';" title="Clear all activity history">
+                <i class="fa-solid fa-trash-can"></i> Clear All
+              </button>
+            </div>
 
             <div class="activity-feed" id="activity-feed">
               <p style="font-size:13px; color:var(--text-muted); padding:10px 0;">Loading activity...</p>
@@ -824,8 +832,49 @@
           style="background: linear-gradient(135deg,#d946ef,#a855f7); border:none;">Save Changes</button>
       </div>
     </div>
+
+    <!-- FRIEND BAR -->
+    <div class="friend-bar" id="friend-bar">
+      <div class="friend-bar-header">
+        <h3><i class="fa-solid fa-user-group"></i> Friends</h3>
+        <button class="close-friends-btn" id="close-friends-btn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="friend-search-wrap">
+        <div class="friend-search-box">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="friend-search-input" placeholder="Search friends...">
+        </div>
+        <button class="add-friend-trigger" id="add-friend-trigger-btn">
+          <i class="fa-solid fa-user-plus"></i> Add New Friend
+        </button>
+      </div>
+      <div class="friend-list-content" id="friend-list-content">
+        <div class="friend-section-title"><i class="fa-solid fa-clock-rotate-left"></i> Loading...</div>
+      </div>
+    </div>
   </div>
 
+  <!-- Add Friend Modal -->
+  <div class="modal-overlay" id="add-friend-modal">
+    <div class="modal-content upload-modal-content" style="width:400px; padding-top:40px;">
+      <button class="modal-close-btn" id="close-add-friend-modal"><i class="fa-solid fa-xmark"></i></button>
+      <div style="text-align:center;">
+        <i class="fa-solid fa-user-plus" style="font-size:40px; color:#4facfe; margin-bottom:15px;"></i>
+        <h3 style="margin-bottom:8px; font-weight:700;">Add New Friend</h3>
+        <p style="font-size:13px; color:var(--text-muted); margin-bottom:20px;">Search for a user by their username</p>
+        <div class="form-group" style="text-align:left;">
+          <label style="font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:6px; display:block;">USERNAME</label>
+          <input type="text" id="add-friend-username-input" class="text-input" placeholder="e.g. sourav123">
+        </div>
+        <div id="search-result-container" style="margin-top:15px; text-align:left;"></div>
+        <button class="btn-primary" id="confirm-search-user-btn" style="width:100%; margin-top:20px; height:45px; justify-content:center; display:flex;">
+          <i class="fa-solid fa-magnifying-glass"></i> Search User
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="webrtc.js"></script>
   <script src="script.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -850,101 +899,22 @@
       const fs = localStorage.getItem('userFilesSent');
       const fr = localStorage.getItem('userFilesRecv');
       if (tf != null) document.getElementById('stat-total-files').textContent    = tf;
-      if (fs != null) document.getElementById('stat-files-sent').textContent      = fs;
-      if (fr != null) document.getElementById('stat-files-received').textContent  = fr;
-      document.getElementById('stat-storage-used').textContent = storage;
+      if (fs != null) document.getElementById('stat-files-sent').textContent     = fs;
+      if (fr != null) document.getElementById('stat-files-received').textContent = fr;
+      if (storage)    document.getElementById('stat-storage-used').textContent   = storage;
 
-      // ---- Open modal from BOTH triggers ----
-      const modal = document.getElementById('edit-profile-modal');
-      const cancelBtn = document.getElementById('cancel-edit-btn');
-      const saveBtn = document.getElementById('save-profile-btn');
-      const modalMsg = document.getElementById('edit-modal-msg');
-
-      function openModal() {
-        document.getElementById('edit-username-input').value = localStorage.getItem('username') || '';
-        document.getElementById('edit-bio-input').value = localStorage.getItem('userBio') || '';
-        modal.classList.add('active');
+      // Guest Check for Profile page
+      const isGuest = localStorage.getItem('isGuest') === 'true';
+      if (isGuest) {
+          const editBtn1 = document.getElementById('open-edit-modal-btn');
+          const editBtn2 = document.getElementById('open-edit-modal-btn-2');
+          const verifiedTag = document.getElementById('profile-verified-tag');
+          if (editBtn1) editBtn1.style.display = 'none';
+          if (editBtn2) editBtn2.style.display = 'none';
+          if (verifiedTag) verifiedTag.style.display = 'none';
       }
 
-      document.getElementById('open-edit-modal-btn').addEventListener('click', openModal);
-      document.getElementById('open-edit-modal-btn-2').addEventListener('click', openModal);
-
-      cancelBtn.addEventListener('click', () => {
-        modal.classList.remove('active');
-        modalMsg.style.display = 'none';
-        document.getElementById('edit-pic-input').value = '';
-      });
-
-      saveBtn.addEventListener('click', async () => {
-        const newUsername = document.getElementById('edit-username-input').value.trim();
-        const newBio = document.getElementById('edit-bio-input').value.trim();
-        const picFile = document.getElementById('edit-pic-input').files[0];
-        const userEmail = localStorage.getItem('userEmail');
-
-        if (!newUsername) {
-          modalMsg.textContent = 'Username cannot be empty.';
-          modalMsg.style.color = '#ef4444';
-          modalMsg.style.display = 'block';
-          return;
-        }
-
-        saveBtn.textContent = 'Saving…';
-        saveBtn.disabled = true;
-
-        // --- Handle local profile pic preview ---
-        if (picFile) {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            document.getElementById('profile-img-display').src = e.target.result;
-            localStorage.setItem('profilePic', e.target.result);
-          };
-          reader.readAsDataURL(picFile);
-        }
-
-        // --- Try API, fall back gracefully ---
-        const formData = new FormData();
-        if (userEmail) formData.append('email', userEmail);
-        formData.append('username', newUsername);
-        formData.append('bio', newBio);
-        if (picFile) formData.append('profile_pic', picFile);
-
-        try {
-          const response = await fetch('http://127.0.0.1:8000/update-profile', {
-            method: 'POST',
-            body: formData
-          });
-          const data = await response.json();
-          if (response.ok) {
-            const finalName = data.username || newUsername;
-            const finalBio = data.bio || newBio;
-            applyProfileUpdate(finalName, finalBio);
-          } else {
-            // API error — still save locally
-            applyProfileUpdate(newUsername, newBio);
-          }
-        } catch (_) {
-          // Network error — save locally anyway
-          applyProfileUpdate(newUsername, newBio);
-        }
-
-        function applyProfileUpdate(name, bio) {
-          localStorage.setItem('username', name);
-          if (bio) localStorage.setItem('userBio', bio);
-
-          document.getElementById('profile-page-name').textContent = name;
-          if (bio) document.getElementById('profile-bio-display').textContent = bio;
-          const du = document.getElementById('display-username');
-          if (du) du.textContent = name;
-
-          modal.classList.remove('active');
-          modalMsg.style.display = 'none';
-          saveBtn.textContent = 'Save Changes';
-          saveBtn.disabled = false;
-          document.getElementById('edit-pic-input').value = '';
-        }
-      });
-
-      // ---- Restore profile pic if saved locally ----
+      // ---- Refresh data silently from back-end to catch any changes ----
       const savedPic = localStorage.getItem('profilePic');
       if (savedPic) {
         document.getElementById('profile-img-display').src = savedPic;
@@ -1043,33 +1013,22 @@
 
           btn.addEventListener('click', function() {
             isExpanded = !isExpanded;
-            // Get all items currently in the DOM for this feed
             const items = feedWrap.querySelectorAll('.feed-item');
             
             if (isExpanded) {
-              items.forEach((el, index) => {
-                const itemIsToday = el.getAttribute('data-is-today') === 'true';
-                if (itemIsToday || index < maxActivity) {
-                  el.style.display = 'flex';
-                  // Adding a manual animation triggers for smooth reveal
-                  if (el.classList.contains('hidden-activity-item')) {
-                    el.style.opacity = '0';
-                    el.style.animation = 'fadeIn 0.3s ease forwards';
-                  }
-                } else {
-                  el.style.display = 'none'; 
+              items.forEach(el => {
+                el.style.display = 'flex';
+                if (el.classList.contains('hidden-activity-item')) {
+                  el.style.opacity = '0';
+                  el.style.animation = 'fadeIn 0.3s ease forwards';
                 }
               });
               this.innerHTML = '<i class="fa-solid fa-chevron-up"></i> Show Less';
             } else {
               items.forEach((el, index) => {
-                if (index < maxActivity) {
-                  el.style.display = 'flex';
-                } else {
-                  el.style.display = 'none';
-                }
+                el.style.display = index < maxActivity ? 'flex' : 'none';
               });
-              this.innerHTML = '<i class="fa-solid fa-chevron-down"></i> Show More (All 1 Day Activity)';
+              this.innerHTML = '<i class="fa-solid fa-chevron-down"></i> Show More';
               feedWrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
           });
@@ -1089,6 +1048,40 @@
         document.getElementById('btn-send').classList.remove('active');
         if (window._activityChart) window.renderActivityChart(window._activityChart, 'receive');
       });
+
+      // Clear all activity
+      const clearBtn = document.getElementById('clear-activity-btn');
+      if (clearBtn) {
+        clearBtn.addEventListener('click', async () => {
+          if (!confirm("Are you sure you want to clear your entire activity history? This cannot be undone.")) return;
+          
+          try {
+            const email = localStorage.getItem('userEmail');
+            const res = await fetch(`http://127.0.0.1:8000/activity?email=${encodeURIComponent(email)}`, {
+              method: 'DELETE'
+            });
+            
+            if (res.ok) {
+              // Successfully cleared from backend
+              window.renderActivityFeed([]);
+              // Reset the chart too if possible, or just let it be.
+              // Assuming that clearing activity also means the chart should be updated
+              if (window._activityChart) {
+                const empty = {sun:0, mon:0, tue:0, wed:0, thu:0, fri:0, sat:0};
+                window._activityChart = {send: {...empty}, receive: {...empty}, days: window._activityChart.days};
+                window.renderActivityChart(window._activityChart, window._chartMode || 'receive');
+              }
+              // Toast or Alert
+              alert("Activity history cleared successfully.");
+            } else {
+              alert("Failed to clear activity history.");
+            }
+          } catch (err) {
+            console.error("Failed to clear activity", err);
+            alert("Network error. Could not clear activity history.");
+          }
+        });
+      }
 
     });
   </script>

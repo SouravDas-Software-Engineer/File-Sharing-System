@@ -85,18 +85,27 @@
 
     .form-group input {
       padding: 11px 14px;
-      border: 1px solid var(--border-glass);
+      border: 1px solid rgba(0,0,0,0.12);
       border-radius: 10px;
-      background: rgba(255,255,255,0.05);
+      background: #fff;
       color: var(--text-main);
       font-family: inherit;
       font-size: 14px;
       outline: none;
       transition: all 0.25s ease;
+    }
+    body.dark-mode .form-group input {
+      border-color: var(--border-glass);
+      background: rgba(255,255,255,0.05);
       backdrop-filter: blur(8px);
     }
 
     .form-group input:focus {
+      border-color: #3b82f6;
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    body.dark-mode .form-group input:focus {
       border-color: #4facfe;
       background: rgba(255,255,255,0.1);
       box-shadow: 0 0 0 3px rgba(79,172,254,0.15), var(--reflection);
@@ -314,6 +323,7 @@
     </div>
   </div>
 
+  <script src="webrtc.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
