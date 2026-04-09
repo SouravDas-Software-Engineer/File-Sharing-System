@@ -14,14 +14,32 @@ document.addEventListener("DOMContentLoaded", function () {
     // If someone tries to access this page directly without an OTP, send them back
     if (!email || !otp) {
         alert("Unauthorized access. Please verify your email first.");
-        window.location.href = "index.html"; 
+        window.location.href = "../index.html"; 
     }
 
-    modeBtn.addEventListener("click", function () {
-        document.body.classList.toggle("dark");
-        document.body.classList.toggle("light");
-        modeBtn.textContent = document.body.classList.contains("dark") ? "🌙" : "☀️";
-    });
+  // ================= THEME MEMORY LOGIC =================
+  const savedTheme = localStorage.getItem("fileShareTheme") || "dark";
+  
+  if (savedTheme === "dark") {
+      document.body.classList.add("dark-mode");
+      if(modeBtn) modeBtn.textContent = "🌙";
+  } else {
+      document.body.classList.remove("dark-mode");
+      if(modeBtn) modeBtn.textContent = "☀️";
+  }
+
+  if(modeBtn) {
+      modeBtn.addEventListener("click", function () {
+          document.body.classList.toggle("dark-mode");
+          if (document.body.classList.contains("dark-mode")) {
+              modeBtn.textContent = "🌙";
+              localStorage.setItem("fileShareTheme", "dark");
+          } else {
+              modeBtn.textContent = "☀️";
+              localStorage.setItem("fileShareTheme", "light");
+          }
+      });
+  }
 
     resetBtn.addEventListener("click", async function () {
         const newPassword = newPasswordInput.value.trim();
@@ -50,7 +68,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (response.ok) {
                 alert("Password changed successfully! You can now log in.");
-                window.location.href = "/Frontend/Login page/index.html"; 
+                window.location.href = "../../Login page/index.html"; 
             } else {
                 const data = await response.json();
                 alert("Error: " + data.detail);

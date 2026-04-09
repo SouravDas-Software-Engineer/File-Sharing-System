@@ -1,8 +1,16 @@
 fastapi
-uvicorn
+uvicorn[standard]
 motor
+pymongo
+python-multipart
+bcrypt
+python-jose[cryptography]
 python-dotenv
+<<<<<<< HEAD
 pydantic
 python-jose[cryptography]
 passlib[bcrypt]
 python-multipart
+=======
+pydantic[email]
+>>>>>>> dev

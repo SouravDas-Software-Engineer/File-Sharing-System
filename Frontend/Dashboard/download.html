@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Download File - FileShare</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      background: linear-gradient(-45deg, #0f172a, #1e1b4b, #082f49);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      color: var(--text-main);
+      font-family: 'Inter', sans-serif;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      width: 450px; height: 450px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(79,172,254,0.15), transparent 70%);
+      top: -100px; left: -100px;
+      filter: blur(70px);
+      pointer-events: none;
+      animation: floatOrb 20s ease-in-out infinite alternate;
+      z-index: 0;
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      width: 350px; height: 350px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(168,85,247,0.13), transparent 70%);
+      bottom: -80px; right: -80px;
+      filter: blur(70px);
+      pointer-events: none;
+      animation: floatOrb2 25s ease-in-out infinite alternate;
+      z-index: 0;
+    }
+    @keyframes floatOrb  { from { transform: translate(0,0); } to { transform: translate(50px, 35px); } }
+    @keyframes floatOrb2 { from { transform: translate(0,0); } to { transform: translate(-40px, -25px); } }
+    @keyframes gradientBG {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .download-card {
+      background: var(--bg-glass);
+      backdrop-filter: blur(20px) saturate(120%);
+      -webkit-backdrop-filter: blur(20px) saturate(120%);
+      border: 1px solid var(--border-glass);
+      border-top: 2px solid rgba(79,172,254,0.5);
+      border-radius: 20px;
+      padding: 40px;
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.25), 0 0 0 1px rgba(79,172,254,0.08), var(--reflection);
+      animation: fadeIn 0.5s cubic-bezier(0.16,1,0.3,1) forwards;
+      position: relative;
+      z-index: 1;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 30px;
+      letter-spacing: -0.5px;
+    }
+
+    .file-icon {
+      font-size: 52px;
+      margin-bottom: 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 90px;
+      height: 90px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border-glass);
+      box-shadow: var(--reflection);
+      animation: iconPulse 3s ease-in-out infinite;
+    }
+    @keyframes iconPulse {
+      0%, 100% { box-shadow: var(--reflection), 0 0 0 0 rgba(79,172,254,0); }
+      50%       { box-shadow: var(--reflection), 0 0 22px 7px rgba(79,172,254,0.2); }
+    }
+
+    .file-icon.pdf { color: #ef4444; background: rgba(239,68,68,0.1); }
+    .file-icon.image { color: #22c55e; background: rgba(34,197,94,0.1); }
+    .file-icon.video { color: #3b82f6; background: rgba(59,130,246,0.1); }
+    .file-icon.archive { color: #f59e0b; background: rgba(245,158,11,0.1); }
+    .file-icon.doc { color: #3b82f6; background: rgba(59,130,246,0.1); }
+    .file-icon.file { color: #94a3b8; background: rgba(148,163,184,0.1); }
+
+    .file-name {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text-main);
+      word-break: break-all;
+    }
+
+    .file-meta {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      margin-bottom: 30px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .file-meta span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-download {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      border: none;
+      background: linear-gradient(135deg, #d946ef, #a855f7);
+      color: white;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(217,70,239,0.3);
+      transition: all 0.2s ease;
+    }
+
+    .btn-download:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 22px rgba(217,70,239,0.45);
+    }
+
+    .uploader-info {
+      margin-top: 24px;
+      font-size: 13px;
+      color: var(--text-muted);
+      padding-top: 20px;
+      border-top: 1px solid var(--border-glass);
+    }
+
+    .uploader-info strong {
+      color: var(--text-main);
+    }
+
+    .error-state {
+      display: none;
+    }
+
+    .error-state i {
+      font-size: 48px;
+      color: #ef4444;
+      margin-bottom: 16px;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  
+  <script>
+    if ((localStorage.getItem('fileShareTheme') || 'dark') === 'dark') document.body.classList.add('dark-mode');
+    else document.body.classList.remove('dark-mode');
+  </script>
+
+  <div class="download-card" id="download-card">
+    <div class="logo"><i class="fa-solid fa-layer-group" style="color: #4facfe; filter: drop-shadow(0 0 6px rgba(79,172,254,0.6));"></i> <span style="background:linear-gradient(135deg,#4facfe,#a855f7);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;">FileShare</span></div>
+    
+    <div id="loading-state" style="padding: 20px 0;">
+      <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 32px; color: var(--text-muted); margin-bottom: 16px;"></i>
+      <div style="color: var(--text-muted); font-size: 14px;">Looking for file...</div>
+    </div>
+
+    <div id="file-state" style="display: none;">
+      <div class="file-icon" id="file-icon"><i class="fa-solid fa-file"></i></div>
+      <div class="file-name" id="file-name">filename.ext</div>
+      <div class="file-meta">
+        <span><i class="fa-solid fa-hard-drive"></i> <b id="file-size">0 MB</b></span>
+        <span><i class="fa-solid fa-calendar"></i> <b id="file-date">Unknown date</b></span>
+      </div>
+      
+      <button class="btn-download" id="btn-download">
+        <i class="fa-solid fa-cloud-arrow-down"></i> Download File
+      </button>
+      
+      <div class="uploader-info">
+        Shared securely by <strong id="uploader-name">User</strong>
+      </div>
+    </div>
+
+    <div id="error-state" class="error-state">
+      <i class="fa-solid fa-link-slash"></i>
+      <h3 style="margin:0 0 8px; color:var(--text-main);">Link Invalid or Expired</h3>
+      <p style="margin:0; font-size:13.5px; color:var(--text-muted);">This file may have been deleted or the link is broken.</p>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const fileId = urlParams.get('id');
+      const API_URL = 'http://127.0.0.1:8000';
+      
+      const loadingState = document.getElementById('loading-state');
+      const fileState    = document.getElementById('file-state');
+      const errorState   = document.getElementById('error-state');
+
+      if (!fileId) {
+        loadingState.style.display = 'none';
+        errorState.style.display = 'block';
+        return;
+      }
+
+      const API_ICONS = {
+        pdf: 'fa-file-pdf', image: 'fa-file-image', video: 'fa-file-video',
+        audio: 'fa-file-audio', archive: 'fa-file-zipper', code: 'fa-file-code',
+        doc: 'fa-file-word', spreadsheet: 'fa-file-excel', slides: 'fa-file-powerpoint',
+        text: 'fa-file-lines', file: 'fa-file'
+      };
+
+      try {
+        const res = await fetch(`${API_URL}/public/file/${fileId}`);
+        if (!res.ok) throw new Error('File not found');
+        const data = await res.json();
+        
+        // Populate UI
+        document.getElementById('file-name').textContent = data.filename;
+        document.getElementById('file-size').textContent = (data.size_mb >= 1024) 
+                                                     ? `${(data.size_mb/1024).toFixed(2)} GB` 
+                                                     : `${data.size_mb.toFixed(1)} MB`;
+        document.getElementById('file-date').textContent = data.uploaded_at || 'Recently';
+        document.getElementById('uploader-name').textContent = data.uploader;
+        
+        const typeClass = data.type || 'file';
+        const iconClass = API_ICONS[typeClass] || 'fa-file';
+        const iconEl = document.getElementById('file-icon');
+        iconEl.className = `file-icon ${['pdf', 'image', 'video', 'doc', 'archive'].includes(typeClass) ? typeClass : 'file'}`;
+        iconEl.innerHTML = `<i class="fa-solid ${iconClass}"></i>`;
+
+        loadingState.style.display = 'none';
+        fileState.style.display = 'block';
+
+        // Bind download logic
+        document.getElementById('btn-download').addEventListener('click', async () => {
+          document.getElementById('btn-download').innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Starting...';
+          try {
+            // Track download (triggers notification to owner)
+            await fetch(`${API_URL}/track/download/${fileId}`, { method: 'POST' });
+          } catch (e) {
+            console.error(e);
+          }
+          // Redirect securely to raw file
+          const a = document.createElement('a');
+          a.style.display = 'none';
+          a.href = `${API_URL}/uploads/files/${fileId}`;
+          a.download = data.filename;
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(() => { document.body.removeChild(a); }, 100);
+          
+          setTimeout(() => {
+             document.getElementById('btn-download').innerHTML = '<i class="fa-solid fa-check"></i> Downloaded';
+             document.getElementById('btn-download').style.background = '#22c55e';
+          }, 1000);
+        });
+
+      } catch (err) {
+        loadingState.style.display = 'none';
+        errorState.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>

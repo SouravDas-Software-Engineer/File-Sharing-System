@@ -1,121 +1,1090 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Profile</title>
+  <title>My Profile - FileShare</title>
+  <meta name="description" content="View and manage your FileShare profile, activity, and file statistics.">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style_friends.css">
+  <script>
+    if (!localStorage.getItem('username')) window.location.href = '../Login page/index.html';
+  </script>
   <style>
-    /* Profile specific styles */
-    .profile-card { background: var(--bg-card); padding: 40px; border-radius: 12px; display: flex; gap: 30px; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.03); margin-top: 20px;}
-    .profile-avatar { width: 100px; height: 100px; border-radius: 50%; background: #eff6ff; color: #3b82f6; display: flex; align-items: center; justify-content: center; font-size: 40px; }
-    .profile-details h2 { margin-bottom: 5px; color: var(--text-main); }
-    .profile-details p { color: var(--text-muted); margin-bottom: 15px; }
-    .btn-primary { background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 500; }
-  </style>
-<script>
-  const currentUser = localStorage.getItem('username');
-  
-  if (!currentUser) {
-    // Step back one folder, then enter the Login page folder
-    window.location.href = '../Login page/index.html'; 
-  }
-</script>
-</head>
-<body>
-    <script>
-        const earlyTheme = localStorage.getItem('fileShareTheme') || 'dark';
-    if (earlyTheme === 'dark') {
-      document.body.classList.add('dark-mode');
-    } else {
-      document.body.classList.remove('dark-mode');
+    .main {
+      padding-top: 0;
     }
-    </script>
-<div class="dashboard">
-  <div class="sidebar">
-    <h2 class="logo"><i class="fa-solid fa-layer-group" style="color: #4facfe;"></i> FileShare</h2>
-    <ul>
-      <li><a href="index.html" style="text-decoration: none; color: inherit; display: flex; gap: 15px;"><i class="fa-solid fa-house"></i> Dashboard</a></li>
-      <li class="active"><i class="fa-solid fa-user"></i> My Profile</li>
-    </ul>
+
+    /* ---- COVER BANNER ---- */
+    .profile-cover {
+      width: 100%;
+      height: 180px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 40%, #d946ef 100%);
+      border-radius: 0 0 24px 24px;
+      position: relative;
+      /* Removed overflow: hidden to allow dropdowns to show outside the banner */
+      overflow: visible;
+      flex-shrink: 0;
+    }
+
+    .profile-cover::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    .profile-cover-topbar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 15px 30px;
+    }
+
+    /* ---- PROFILE CARD (overlaps cover) ---- */
+    .profile-page-content {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 0 24px 40px;
+    }
+
+    .profile-card {
+      margin-top: -60px;
+      padding: 24px 28px 20px;
+      border-radius: 20px;
+      background: var(--bg-glass-heavy);
+      backdrop-filter: blur(20px) saturate(120%);
+      -webkit-backdrop-filter: blur(20px) saturate(120%);
+      border: 1px solid var(--border-glass);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.12), var(--reflection);
+      display: flex;
+      align-items: flex-start;
+      gap: 24px;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 2; /* Ensures card stays above the banner banner */
+    }
+
+    /* Avatar */
+    .profile-avatar-wrap {
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .profile-avatar-wrap img {
+      width: 100px;
+      height: 100px;
+      border-radius: 22px;
+      object-fit: cover;
+      border: 3px solid var(--border-glass);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2), var(--reflection);
+      display: block;
+    }
+
+    .avatar-edit-btn {
+      position: absolute;
+      bottom: -6px;
+      right: -6px;
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #d946ef, #a855f7);
+      border: 2px solid var(--bg-glass);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 11px;
+      color: white;
+      transition: transform 0.2s ease;
+      box-shadow: 0 4px 12px rgba(217, 70, 239, 0.4);
+    }
+
+    .avatar-edit-btn:hover {
+      transform: scale(1.1);
+    }
+
+    /* Profile info */
+    .profile-info {
+      flex: 1;
+      min-width: 180px;
+    }
+
+    .profile-info h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 4px;
+      text-shadow: 0 0 6px rgba(255, 255, 255, 0.15);
+    }
+
+    .profile-info .profile-email {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .profile-bio-text {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 12px;
+      max-width: 380px;
+    }
+
+    .profile-meta-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .meta-tag {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      color: var(--text-muted);
+      background: var(--bg-glass);
+      backdrop-filter: blur(8px) saturate(120%);
+      -webkit-backdrop-filter: blur(8px) saturate(120%);
+      border: 1px solid var(--border-glass);
+      padding: 4px 10px;
+      border-radius: 20px;
+      box-shadow: var(--reflection);
+    }
+
+    .meta-tag i {
+      font-size: 11px;
+    }
+
+    /* Edit profile button (top right of card) */
+    .profile-card-actions {
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+
+    .btn-edit-profile {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 18px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border-glass);
+      background: var(--bg-glass);
+      color: var(--text-main);
+      transition: all 0.2s ease;
+      backdrop-filter: blur(12px) saturate(120%);
+      -webkit-backdrop-filter: blur(12px) saturate(120%);
+      box-shadow: var(--reflection);
+    }
+
+    .btn-edit-profile:hover {
+      background: linear-gradient(135deg, #d946ef, #a855f7);
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 6px 20px rgba(217,70,239,0.35), var(--reflection);
+      transform: translateY(-1px);
+    }
+
+    /* ---- STATS ROW ---- */
+    .profile-stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-top: 20px;
+    }
+
+    .stat-card {
+      background: var(--bg-glass);
+      backdrop-filter: blur(16px) saturate(120%);
+      -webkit-backdrop-filter: blur(16px) saturate(120%);
+      border: 1px solid var(--border-glass);
+      border-radius: 16px;
+      padding: 18px 14px;
+      text-align: center;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06), var(--reflection);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 28px rgba(0,0,0,0.12), var(--reflection), 0 0 20px var(--neon-glow);
+    }
+
+    .stat-card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 10px;
+      font-size: 17px;
+    }
+
+    .stat-card-icon.blue {
+      background: rgba(59, 130, 246, 0.15);
+      color: #3b82f6;
+      box-shadow: 0 0 12px rgba(59, 130, 246, 0.2);
+    }
+
+    .stat-card-icon.purple {
+      background: rgba(168, 85, 247, 0.15);
+      color: #a855f7;
+      box-shadow: 0 0 12px rgba(168, 85, 247, 0.2);
+    }
+
+    .stat-card-icon.green {
+      background: rgba(34, 197, 94, 0.15);
+      color: #22c55e;
+      box-shadow: 0 0 12px rgba(34, 197, 94, 0.2);
+    }
+
+    .stat-card-icon.orange {
+      background: rgba(249, 115, 22, 0.15);
+      color: #f97316;
+      box-shadow: 0 0 12px rgba(249, 115, 22, 0.2);
+    }
+
+    .stat-card-value {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    .stat-card-label {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      font-weight: 500;
+      display: block;
+    }
+
+    /* ---- TWO-COLUMN BELOW STATS ---- */
+    .profile-lower {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 18px;
+      margin-top: 20px;
+    }
+
+    /* ---- SHARED PANEL ---- */
+    .profile-panel {
+      background: var(--bg-glass);
+      backdrop-filter: blur(16px) saturate(120%);
+      -webkit-backdrop-filter: blur(16px) saturate(120%);
+      border: 1px solid var(--border-glass);
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1), var(--reflection);
+    }
+
+    .panel-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 4px;
+    }
+
+    .panel-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 18px;
+    }
+
+    /* ---- ACTIVITY CHART ---- */
+    .activity-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 18px;
+    }
+
+    .activity-toggles {
+      display: flex;
+      gap: 8px;
+    }
+
+    .toggle-btn {
+      padding: 6px 16px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border-glass);
+      background: var(--bg-glass);
+      backdrop-filter: blur(8px) saturate(120%);
+      -webkit-backdrop-filter: blur(8px) saturate(120%);
+      color: var(--text-muted);
+      transition: all 0.2s ease;
+      box-shadow: var(--reflection);
+    }
+
+    .toggle-btn.active {
+      background: linear-gradient(135deg, #d946ef, #a855f7);
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 4px 12px rgba(217,70,239,0.3), var(--reflection);
+    }
+
+    .toggle-btn:not(.active):hover {
+      background: var(--hover-btn);
+      color: var(--text-main);
+      box-shadow: 0 0 10px var(--neon-glow), var(--reflection);
+    }
+
+    /* Chart */
+    .chart-area {
+      position: relative;
+      height: 190px;
+      padding-left: 32px;
+    }
+
+    .chart-grid {
+      position: absolute;
+      top: 0;
+      left: 32px;
+      right: 0;
+      bottom: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .chart-grid-line {
+      border-bottom: 1px dashed var(--border-glass);
+      position: relative;
+      opacity: 0.7;
+    }
+
+    .chart-grid-line span {
+      position: absolute;
+      left: -28px;
+      bottom: -8px;
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .chart-bars-wrap {
+      position: absolute;
+      top: 0;
+      left: 32px;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      align-items: flex-end;
+      padding-bottom: 28px;
+      gap: 0;
+      justify-content: space-around;
+      z-index: 1;
+    }
+
+    .bar-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      position: relative;
+      width: 32px;
+    }
+
+    .bar-col .bar {
+      width: 22px;
+      border-radius: 6px 6px 0 0;
+      background: #f1f5f9;
+      border: 1px solid rgba(0,0,0,0.05);
+      border-bottom: none;
+      transition: height 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s ease, box-shadow 0.2s ease;
+      cursor: pointer;
+      position: relative;
+    }
+    body.dark-mode .bar-col .bar {
+      background: var(--bg-glass-heavy);
+      border: 1px solid var(--border-glass);
+    }
+
+    .bar-col .bar.highlight, .bar-col .bar:hover {
+      background: linear-gradient(180deg, #60a5fa 0%, #3b82f6 100%);
+      border-color: transparent;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+    }
+    body.dark-mode .bar-col .bar.highlight, body.dark-mode .bar-col .bar:hover {
+      background: linear-gradient(180deg, #d946ef 0%, #a855f7 100%);
+      box-shadow: 0 -4px 14px rgba(217,70,239,0.45), var(--reflection);
+    }
+
+    /* tooltip */
+    .bar-col .bar::after {
+      content: attr(data-value);
+      position: absolute;
+      top: -30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--bg-glass-heavy);
+      backdrop-filter: blur(12px) saturate(120%);
+      -webkit-backdrop-filter: blur(12px) saturate(120%);
+      border: 1px solid var(--border-glass);
+      color: var(--text-main);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15), var(--reflection);
+    }
+
+    .bar-col .bar:hover::after {
+      opacity: 1;
+    }
+
+    .bar-col .bar-day {
+      position: absolute;
+      bottom: -22px;
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* ---- ACTIVITY FEED ---- */
+    .activity-feed {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .feed-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 13px 0;
+      border-bottom: 1px solid var(--border-glass);
+      border-radius: 8px;
+      transition: background 0.15s ease, box-shadow 0.15s ease;
+      margin: 0 -6px;
+      padding-left: 6px;
+      padding-right: 6px;
+    }
+
+    .feed-item:hover {
+      background: var(--bg-glass);
+      box-shadow: var(--reflection);
+    }
+
+    .feed-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .feed-item:first-child {
+      padding-top: 0;
+    }
+
+    .feed-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .feed-icon.upload { background: #eff6ff; color: #3b82f6; }
+    .feed-icon.share { background: #faf5ff; color: #a855f7; }
+    .feed-icon.download { background: #f0fdf4; color: #22c55e; }
+    .feed-icon.delete { background: #fef2f2; color: #ef4444; }
+    .feed-icon.login { background: #fffbeb; color: #f59e0b; }
+
+    body.dark-mode .feed-icon {
+      border: 1px solid var(--border-glass);
+      box-shadow: var(--reflection);
+    }
+    body.dark-mode .feed-icon.upload { background: rgba(59,130,246,0.15); box-shadow: 0 0 8px rgba(59,130,246,0.2), var(--reflection); }
+    body.dark-mode .feed-icon.share { background: rgba(168,85,247,0.15); box-shadow: 0 0 8px rgba(168,85,247,0.2), var(--reflection); }
+    body.dark-mode .feed-icon.download { background: rgba(34,197,94,0.15); box-shadow: 0 0 8px rgba(34,197,94,0.2), var(--reflection); }
+    body.dark-mode .feed-icon.delete { background: rgba(239,68,68,0.12); box-shadow: 0 0 8px rgba(239,68,68,0.15), var(--reflection); }
+    body.dark-mode .feed-icon.login { background: rgba(245,158,11,0.15); box-shadow: 0 0 8px rgba(245,158,11,0.2), var(--reflection); }
+
+    .feed-body {
+      flex: 1;
+    }
+
+    .feed-title {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 2px;
+    }
+
+    .feed-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .feed-time {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .hidden-activity-item {
+      display: none;
+    }
+
+    .show-more-btn {
+      width: 100%;
+      padding: 14px;
+      margin-top: 20px;
+      background: #fff;
+      border: 1px solid rgba(0,0,0,0.05);
+      border-radius: 14px;
+      color: #4facfe;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    body.dark-mode .show-more-btn {
+      background: var(--bg-glass);
+      border: 1px solid var(--border-glass);
+      box-shadow: var(--reflection);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .show-more-btn:hover {
+      background: #f8fafc;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    body.dark-mode .show-more-btn:hover {
+      background: var(--hover-btn);
+      box-shadow: 0 0 15px var(--neon-glow), var(--reflection);
+    }
+
+    .show-more-btn i {
+      font-size: 12px;
+    }
+
+    /* ---- MODAL STYLES (reuse existing) ---- */
+    .modal-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    /* Responsive */
+    @media (max-width: 720px) {
+      .profile-stats-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .profile-lower {
+        grid-template-columns: 1fr;
+      }
+
+      .profile-card {
+        gap: 16px;
+      }
+
+      .profile-card-actions {
+        width: 100%;
+      }
+
+      .btn-edit-profile {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <script>
+    if ((localStorage.getItem('fileShareTheme') || 'dark') === 'dark') document.body.classList.add('dark-mode');
+    else document.body.classList.remove('dark-mode');
+  </script>
+
+  <div class="dashboard">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <h2 class="logo"><i class="fa-solid fa-layer-group" style="color:#4facfe; filter:drop-shadow(0 0 6px rgba(79,172,254,0.6));"></i> <span style="background:linear-gradient(135deg,#4facfe,#a855f7);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;">FileShare</span></h2>
+      <ul>
+        <li><a href="index.html"><i class="fa-solid fa-house"></i> Dashboard</a></li>
+        <li class="active"><a href="profile.html"><i class="fa-solid fa-user"></i> My Profile</a></li>
+        <li><a href="files.html"><i class="fa-solid fa-folder"></i> My Files</a></li>
+        <li><a href="settings.html"><i class="fa-solid fa-lock"></i> Account Security</a></li>
+        <li><a href="app_settings.html"><i class="fa-solid fa-sliders"></i> App Settings</a></li>
+      </ul>
+      <div class="sidebar-footer">
+        <button class="logout-btn-sidebar" id="sidebar-logout-btn">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i> Log Out
+        </button>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main" style="padding: 0; overflow-y: auto;">
+
+      <!-- Cover Banner (holds topbar inside) -->
+      <div class="profile-cover">
+        <div class="profile-cover-topbar">
+          <div class="topbar" style="margin-bottom: 0; background: rgba(255,255,255,0.08); backdrop-filter: blur(16px) saturate(120%); -webkit-backdrop-filter: blur(16px) saturate(120%); border: 1px solid var(--border-glass); box-shadow: 0 4px 20px rgba(0,0,0,0.1), var(--reflection); padding: 10px 20px; border-radius: 14px;">
+            <div class="search-bar">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" placeholder="Search...">
+            </div>
+            <div class="user-area">
+              <div class="theme-toggle" id="theme-toggle"
+                style="cursor: pointer; font-size: 20px; color: rgba(255,255,255,0.8);"><i class="fa-solid fa-moon"></i>
+              </div>
+              <div class="topbar-icon-btn" id="open-friends-btn" title="Friends" style="background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.2); color:#fff; width:38px; height:38px; display:flex; align-items:center; justify-content:center; border-radius:10px; cursor:pointer; position:relative;">
+                <i class="fa-solid fa-user-group"></i>
+                <span class="badge" id="friend-request-badge" style="display:none; position:absolute; top:-4px; right:-4px; background:#ef4444; color:white; font-size:10px; padding:2px 6px; border-radius:10px; border:2px solid #fff;">0</span>
+              </div>
+              <div class="notification" id="notification-bell" style="color: rgba(255,255,255,0.8);">
+                <i class="fa-solid fa-bell"></i><span class="badge">0</span>
+                <div class="notification-dropdown" id="notification-dropdown">
+                  <div class="notification-header">
+                    <h3>Notifications</h3>
+                    <div class="clear-all" id="clear-notifications">Clear All</div>
+                  </div>
+                  <div class="notification-list" id="notification-list">
+                    <div class="notification-empty" id="notification-empty">No notifications</div>
+                  </div>
+                </div>
+              </div>
+              <div class="user-profile" id="profile-btn" style="color: rgba(255,255,255,0.9);">
+                <span id="display-username">Loading...</span><i class="fa-solid fa-chevron-down"></i>
+                <div class="profile-dropdown" id="profile-dropdown">
+                  <a href="profile.html"><i class="fa-regular fa-user"></i> My Profile</a>
+                  <a href="settings.html"><i class="fa-solid fa-lock"></i> Account Security</a>
+                  <a href="app_settings.html"><i class="fa-solid fa-sliders"></i> App Settings</a>
+                  <div class="dropdown-divider"></div>
+                  <a href="#" class="logout-text" id="logout-btn"><i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    Log Out</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- END Cover -->
+
+      <div class="profile-page-content">
+
+        <!-- Profile Card -->
+        <div class="profile-card">
+          <div class="profile-avatar-wrap">
+            <img id="profile-img-display" src="https://i.pravatar.cc/150?img=11" alt="Profile Picture">
+            <div class="avatar-edit-btn" id="open-edit-modal-btn" title="Edit Profile">
+              <i class="fa-solid fa-pen"></i>
+            </div>
+          </div>
+
+          <div class="profile-info">
+            <h1 id="profile-page-name">Loading...</h1>
+            <p class="profile-email" id="profile-email-display">user@example.com</p>
+            <p class="profile-bio-text" id="profile-bio-display">No bio yet — add one to tell others about yourself.</p>
+            <div class="profile-meta-tags">
+              <span class="meta-tag"><i class="fa-solid fa-calendar-days"></i> <span id="profile-joined-tag">Joined —</span></span>
+              <span class="meta-tag" id="profile-verified-tag"><i class="fa-solid fa-circle-check" style="color:#22c55e;"></i> Verified</span>
+              <span class="meta-tag"><i class="fa-solid fa-clock"></i> Active today</span>
+            </div>
+          </div>
+
+          <div class="profile-card-actions">
+            <button class="btn-edit-profile" id="open-edit-modal-btn-2">
+              <i class="fa-solid fa-pen-to-square"></i> Edit Profile
+            </button>
+          </div>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="profile-stats-row">
+          <div class="stat-card">
+            <div class="stat-card-icon blue"><i class="fa-solid fa-file-lines"></i></div>
+            <span class="stat-card-value" id="stat-total-files">—</span>
+            <span class="stat-card-label">Total Files</span>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon purple"><i class="fa-solid fa-paper-plane"></i></div>
+            <span class="stat-card-value" id="stat-files-sent">—</span>
+            <span class="stat-card-label">Files Sent</span>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon green"><i class="fa-solid fa-download"></i></div>
+            <span class="stat-card-value" id="stat-files-received">—</span>
+            <span class="stat-card-label">Files Received</span>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon orange"><i class="fa-solid fa-database"></i></div>
+            <span class="stat-card-value" id="stat-storage-used">—</span>
+            <span class="stat-card-label">Storage Used</span>
+          </div>
+        </div>
+
+        <!-- Lower Two-Column -->
+        <div class="profile-lower">
+
+          <!-- Activity Chart Panel -->
+          <div class="profile-panel">
+            <div class="activity-header-row">
+              <div>
+                <p class="panel-title">Activity</p>
+                <p class="panel-subtitle">Files per day this week</p>
+              </div>
+              <div class="activity-toggles">
+                <button class="toggle-btn" id="btn-send" data-mode="send">Send</button>
+                <button class="toggle-btn active" id="btn-receive" data-mode="receive">Receive</button>
+              </div>
+            </div>
+
+            <div class="chart-area" id="chart-area">
+              <!-- Grid lines -->
+              <div class="chart-grid">
+                <div class="chart-grid-line"><span>10</span></div>
+                <div class="chart-grid-line"><span>7</span></div>
+                <div class="chart-grid-line"><span>4</span></div>
+                <div class="chart-grid-line"><span>1</span></div>
+                <div class="chart-grid-line"><span>0</span></div>
+              </div>
+
+              <!-- Bars -->
+              <div class="chart-bars-wrap" id="chart-bars">
+                <!-- Injected by JS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Activity Feed -->
+          <div class="profile-panel">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+              <div>
+                <p class="panel-title">Recent Activity</p>
+                <p class="panel-subtitle">Your latest actions</p>
+              </div>
+              <button id="clear-activity-btn" style="background:none; border:none; color:var(--text-muted); font-size:12px; cursor:pointer; padding:5px 10px; border-radius:6px; transition:all 0.2s;" onmouseover="this.style.background='rgba(239,68,68,0.1)'; this.style.color='#ef4444';" onmouseout="this.style.background='none'; this.style.color='var(--text-muted)';" title="Clear all activity history">
+                <i class="fa-solid fa-trash-can"></i> Clear All
+              </button>
+            </div>
+
+            <div class="activity-feed" id="activity-feed">
+              <p style="font-size:13px; color:var(--text-muted); padding:10px 0;">Loading activity...</p>
+            </div>
+          </div>
+
+        </div>
+        <!-- END lower two-column -->
+
+      </div>
+      <!-- END profile-page-content -->
+
+    </div>
+    <!-- END main -->
+  </div>
+  <!-- END dashboard -->
+
+  <!-- Edit Profile Modal -->
+  <div id="edit-profile-modal" class="modal-overlay">
+    <div class="modal-content">
+      <h3 style="margin-bottom: 20px; font-size: 20px; color: var(--text-main);">Edit Profile</h3>
+      <div class="form-group">
+        <label style="font-size:13px; color:var(--text-muted); font-weight:600;">Profile Picture</label>
+        <input type="file" id="edit-pic-input" accept="image/*" class="file-input">
+      </div>
+      <div class="form-group">
+        <label style="font-size:13px; color:var(--text-muted); font-weight:600;">Username</label>
+        <input type="text" id="edit-username-input" class="text-input" placeholder="Update username">
+      </div>
+      <div class="form-group">
+        <label style="font-size:13px; color:var(--text-muted); font-weight:600;">Bio (Optional)</label>
+        <textarea id="edit-bio-input" class="text-input" placeholder="Tell us about yourself" rows="3"></textarea>
+      </div>
+      <p id="edit-modal-msg" style="display: none; font-size: 14px; margin-top: 10px;"></p>
+      <div class="modal-buttons">
+        <button id="cancel-edit-btn" class="btn-cancel">Cancel</button>
+        <button id="save-profile-btn" class="btn-primary"
+          style="background: linear-gradient(135deg,#d946ef,#a855f7); border:none;">Save Changes</button>
+      </div>
+    </div>
+
+    <!-- FRIEND BAR -->
+    <div class="friend-bar" id="friend-bar">
+      <div class="friend-bar-header">
+        <h3><i class="fa-solid fa-user-group"></i> Friends</h3>
+        <button class="close-friends-btn" id="close-friends-btn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="friend-search-wrap">
+        <div class="friend-search-box">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="friend-search-input" placeholder="Search friends...">
+        </div>
+        <button class="add-friend-trigger" id="add-friend-trigger-btn">
+          <i class="fa-solid fa-user-plus"></i> Add New Friend
+        </button>
+      </div>
+      <div class="friend-list-content" id="friend-list-content">
+        <div class="friend-section-title"><i class="fa-solid fa-clock-rotate-left"></i> Loading...</div>
+      </div>
+    </div>
   </div>
 
-  <div class="main">
-    <div class="profile-header">
-  <div class="profile-avatar">
-    <img id="profile-img-display" src="https://via.placeholder.com/100" alt="Profile Picture">
+  <!-- Add Friend Modal -->
+  <div class="modal-overlay" id="add-friend-modal">
+    <div class="modal-content upload-modal-content" style="width:400px; padding-top:40px;">
+      <button class="modal-close-btn" id="close-add-friend-modal"><i class="fa-solid fa-xmark"></i></button>
+      <div style="text-align:center;">
+        <i class="fa-solid fa-user-plus" style="font-size:40px; color:#4facfe; margin-bottom:15px;"></i>
+        <h3 style="margin-bottom:8px; font-weight:700;">Add New Friend</h3>
+        <p style="font-size:13px; color:var(--text-muted); margin-bottom:20px;">Search for a user by their username</p>
+        <div class="form-group" style="text-align:left;">
+          <label style="font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:6px; display:block;">USERNAME</label>
+          <input type="text" id="add-friend-username-input" class="text-input" placeholder="e.g. sourav123">
+        </div>
+        <div id="search-result-container" style="margin-top:15px; text-align:left;"></div>
+        <button class="btn-primary" id="confirm-search-user-btn" style="width:100%; margin-top:20px; height:45px; justify-content:center; display:flex;">
+          <i class="fa-solid fa-magnifying-glass"></i> Search User
+        </button>
+      </div>
+    </div>
   </div>
-  <div class="profile-info">
-    <h2 id="profile-username-display">Loading...</h2>
-    <p id="profile-bio-display" class="bio-text">No bio added yet.</p>
-    <button id="open-edit-modal-btn" class="btn-primary" style="background: #3b82f6; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; margin-top: 10px;">Edit Profile</button>
-  </div>
-</div>
 
-<h3 class="section-title" style="margin-top: 40px;">Activity Overview</h3>
-<div class="stats">
-  <div class="card">
-    <div class="card-icon blue"><i class="fa-solid fa-cloud-arrow-up"></i></div>
-    <div class="card-info">
-      <p>Uploads</p>
-      <h3>12</h3>
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-icon light-blue"><i class="fa-solid fa-link"></i></div>
-    <div class="card-info">
-      <p>Active Links</p>
-      <h3>5</h3>
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-icon green"><i class="fa-solid fa-inbox"></i></div>
-    <div class="card-info">
-      <p>Received Files</p>
-      <h3>8</h3>
-    </div>
-  </div>
-</div>
+  <script src="webrtc.js"></script>
+  <script src="script.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
 
-<div id="edit-profile-modal" class="modal-overlay">
-  <div class="modal-content">
-    <h3 style="margin-bottom: 20px; font-size: 20px; color: var(--text-main);">Edit Profile</h3>
-    
-    <div class="form-group">
-      <label>Profile Picture</label>
-      <input type="file" id="edit-pic-input" accept="image/*" class="file-input">
-    </div>
-    
-    <div class="form-group">
-      <label>Username</label>
-      <input type="text" id="edit-username-input" class="text-input" placeholder="Update username">
-    </div>
-    
-    <div class="form-group">
-      <label>Bio (Optional)</label>
-      <textarea id="edit-bio-input" class="text-input" placeholder="Tell us about yourself" rows="3"></textarea>
-    </div>
-    
-    <p id="edit-modal-msg" style="display: none; font-size: 14px; margin-top: 10px;"></p>
-    
-    <div class="modal-buttons">
-      <button id="cancel-edit-btn" class="btn-cancel">Cancel</button>
-      <button id="save-profile-btn" class="btn-primary">Save Changes</button>
-    </div>
-  </div>
-</div>
-  </div>
-</div>
-<script src="script.js"></script>
-<script>
-  // Quick script to populate name on this specific page
-  document.addEventListener('DOMContentLoaded', () => {
-    const pageName = document.getElementById('profile-page-name');
-    const stored = localStorage.getItem('username');
-    if(pageName && stored) pageName.textContent = stored;
-  });
-</script>
+      // ---- Populate all fields from localStorage cache immediately ----
+      const stored   = localStorage.getItem('username');
+      const email    = localStorage.getItem('userEmail');
+      const bio      = localStorage.getItem('userBio');
+      const joined   = localStorage.getItem('userJoined');
+      const rawMb    = parseFloat(localStorage.getItem('userStorageMB') || '0');
+      const storage  = rawMb >= 1024 ? `${(rawMb/1024).toFixed(1)} GB` : `${rawMb.toFixed(1)} MB`;
+      const pic      = localStorage.getItem('profilePic') || localStorage.getItem('profilePicUrl');
+
+      if (stored)  document.getElementById('profile-page-name').textContent  = stored;
+      if (email)   document.getElementById('profile-email-display').textContent = email;
+      if (bio)     document.getElementById('profile-bio-display').textContent = bio;
+      if (joined)  document.getElementById('profile-joined-tag').textContent  = `Joined ${joined}`;
+      if (pic)     document.getElementById('profile-img-display').src         = pic;
+
+      // Stats from cache
+      const tf = localStorage.getItem('userTotalFiles');
+      const fs = localStorage.getItem('userFilesSent');
+      const fr = localStorage.getItem('userFilesRecv');
+      if (tf != null) document.getElementById('stat-total-files').textContent    = tf;
+      if (fs != null) document.getElementById('stat-files-sent').textContent     = fs;
+      if (fr != null) document.getElementById('stat-files-received').textContent = fr;
+      if (storage)    document.getElementById('stat-storage-used').textContent   = storage;
+
+      // Guest Check for Profile page
+      const isGuest = localStorage.getItem('isGuest') === 'true';
+      if (isGuest) {
+          const editBtn1 = document.getElementById('open-edit-modal-btn');
+          const editBtn2 = document.getElementById('open-edit-modal-btn-2');
+          const verifiedTag = document.getElementById('profile-verified-tag');
+          if (editBtn1) editBtn1.style.display = 'none';
+          if (editBtn2) editBtn2.style.display = 'none';
+          if (verifiedTag) verifiedTag.style.display = 'none';
+      }
+
+      // ---- Refresh data silently from back-end to catch any changes ----
+      const savedPic = localStorage.getItem('profilePic');
+      if (savedPic) {
+        document.getElementById('profile-img-display').src = savedPic;
+      }
+
+      // ---- Activity Chart & Feed (Global functions for script.js to call) ----
+      window._chartMode = 'receive';
+      
+      window.renderActivityChart = function(chartData, mode) {
+        if (!chartData) return;
+        const barsWrap = document.getElementById('chart-bars');
+        if (!barsWrap) return;
+        
+        const data = chartData[mode];
+        if (!data) return;
+        const days = chartData.days || ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+        
+        // Find max value to calculate percentage heights
+        let maxVal = Math.max(...Object.values(data));
+        if (maxVal < 5) maxVal = 5; // keep some headroom if values are very low
+        
+        // highlight the day with the max value
+        let highlightDay = '';
+        for (const [d, v] of Object.entries(data)) {
+          if (v === Math.max(...Object.values(data)) && v > 0) highlightDay = d;
+        }
+
+        barsWrap.innerHTML = days.map((day) => {
+          const val = data[day] || 0;
+          const pct = Math.round((val / maxVal) * 100);
+          const isHL = day === highlightDay ? 'highlight' : '';
+          return `
+            <div class="bar-col">
+              <div class="bar ${isHL}" data-value="${val} files" style="height: ${pct}%;"></div>
+              <span class="bar-day">${day}</span>
+            </div>
+          `;
+        }).join('');
+      };
+
+      window.renderActivityFeed = function(events) {
+        const feedWrap = document.getElementById('activity-feed');
+        if (!feedWrap) return;
+
+        // Remove existing show-more button if present
+        const oldBtn = document.getElementById('show-more-container');
+        if (oldBtn) oldBtn.remove();
+
+        if (!events || events.length === 0) {
+          feedWrap.innerHTML = '<p style="font-size:13px; color:var(--text-muted); padding:10px 0;">No recent activity.</p>';
+          return;
+        }
+
+        const icons = {
+          upload: 'fa-cloud-arrow-up',
+          share: 'fa-share-nodes',
+          download: 'fa-download',
+          delete: 'fa-trash',
+          login: 'fa-right-to-bracket',
+          system: 'fa-gear'
+        };
+
+        const maxActivity = 5;
+        
+        feedWrap.innerHTML = events.map((ev, index) => {
+          const isToday = !ev.time.includes('Yesterday') && !ev.time.includes('days ago');
+          const isHidden = index >= maxActivity ? 'hidden-activity-item' : '';
+          return `
+            <div class="feed-item ${isHidden}" data-is-today="${isToday}">
+              <div class="feed-icon ${ev.type}">
+                <i class="fa-solid ${icons[ev.type] || 'fa-bolt'}"></i>
+              </div>
+              <div class="feed-body">
+                <h4 class="feed-title">${ev.title}</h4>
+                <p class="feed-desc">${ev.description}</p>
+              </div>
+              <span class="feed-time">${ev.time}</span>
+            </div>
+          `;
+        }).join('');
+
+        const totalToday = events.filter(e => !e.time.includes('Yesterday') && !e.time.includes('days ago')).length;
+
+        if (events.length > maxActivity) {
+          const showMoreDiv = document.createElement('div');
+          showMoreDiv.id = 'show-more-container';
+          showMoreDiv.innerHTML = `
+            <button class="show-more-btn" id="btn-show-all-activity">
+              <i class="fa-solid fa-chevron-down"></i> Show More (All 1 Day Activity)
+            </button>
+          `;
+          feedWrap.after(showMoreDiv);
+
+          let isExpanded = false;
+          const btn = document.getElementById('btn-show-all-activity');
+
+          btn.addEventListener('click', function() {
+            isExpanded = !isExpanded;
+            const items = feedWrap.querySelectorAll('.feed-item');
+            
+            if (isExpanded) {
+              items.forEach(el => {
+                el.style.display = 'flex';
+                if (el.classList.contains('hidden-activity-item')) {
+                  el.style.opacity = '0';
+                  el.style.animation = 'fadeIn 0.3s ease forwards';
+                }
+              });
+              this.innerHTML = '<i class="fa-solid fa-chevron-up"></i> Show Less';
+            } else {
+              items.forEach((el, index) => {
+                el.style.display = index < maxActivity ? 'flex' : 'none';
+              });
+              this.innerHTML = '<i class="fa-solid fa-chevron-down"></i> Show More';
+              feedWrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+          });
+        }
+      };
+
+      document.getElementById('btn-send').addEventListener('click', () => {
+        window._chartMode = 'send';
+        document.getElementById('btn-send').classList.add('active');
+        document.getElementById('btn-receive').classList.remove('active');
+        if (window._activityChart) window.renderActivityChart(window._activityChart, 'send');
+      });
+
+      document.getElementById('btn-receive').addEventListener('click', () => {
+        window._chartMode = 'receive';
+        document.getElementById('btn-receive').classList.add('active');
+        document.getElementById('btn-send').classList.remove('active');
+        if (window._activityChart) window.renderActivityChart(window._activityChart, 'receive');
+      });
+
+      // Clear all activity
+      const clearBtn = document.getElementById('clear-activity-btn');
+      if (clearBtn) {
+        clearBtn.addEventListener('click', async () => {
+          if (!confirm("Are you sure you want to clear your entire activity history? This cannot be undone.")) return;
+          
+          try {
+            const email = localStorage.getItem('userEmail');
+            const res = await fetch(`http://127.0.0.1:8000/activity?email=${encodeURIComponent(email)}`, {
+              method: 'DELETE'
+            });
+            
+            if (res.ok) {
+              // Successfully cleared from backend
+              window.renderActivityFeed([]);
+              // Reset the chart too if possible, or just let it be.
+              // Assuming that clearing activity also means the chart should be updated
+              if (window._activityChart) {
+                const empty = {sun:0, mon:0, tue:0, wed:0, thu:0, fri:0, sat:0};
+                window._activityChart = {send: {...empty}, receive: {...empty}, days: window._activityChart.days};
+                window.renderActivityChart(window._activityChart, window._chartMode || 'receive');
+              }
+              // Toast or Alert
+              alert("Activity history cleared successfully.");
+            } else {
+              alert("Failed to clear activity history.");
+            }
+          } catch (err) {
+            console.error("Failed to clear activity", err);
+            alert("Network error. Could not clear activity history.");
+          }
+        });
+      }
+
+    });
+  </script>
 </body>
+
 </html>

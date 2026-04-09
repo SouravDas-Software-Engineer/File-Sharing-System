@@ -49,21 +49,21 @@ document.addEventListener("DOMContentLoaded", () => {
             if (response.ok && data.status === "success") {
                 showMessage("Login Successful ✅", "#10b981");
 
-                // Save the username to unlock the dashboard
-                if (data.username) {
-                    localStorage.setItem("username", data.username);
+                // Cache all profile data from the login response
+                localStorage.setItem('username',       data.username      || '');
+                localStorage.setItem('userEmail',      email);
+                localStorage.setItem('userBio',        data.bio           || '');
+                localStorage.setItem('userJoined',     data.joined_date   || '');
+                localStorage.setItem('userTotalFiles', data.total_files   ?? 0);
+                localStorage.setItem('userFilesSent',  data.files_sent    ?? 0);
+                localStorage.setItem('userFilesRecv',  data.files_received ?? 0);
+                localStorage.setItem('userStorageMB',  data.storage_used_mb ?? 0);
+                if (data.profile_pic_url) {
+                    localStorage.setItem('profilePicUrl', data.profile_pic_url);
                 }
-                if (response.ok) {
-                        localStorage.setItem('username', data.username);
-                                localStorage.setItem('userEmail', emailInput.value); 
-                                
-                                window.location.href = '../Dashboard/index.html';
-                            }
-                // Redirect to dashboard
-                setTimeout(() => {
-                        // Step back one folder, then enter the Dashboard folder
-                        window.location.href = '../Dashboard/index.html';
-                 }, 1000);
+
+                // Redirect immediately (no extra timeout needed)
+                window.location.href = '../Dashboard/index.html';
             } else {
                 // Show specific error from backend if available
                 showMessage(data.detail || "Login Failed", "red");
@@ -91,27 +91,66 @@ document.addEventListener("DOMContentLoaded", () => {
   
   // 2. Apply the saved theme immediately on load
   if (savedTheme === "dark") {
-      document.body.classList.add("dark");
-      document.body.classList.remove("light");
+      document.body.classList.add("dark-mode");
       if(modeBtn) modeBtn.textContent = "🌙";
   } else {
-      document.body.classList.add("light");
-      document.body.classList.remove("dark");
+      document.body.classList.remove("dark-mode");
       if(modeBtn) modeBtn.textContent = "☀️";
   }
 
   // 3. Toggle button clicks update the screen AND the memory
   if(modeBtn) {
       modeBtn.addEventListener("click", function () {
-          document.body.classList.toggle("dark");
-          document.body.classList.toggle("light");
+          document.body.classList.toggle("dark-mode");
 
-          if (document.body.classList.contains("dark")) {
+          if (document.body.classList.contains("dark-mode")) {
               modeBtn.textContent = "🌙";
               localStorage.setItem("fileShareTheme", "dark"); // Save to memory
           } else {
               modeBtn.textContent = "☀️";
               localStorage.setItem("fileShareTheme", "light"); // Save to memory
+          }
+      });
+  }
+
+  // ================= GUEST LOGIN =================
+  const guestBtn = document.getElementById("guestLoginBtn");
+  if (guestBtn) {
+      guestBtn.addEventListener("click", async function () {
+          try {
+              guestBtn.textContent = "Loading...";
+              guestBtn.disabled = true;
+              
+              const response = await fetch("http://127.0.0.1:8000/guest-login", {
+                  method: "POST"
+              });
+              
+              const data = await response.json();
+              if (response.ok && data.status === "success") {
+                  showMessage("Guest session started! ✅", "#10b981");
+
+                  // Cache all profile data
+                  localStorage.setItem('username',       data.username      || '');
+                  localStorage.setItem('userEmail',      data.email);
+                  localStorage.setItem('userBio',        data.bio           || '');
+                  localStorage.setItem('userJoined',     data.joined_date   || '');
+                  localStorage.setItem('userTotalFiles', data.total_files   ?? 0);
+                  localStorage.setItem('userFilesSent',  data.files_sent    ?? 0);
+                  localStorage.setItem('userFilesRecv',  data.files_received ?? 0);
+                  localStorage.setItem('userStorageMB',  data.storage_used_mb ?? 0);
+                  localStorage.setItem('isGuest',        'true');
+                  
+                  window.location.href = '../Dashboard/index.html';
+              } else {
+                  showMessage(data.detail || "Guest Login Failed", "red");
+                  guestBtn.textContent = "Continue as Guest";
+                  guestBtn.disabled = false;
+              }
+          } catch (error) {
+              console.error("Error:", error);
+              showMessage("Server connection failed ❌", "red");
+              guestBtn.textContent = "Continue as Guest";
+              guestBtn.disabled = false;
           }
       });
   }

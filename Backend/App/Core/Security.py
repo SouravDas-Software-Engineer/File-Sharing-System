@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 from jose import JWTError, jwt
-from passlib.context import CryptContext
+import bcrypt
 from fastapi import HTTPException, status
 
 # JWT CONFIG (Real project e eita .env theke asa uchit)
@@ -10,11 +10,18 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 # PASSWORD HASHING SETUP
+<<<<<<< HEAD
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # 1. HASH PASSWORD (Register/Reset somoy use hobe)
+=======
+# We use bcrypt directly to avoid passlib bugs with bcrypt 4.0+
+>>>>>>> dev
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    # bcrypt limits passwords to 72 bytes.
+    pwd_bytes = password.encode('utf-8')[:72]
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(pwd_bytes, salt).decode('utf-8')
 
 # 2. CHECK IF VALUE LOOKS LIKE A HASH
 def is_password_hash(value: str) -> bool:
@@ -22,7 +29,15 @@ def is_password_hash(value: str) -> bool:
 
 # 3. VERIFY PASSWORD (Login somoy use hobe)
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+    pwd_bytes = plain_password.encode('utf-8')[:72]
+    try:
+        return bcrypt.checkpw(pwd_bytes, hashed_password.encode('utf-8'))
+    except ValueError:
+        return False
+
+def is_hashed(password: str) -> bool:
+    """Check if the password string appears to be a bcrypt hash."""
+    return password.startswith(("$2b$", "$2a$", "$2y$")) and len(password) == 60
 
 # 4. VERIFY AND UPGRADE (Legacy plain passwords handle korar jonno)
 async def verify_and_upgrade_password(db, email: str, plain_password: str, stored_password: str) -> bool:
