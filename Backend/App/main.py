@@ -25,6 +25,13 @@ from Routes.user import (
     log_user_event,
     get_user_events,
     get_user_activity_chart,
+    clear_user_events,
+)
+from Routes.friends import (
+    search_user_by_username,
+    send_friend_request,
+    respond_to_friend_request,
+    get_user_friendships,
 )
 from Routes.files import (
     send_password_reset_email,
@@ -97,6 +104,12 @@ class RegisterRequest(BaseModel):
     email: str
     password: str
 
+class FriendActionRequest(BaseModel):
+    email: str
+    target_username: str = None
+    sender_email: str = None
+    action: str = None
+
 class EmailRequest(BaseModel):
     email: str
 
@@ -137,9 +150,11 @@ async def login(request: LoginRequest):
 
 @app.post("/register")
 async def register(request: RegisterRequest, background_tasks: BackgroundTasks):
-    success = await create_user(app.db, request.email, request.password, request.username)
-    if not success:
+    result = await create_user(app.db, request.email, request.password, request.username)
+    if result is False:
         raise HTTPException(status_code=400, detail="Email is already registered.")
+    if isinstance(result, str):
+        raise HTTPException(status_code=400, detail=result)
     background_tasks.add_task(send_welcome_email, request.email)
     return {"message": "User created successfully", "status": "success"}
 
@@ -232,7 +247,10 @@ async def update_profile(
             shutil.copyfileobj(profile_pic.file, buf)
         pic_url = f"/{file_path}"
 
-    if not await update_user_profile(app.db, email, username, bio, pic_url):
+    res = await update_user_profile(app.db, email, username, bio, pic_url)
+    if isinstance(res, str):
+        raise HTTPException(status_code=400, detail=res)
+    if not res:
         raise HTTPException(status_code=500, detail="Failed to update profile")
 
     return {"message": "Profile updated", "username": username, "bio": bio, "profile_pic_url": pic_url}
@@ -415,3 +433,40 @@ async def get_activity(email: str):
     events = await get_user_events(app.db, email, limit=20)
     chart  = await get_user_activity_chart(app.db, email)
     return {"events": events, "chart": chart}
+
+
+@app.delete("/activity")
+async def clear_activity(email: str = Query(...)):
+    """Clear all activity events for a user."""
+    await clear_user_events(app.db, email)
+    return {"message": "Activity history cleared"}
+
+# ─── Friendship Endpoints ──────────────────────────────────────────────────────
+@app.get("/friends/search")
+async def search_friend(username: str, current_email: str):
+    """Find a user by username and check relationship status."""
+    user = await search_user_by_username(app.db, username, current_email)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
+
+@app.get("/friends")
+async def list_friends(email: str):
+    """Get accepted and pending friend requests for a user."""
+    return await get_user_friendships(app.db, email)
+
+@app.post("/friends/request")
+async def friend_request(req: FriendActionRequest):
+    """Send a new friend request."""
+    success, msg = await send_friend_request(app.db, req.email, req.target_username)
+    if not success:
+        raise HTTPException(status_code=400, detail=msg)
+    return {"message": msg}
+
+@app.post("/friends/respond")
+async def friend_respond(req: FriendActionRequest):
+    """Accept or decline an incoming friend request."""
+    success = await respond_to_friend_request(app.db, req.email, req.sender_email, req.action)
+    if not success:
+        raise HTTPException(status_code=400, detail="Could not process request")
+    return {"message": f"Request {req.action}ed"}

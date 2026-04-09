@@ -423,16 +423,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ================= PROFILE PAGE LOGIC =================
   const openEditBtn = document.getElementById('open-edit-modal-btn');
+  const openEditBtn2 = document.getElementById('open-edit-modal-btn-2');
   const editProfileModal = document.getElementById('edit-profile-modal');
   const cancelEditBtn = document.getElementById('cancel-edit-btn');
   const saveProfileBtn = document.getElementById('save-profile-btn');
   const editModalMsg = document.getElementById('edit-modal-msg');
 
-  if (openEditBtn && editProfileModal) {
-    openEditBtn.addEventListener('click', () => {
+  if ((openEditBtn || openEditBtn2) && editProfileModal) {
+    const handleOpenModal = () => {
       document.getElementById('edit-username-input').value = localStorage.getItem('username') || '';
+      const bioInput = document.getElementById('edit-bio-input');
+      if (bioInput) bioInput.value = localStorage.getItem('userBio') || '';
       editProfileModal.classList.add('active');
-    });
+    };
+
+    if (openEditBtn) openEditBtn.addEventListener('click', handleOpenModal);
+    if (openEditBtn2) openEditBtn2.addEventListener('click', handleOpenModal);
 
     cancelEditBtn.addEventListener('click', () => {
       editProfileModal.classList.remove('active');
@@ -471,7 +477,17 @@ document.addEventListener('DOMContentLoaded', () => {
           if (document.getElementById('display-username')) {
               document.getElementById('display-username').textContent = data.username || newUsername;
           }
-          if (data.bio) document.getElementById('profile-bio-display').textContent = data.bio;
+          if (data.bio) {
+              document.getElementById('profile-bio-display').textContent = data.bio;
+              localStorage.setItem('userBio', data.bio);
+          }
+          if (data.profile_pic_url) {
+              const picUrl = `${API_URL}${data.profile_pic_url}`;
+              document.getElementById('profile-img-display').src = picUrl;
+              localStorage.setItem('profilePicUrl', data.profile_pic_url);
+              // Clear the local base64 preview if it exists
+              localStorage.removeItem('profilePic');
+          }
 
           localStorage.setItem('username', data.username || newUsername);
 
@@ -981,16 +997,272 @@ document.addEventListener('DOMContentLoaded', () => {
     loadNotifications();
     initDemoNotifications();
     loadUserProfile();    // then sync live from API and update everything
+    initFriendships();
   }
 
-  // Auto-initialize on dashboard page
+  // Auto-initialize on any page that has dashboard elements
   if (document.getElementById('stats-container') || document.getElementById('recent-files-container')) {
     initializeDashboard();
+  } else {
+    // For non-dashboard pages, still load user profile and notifications for the topbar
+    loadUserProfile();
+    loadNotifications();
+    initFriendships();
   }
 
-  // Also sync profile data on any page (topbar username, profile page fields)
-  if (!document.getElementById('stats-container')) {
-    loadUserProfile();
+  // ================= FRIENDSHIP SYSTEM LOGIC =================
+  function initFriendships() {
+    const friendBar = document.getElementById('friend-bar');
+    const openBtn = document.getElementById('open-friends-btn');
+    const closeBtn = document.getElementById('close-friends-btn');
+    const addTrigger = document.getElementById('add-friend-trigger-btn');
+    const addModal = document.getElementById('add-friend-modal');
+    const closeAddModal = document.getElementById('close-add-friend-modal');
+    const searchInput = document.getElementById('friend-search-input');
+    const confirmSearchBtn = document.getElementById('confirm-search-user-btn');
+
+    if (!friendBar) return;
+
+    // Toggle Sidebar
+    openBtn.addEventListener('click', () => {
+      friendBar.classList.add('open');
+      loadFriendList();
+    });
+    closeBtn.addEventListener('click', () => friendBar.classList.remove('open'));
+
+    // Modal Handle
+    if (addTrigger) {
+      addTrigger.addEventListener('click', () => {
+        addModal.classList.add('active');
+        document.getElementById('search-result-container').innerHTML = '';
+        document.getElementById('add-friend-username-input').value = '';
+      });
+    }
+    if (closeAddModal) closeAddModal.addEventListener('click', () => addModal.classList.remove('active'));
+
+    // Search Friends (Local filter)
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        document.querySelectorAll('.friend-card').forEach(card => {
+          const name = card.querySelector('.friend-name').innerText.toLowerCase();
+          card.style.display = name.includes(term) ? 'flex' : 'none';
+        });
+      });
+    }
+
+    // Search New User (Backend)
+    if (confirmSearchBtn) {
+      confirmSearchBtn.addEventListener('click', searchNewFriend);
+    }
+    
+    // Initial fetch
+    loadFriendList();
+  }
+
+  async function loadFriendList() {
+    const email = localStorage.getItem('userEmail');
+    const container = document.getElementById('friend-list-content');
+    const badge = document.getElementById('friend-request-badge');
+    if (!email || !container) return;
+
+    try {
+      const res = await fetch(`${API_URL}/friends?email=${encodeURIComponent(email)}`);
+      const data = await res.json();
+      
+      const { accepted, incoming, outgoing } = data;
+      
+      if (badge) {
+        if (incoming.length > 0) {
+          badge.innerText = incoming.length;
+          badge.style.display = 'block';
+        } else {
+          badge.style.display = 'none';
+        }
+      }
+
+      let html = '';
+
+      // Incoming Pending Section
+      if (incoming.length > 0) {
+        html += `<div class="friend-section-title">Friend Requests (${incoming.length})</div>`;
+        incoming.forEach(p => {
+          html += `
+            <div class="friend-card">
+              <div class="friend-avatar">${(p.username || 'U').charAt(0).toUpperCase()}</div>
+              <div class="friend-info">
+                <div class="friend-name">${p.username}</div>
+                <div class="friend-status-text">Wants to be friends</div>
+              </div>
+              <div class="friend-actions">
+                <div class="friend-action-btn accept" onclick="respondRequest('${p.email}', 'accept')" title="Accept"><i class="fa-solid fa-check"></i></div>
+                <div class="friend-action-btn decline" onclick="respondRequest('${p.email}', 'decline')" title="Decline"><i class="fa-solid fa-xmark"></i></div>
+              </div>
+            </div>
+          `;
+        });
+      }
+
+      // Outgoing Pending Section
+      if (outgoing.length > 0) {
+        html += `<div class="friend-section-title">Sent Requests (${outgoing.length})</div>`;
+        outgoing.forEach(p => {
+          html += `
+            <div class="friend-card" style="opacity: 0.8;">
+              <div class="friend-avatar">${(p.username || 'U').charAt(0).toUpperCase()}</div>
+              <div class="friend-info">
+                <div class="friend-name">${p.username}</div>
+                <div class="friend-status-text">Waiting for response...</div>
+              </div>
+            </div>
+          `;
+        });
+      }
+
+      // Online Section
+      const online = accepted.filter(f => f.online);
+      html += `<div class="friend-section-title">Online — ${online.length}</div>`;
+      online.forEach(f => {
+        html += `
+          <div class="friend-card">
+            <div class="friend-avatar">
+              ${f.profile_pic ? `<img src="${API_URL}${f.profile_pic}" style="width:100%;height:100%;border-radius:inherit;object-fit:cover;">` : (f.username || 'U').charAt(0).toUpperCase()}
+              <span class="status-dot online"></span>
+            </div>
+            <div class="friend-info">
+              <div class="friend-name">${f.username}</div>
+              <div class="friend-status-text">Active Now</div>
+            </div>
+          </div>
+        `;
+      });
+
+      // Offline Section
+      const offline = accepted.filter(f => !f.online);
+      html += `<div class="friend-section-title">Offline — ${offline.length}</div>`;
+      offline.forEach(f => {
+        html += `
+          <div class="friend-card">
+            <div class="friend-avatar">
+              ${f.profile_pic ? `<img src="${API_URL}${f.profile_pic}" style="width:100%;height:100%;border-radius:inherit;object-fit:cover;filter:grayscale(1);">` : (f.username || 'U').charAt(0).toUpperCase()}
+              <span class="status-dot offline"></span>
+            </div>
+            <div class="friend-info">
+              <div class="friend-name">${f.username}</div>
+              <div class="friend-status-text">Offline</div>
+            </div>
+          </div>
+        `;
+      });
+
+      if (accepted.length === 0 && incoming.length === 0 && outgoing.length === 0) {
+        html = `<div style="text-align:center; padding:40px 20px; color:var(--text-muted);">
+          <i class="fa-solid fa-user-group" style="font-size:30px; margin-bottom:15px; opacity:0.3;"></i>
+          <p style="font-size:13px;">No friends yet. Click "Add New Friend" to start growing your circle!</p>
+        </div>`;
+      }
+
+      container.innerHTML = html;
+      
+      // Update upload modal if it exists
+      renderSuggestedFriends(accepted);
+
+    } catch (e) {
+      console.error("Error loading friends:", e);
+    }
+  }
+
+  async function searchNewFriend() {
+    const username = document.getElementById('add-friend-username-input').value.trim();
+    const resultContainer = document.getElementById('search-result-container');
+    const currentEmail = localStorage.getItem('userEmail');
+    if (!username) return;
+
+    resultContainer.innerHTML = '<p style="font-size:13px; color:var(--text-muted);">Searching...</p>';
+
+    try {
+      const res = await fetch(`${API_URL}/friends/search?username=${encodeURIComponent(username)}&current_email=${encodeURIComponent(currentEmail)}`);
+      if (!res.ok) {
+        resultContainer.innerHTML = '<p style="font-size:13px; color:#ef4444;">User not found.</p>';
+        return;
+      }
+      const user = await res.json();
+      
+      let actionHtml = '';
+      if (user.status === 'none') {
+        actionHtml = `<button class="browse-btn" onclick="sendReq('${user.username}')" style="padding:6px 12px; font-size:12px;">Add Friend</button>`;
+      } else if (user.status === 'outgoing') {
+        actionHtml = `<span style="font-size:12px; color:var(--text-muted);">Request Sent</span>`;
+      } else if (user.status === 'accepted') {
+        actionHtml = `<span style="font-size:12px; color:#22c55e;">Already Friends</span>`;
+      } else if (user.status === 'self') {
+        actionHtml = `<span style="font-size:12px; color:var(--text-muted);">(You)</span>`;
+      }
+
+      resultContainer.innerHTML = `
+        <div class="friend-card" style="background:rgba(0,0,0,0.03); border:1px solid var(--border-glass); margin-top:10px; cursor:default;">
+          <div class="friend-avatar">${user.username.charAt(0).toUpperCase()}</div>
+          <div class="friend-info">
+            <div class="friend-name">${user.username}</div>
+          </div>
+          ${actionHtml}
+        </div>
+      `;
+    } catch (e) {
+      resultContainer.innerHTML = '<p style="font-size:13px; color:#ef4444;">Error searching user.</p>';
+    }
+  }
+
+  window.sendReq = async function(username) {
+    const email = localStorage.getItem('userEmail');
+    try {
+      const res = await fetch(`${API_URL}/friends/request`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, target_username: username })
+      });
+      if (res.ok) {
+        showToast({ title: "Request Sent", message: `Friend request sent to ${username}`, type: "success" });
+        searchNewFriend(); // Refresh result
+        loadFriendList();
+      }
+    } catch (e) { console.error(e); }
+  };
+
+  window.respondRequest = async function(senderEmail, action) {
+    const email = localStorage.getItem('userEmail');
+    try {
+      const res = await fetch(`${API_URL}/friends/respond`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, sender_email: senderEmail, action })
+      });
+      if (res.ok) {
+        showToast({ title: "Friend Added", message: `You are now friends!`, type: "success" });
+        loadFriendList();
+      }
+    } catch (e) { console.error(e); }
+  };
+
+  function renderSuggestedFriends(friends) {
+    const container = document.getElementById('suggested-friends-container');
+    const list = document.getElementById('suggested-friends-list');
+    if (!container || !list) return;
+
+    if (friends.length === 0) {
+      container.style.display = 'none';
+      return;
+    }
+
+    container.style.display = 'block';
+    list.innerHTML = friends.map(f => `
+      <div class="suggested-item" onclick="this.classList.toggle('selected')">
+        <div class="suggested-avatar">
+          ${f.profile_pic ? `<img src="${API_URL}${f.profile_pic}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : f.username.charAt(0).toUpperCase()}
+        </div>
+        <span class="suggested-name">${f.username}</span>
+      </div>
+    `).join('');
   }
 
 });
