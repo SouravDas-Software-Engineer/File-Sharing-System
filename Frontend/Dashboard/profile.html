@@ -712,7 +712,7 @@
             <p class="profile-bio-text" id="profile-bio-display">No bio yet — add one to tell others about yourself.</p>
             <div class="profile-meta-tags">
               <span class="meta-tag"><i class="fa-solid fa-calendar-days"></i> <span id="profile-joined-tag">Joined —</span></span>
-              <span class="meta-tag"><i class="fa-solid fa-circle-check" style="color:#22c55e;"></i> Verified</span>
+              <span class="meta-tag" id="profile-verified-tag"><i class="fa-solid fa-circle-check" style="color:#22c55e;"></i> Verified</span>
               <span class="meta-tag"><i class="fa-solid fa-clock"></i> Active today</span>
             </div>
           </div>
@@ -874,6 +874,7 @@
     </div>
   </div>
 
+  <script src="webrtc.js"></script>
   <script src="script.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -898,13 +899,22 @@
       const fs = localStorage.getItem('userFilesSent');
       const fr = localStorage.getItem('userFilesRecv');
       if (tf != null) document.getElementById('stat-total-files').textContent    = tf;
-      if (fs != null) document.getElementById('stat-files-sent').textContent      = fs;
-      if (fr != null) document.getElementById('stat-files-received').textContent  = fr;
-      document.getElementById('stat-storage-used').textContent = storage;
+      if (fs != null) document.getElementById('stat-files-sent').textContent     = fs;
+      if (fr != null) document.getElementById('stat-files-received').textContent = fr;
+      if (storage)    document.getElementById('stat-storage-used').textContent   = storage;
 
+      // Guest Check for Profile page
+      const isGuest = localStorage.getItem('isGuest') === 'true';
+      if (isGuest) {
+          const editBtn1 = document.getElementById('open-edit-modal-btn');
+          const editBtn2 = document.getElementById('open-edit-modal-btn-2');
+          const verifiedTag = document.getElementById('profile-verified-tag');
+          if (editBtn1) editBtn1.style.display = 'none';
+          if (editBtn2) editBtn2.style.display = 'none';
+          if (verifiedTag) verifiedTag.style.display = 'none';
+      }
 
-
-      // ---- Restore profile pic if saved locally ----
+      // ---- Refresh data silently from back-end to catch any changes ----
       const savedPic = localStorage.getItem('profilePic');
       if (savedPic) {
         document.getElementById('profile-img-display').src = savedPic;

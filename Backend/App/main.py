@@ -2,10 +2,12 @@ import os
 import uuid
 import shutil
 import random
+import asyncio
+from datetime import datetime, timedelta
 from pathlib import Path
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks, File, UploadFile, Form, Query
+from fastapi import FastAPI, HTTPException, BackgroundTasks, File, UploadFile, Form, Query, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -16,6 +18,7 @@ from Routes.user import (
     check_email_exists,
     update_user_password,
     create_user,
+    create_guest_user,
     authenticate_user,
     delete_user_account,
     update_user_profile,
@@ -45,6 +48,24 @@ os.makedirs("uploads/profiles", exist_ok=True)
 os.makedirs("uploads/files",    exist_ok=True)
 
 
+async def cleanup_inactive_guests(db):
+    """Background task to delete guest users who have been offline for 1 hour."""
+    while True:
+        try:
+            one_hour_ago = datetime.utcnow() - timedelta(hours=1)
+            result = await db.users.delete_many({
+                "is_guest": True,
+                "last_active": {"$lt": one_hour_ago}
+            })
+            if result.deleted_count > 0:
+                print(f"[Cleanup] Deleted {result.deleted_count} inactive guest accounts.")
+        except asyncio.CancelledError:
+            break
+        except Exception as e:
+            print(f"[Cleanup] Error deleting inactive guests: {e}")
+        await asyncio.sleep(600)  # Next check in 10 minutes
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     app.mongodb_client = AsyncIOMotorClient(MONGO_URL)
@@ -62,7 +83,11 @@ async def lifespan(app: FastAPI):
                 {"$set": {"password": hashed}}
             )
             
+    # Start guest cleanup task
+    cleanup_task = asyncio.create_task(cleanup_inactive_guests(app.db))
+    
     yield
+    cleanup_task.cancel()
     app.mongodb_client.close()
 
 
@@ -145,6 +170,25 @@ async def login(request: LoginRequest):
         "files_sent":       profile.get("files_sent", 0),
         "files_received":   profile.get("files_received", 0),
         "storage_used_mb":  profile.get("storage_used_mb", 0.0),
+        "is_guest":         profile.get("is_guest", False),
+    }
+
+@app.post("/guest-login")
+async def guest_login():
+    doc = await create_guest_user(app.db)
+    return {
+        "message":          "Guest Login successful",
+        "status":           "success",
+        "username":         doc["username"],
+        "email":            doc["email"],
+        "bio":              doc["bio"],
+        "profile_pic_url":  doc["profile_pic_url"],
+        "joined_date":      doc["joined_date"],
+        "total_files":      0,
+        "files_sent":       0,
+        "files_received":   0,
+        "storage_used_mb":  0.0,
+        "is_guest":         True
     }
 
 
@@ -470,3 +514,55 @@ async def friend_respond(req: FriendActionRequest):
     if not success:
         raise HTTPException(status_code=400, detail="Could not process request")
     return {"message": f"Request {req.action}ed"}
+
+# ─── WebRTC Signaling (WebSockets) ─────────────────────────────────────────────
+class ConnectionManager:
+    def __init__(self):
+        # Maps username to their active WebSocket connection
+        self.active_connections: dict[str, WebSocket] = {}
+
+    async def connect(self, username: str, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections[username] = websocket
+
+    def disconnect(self, username: str):
+        if username in self.active_connections:
+            del self.active_connections[username]
+
+    async def send_personal_message(self, message: dict, username: str):
+        if username in self.active_connections:
+            await self.active_connections[username].send_json(message)
+
+manager = ConnectionManager()
+
+@app.websocket("/ws/{username}")
+async def websocket_endpoint(websocket: WebSocket, username: str):
+    await manager.connect(username, websocket)
+    try:
+        await app.db.users.update_one({"username": username}, {"$set": {"last_active": datetime.utcnow()}})
+    except Exception:
+        pass
+        
+    try:
+        while True:
+            # We expect JSON messages for WebRTC signaling
+            data = await websocket.receive_json()
+            
+            # Extract target username
+            target_username = data.get("target")
+            if not target_username:
+                continue
+                
+            # Forward the message to the target peer
+            await manager.send_personal_message({
+                "type": data.get("type"),
+                "sender": username,
+                "payload": data.get("payload")
+            }, target_username)
+            
+    except WebSocketDisconnect:
+        manager.disconnect(username)
+        try:
+            await app.db.users.update_one({"username": username}, {"$set": {"last_active": datetime.utcnow()}})
+        except Exception:
+            pass

@@ -90,6 +90,36 @@ async def create_user(db, email: str, password: str, username: str = None) -> bo
         await log_user_event(db, email, "login", "Account created", "Welcome to FileShare!")
     return result.inserted_id is not None
 
+async def create_guest_user(db) -> dict:
+    import uuid
+    import random
+    
+    # Generate unique guest username
+    while True:
+        num = random.randint(10000, 99999)
+        username = f"Guest_{num}"
+        if not await db.users.find_one({"username": username}):
+            break
+            
+    guest_email = f"guest_{uuid.uuid4().hex[:8]}@guest.local"
+    
+    doc = {
+        "email": guest_email,
+        "password": "", # No password for guests
+        "username": username,
+        "bio": "I am a guest user.",
+        "profile_pic_url": None,
+        "joined_date": _now().strftime("%B %Y"),
+        "total_files": 0,
+        "files_sent": 0,
+        "files_received": 0,
+        "storage_used_mb": 0.0,
+        "is_guest": True,
+        "last_active": _now()
+    }
+    await db.users.insert_one(doc)
+    return doc
+
 
 async def authenticate_user(db, email: str, password: str):
     from Core.Security import verify_password
@@ -124,6 +154,13 @@ async def delete_user_account(db, email: str) -> bool:
 async def update_user_profile(
     db, email: str, username: str, bio: str, profile_pic_url: str = None
 ) -> bool | str:
+    # Check if guest
+    user = await db.users.find_one({"email": email})
+    if not user:
+        return False
+    if user.get("is_guest") or "@guest.local" in email:
+        return "Guests cannot modify their profile."
+
     # Check if username is taken by another user
     existing = await db.users.find_one({"username": username})
     if existing and existing["email"] != email:
@@ -159,6 +196,7 @@ async def get_user_profile(db, email: str) -> dict | None:
         "files_sent":      doc.get("files_sent", 0),
         "files_received":  doc.get("files_received", 0),
         "storage_used_mb": doc.get("storage_used_mb", 0.0),
+        "is_guest":        doc.get("is_guest", False),
     }
 
 

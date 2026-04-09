@@ -112,4 +112,46 @@ document.addEventListener("DOMContentLoaded", () => {
           }
       });
   }
+
+  // ================= GUEST LOGIN =================
+  const guestBtn = document.getElementById("guestLoginBtn");
+  if (guestBtn) {
+      guestBtn.addEventListener("click", async function () {
+          try {
+              guestBtn.textContent = "Loading...";
+              guestBtn.disabled = true;
+              
+              const response = await fetch("http://127.0.0.1:8000/guest-login", {
+                  method: "POST"
+              });
+              
+              const data = await response.json();
+              if (response.ok && data.status === "success") {
+                  showMessage("Guest session started! ✅", "#10b981");
+
+                  // Cache all profile data
+                  localStorage.setItem('username',       data.username      || '');
+                  localStorage.setItem('userEmail',      data.email);
+                  localStorage.setItem('userBio',        data.bio           || '');
+                  localStorage.setItem('userJoined',     data.joined_date   || '');
+                  localStorage.setItem('userTotalFiles', data.total_files   ?? 0);
+                  localStorage.setItem('userFilesSent',  data.files_sent    ?? 0);
+                  localStorage.setItem('userFilesRecv',  data.files_received ?? 0);
+                  localStorage.setItem('userStorageMB',  data.storage_used_mb ?? 0);
+                  localStorage.setItem('isGuest',        'true');
+                  
+                  window.location.href = '../Dashboard/index.html';
+              } else {
+                  showMessage(data.detail || "Guest Login Failed", "red");
+                  guestBtn.textContent = "Continue as Guest";
+                  guestBtn.disabled = false;
+              }
+          } catch (error) {
+              console.error("Error:", error);
+              showMessage("Server connection failed ❌", "red");
+              guestBtn.textContent = "Continue as Guest";
+              guestBtn.disabled = false;
+          }
+      });
+  }
 }); 

@@ -199,9 +199,22 @@
         <p>Or click to browse your device</p>
         <input type="file" id="file-input" multiple>
         <button class="browse-btn" id="browse-btn"><i class="fa-solid fa-folder-open"></i> Browse Files</button>
-        <button class="browse-btn" id="start-upload-btn" style="display:none; background:linear-gradient(135deg, #a855f7, #6366f1); margin-top: 10px;">
-          <i class="fa-solid fa-paper-plane"></i> Send Files
-        </button>
+        
+        <div id="upload-actions" style="display:none; flex-direction:column; gap:10px; margin-top: 15px;">
+          <button class="browse-btn" id="start-upload-btn" style="background:linear-gradient(135deg, #a855f7, #6366f1); width:100%;">
+            <i class="fa-solid fa-cloud-arrow-up"></i> Upload to Cloud
+          </button>
+          
+          <div style="border-top: 1px dashed var(--border-glass); margin: 5px 0;"></div>
+          
+          <select id="p2p-target-username" style="padding:10px; border-radius:8px; border:1px solid var(--border-glass); background:var(--bg-glass); color:var(--text-main); font-family: inherit; width: 100%;">
+            <option value="">Select a Friend...</option>
+          </select>
+          <input class="guest-p2p" type="text" id="p2p-target-guest" placeholder="Enter Recipient's Username" style="display:none; padding:10px; border-radius:8px; border:1px solid var(--border-glass); background:var(--bg-glass); color:var(--text-main); font-family: inherit; width: 100%;" />
+          <button class="browse-btn" id="start-p2p-btn" style="background:linear-gradient(135deg, #10b981, #059669); width:100%;">
+            <i class="fa-solid fa-bolt"></i> Send Directly (P2P)
+          </button>
+        </div>
         <div class="upload-progress" id="upload-progress" style="display:none;">
           <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
           <span id="progress-text">0%</span>
@@ -211,10 +224,6 @@
 
         <!-- Suggested Friends for quick sharing -->
         <div class="suggested-friends" id="suggested-friends-container" style="display:none; margin-top:20px;">
-          <h4 style="font-size:12px; color:var(--text-muted); text-transform:uppercase; margin-bottom:10px;">Send to friends</h4>
-          <div class="suggested-list" id="suggested-friends-list">
-            <!-- Dynamically populated -->
-          </div>
         </div>
       </div>
     </div>
@@ -232,6 +241,10 @@
         <h3 style="margin-bottom:8px; font-weight:700;">Add New Friend</h3>
         <p style="font-size:13px; color:var(--text-muted); margin-bottom:20px;">Search for a user by their username</p>
         <div class="form-group" style="text-align:left;">
+          <div class="greeting-container" style="display:flex; align-items:center; gap:10px;">
+            <div class="user-greeting" id="display-name" style="font-size: 20px; font-weight: 600;">Welcome</div>
+            <span id="guest-badge" style="display:none; background: #ef4444; color: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; text-transform: uppercase; font-weight: bold;">Guest</span>
+          </div>
           <label style="font-size:12px; font-weight:600; color:var(--text-muted); margin-bottom:6px; display:block;">USERNAME</label>
           <input type="text" id="add-friend-username-input" class="text-input" placeholder="e.g. sourav123">
         </div>
@@ -243,6 +256,45 @@
     </div>
   </div>
 
+  <!-- P2P Receive Modal -->
+  <div class="modal-overlay" id="p2p-receive-modal">
+    <div class="modal-content upload-modal-content" style="width:400px; padding-top:40px; text-align:center;">
+      <i class="fa-solid fa-bolt" style="font-size:40px; color:#10b981; margin-bottom:15px;"></i>
+      <h3 style="margin-bottom:8px; font-weight:700;">Incoming File Transfer</h3>
+      <p style="font-size:13px; color:var(--text-muted); margin-bottom:20px;" id="p2p-sender-text">Someone wants to send you a file.</p>
+      
+      <div style="display:flex; gap:10px; justify-content:center;" id="p2p-action-buttons">
+        <button class="btn-primary" id="accept-p2p-btn" style="background:#10b981; flex:1;">Accept</button>
+        <button class="btn-primary" id="reject-p2p-btn" style="background:#ef4444; flex:1;">Reject</button>
+      </div>
+      
+      <div class="upload-progress" id="p2p-receive-progress" style="display:none; margin-top:20px;">
+        <div class="progress-bar"><div class="progress-fill" id="p2p-receive-fill"></div></div>
+        <span id="p2p-receive-pct">0%</span>
+        <div id="p2p-receive-status" style="font-size:12px; color:var(--text-muted); margin-top:8px;">Transferring...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Guest Upgrade Modal -->
+  <div class="modal-overlay" id="guest-upgrade-modal">
+    <div class="modal-content upload-modal-content" style="width:400px; padding-top:40px;">
+      <button class="modal-close-btn" id="close-guest-upgrade-modal"><i class="fa-solid fa-xmark"></i></button>
+      <div style="text-align:center;">
+        <i class="fa-solid fa-star" style="font-size:40px; color:#f59e0b; margin-bottom:15px;"></i>
+        <h3 style="margin-bottom:8px; font-weight:700;">File Sent Successfully!</h3>
+        <p style="font-size:13px; color:var(--text-muted); margin-bottom:20px;">You are currently using a temporary Guest Account. Upgrade to a full account to save your files permanently, add friends, and claim a personalized username!</p>
+        <button class="btn-primary" onclick="window.location.href='../Signup page/index.html'" style="width:100%; margin-top:10px; height:45px; justify-content:center; display:flex; background: linear-gradient(135deg, #d946ef, #a855f7);">
+          <i class="fa-solid fa-user-plus"></i> Create Full Account
+        </button>
+        <button id="dismiss-upgrade-btn" style="background:transparent; border:none; color:var(--text-muted); font-size:12px; margin-top:15px; cursor:pointer; text-decoration:underline;">
+          Maybe Later
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="webrtc.js"></script>
   <script src="script.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {

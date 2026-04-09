@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // If someone tries to access this page directly without an OTP, send them back
     if (!email || !otp) {
         alert("Unauthorized access. Please verify your email first.");
-        window.location.href = "index.html"; 
+        window.location.href = "../index.html"; 
     }
 
   // ================= THEME MEMORY LOGIC =================
@@ -68,7 +68,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (response.ok) {
                 alert("Password changed successfully! You can now log in.");
-                window.location.href = "/Frontend/Login page/index.html"; 
+                window.location.href = "../../Login page/index.html"; 
             } else {
                 const data = await response.json();
                 alert("Error: " + data.detail);

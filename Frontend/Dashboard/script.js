@@ -2,6 +2,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const API_URL = "http://127.0.0.1:8000";
   const dashboardContainer = document.querySelector('.dashboard');
+  
+  // ================= GUEST ROLE CHECK =================
+  const isGuest = localStorage.getItem('isGuest') === 'true';
+
+  // ================= GUEST UPGRADE MODAL =================
+  const guestUpgradeModal = document.getElementById('guest-upgrade-modal');
+  const closeGuestUpgradeBtn = document.getElementById('close-guest-upgrade-modal');
+  const dismissUpgradeBtn = document.getElementById('dismiss-upgrade-btn');
+  
+  if (guestUpgradeModal) {
+      const closeUpgradeModal = () => guestUpgradeModal.classList.remove('active');
+      if (closeGuestUpgradeBtn) closeGuestUpgradeBtn.addEventListener('click', closeUpgradeModal);
+      if (dismissUpgradeBtn) dismissUpgradeBtn.addEventListener('click', closeUpgradeModal);
+  }
 
   // ================= TOAST NOTIFICATION SYSTEM =================
   const toastContainer = document.createElement('div');
@@ -133,6 +147,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (displayUsername && storedUsername) displayUsername.textContent = storedUsername;
   if (profilePageName && storedUsername) profilePageName.textContent = storedUsername;
+  
+  const displayNameWelcome = document.getElementById('display-name');
+  if (displayNameWelcome && storedUsername) displayNameWelcome.textContent = `Welcome, ${storedUsername}`;
+
+  const guestBadge = document.getElementById('guest-badge');
+  if (guestBadge && isGuest) {
+      guestBadge.style.display = 'inline-block';
+  }
+
+  const openFriendsBtn = document.getElementById('open-friends-btn');
+  if (isGuest && openFriendsBtn) {
+      openFriendsBtn.style.display = 'none';
+  }
 
   // ================= PROFILE DROPDOWN LOGIC =================
   const profileBtn = document.getElementById('profile-btn');
@@ -166,7 +193,16 @@ document.addEventListener('DOMContentLoaded', () => {
       const res = await fetch(`${API_URL}/notifications?email=${encodeURIComponent(email)}`);
       if (res.ok) {
         const data = await res.json();
-        renderNotifications(data.notifications || []);
+        const notifications = data.notifications || [];
+        if (isGuest) {
+            notifications.unshift({
+                type: 'system',
+                title: 'Limited Guest Mode',
+                message: 'Create a full account to save files, get a permanent username, and add friends! <br><a href="../Signup page/index.html" style="display:inline-block; margin-top:8px; color:#4facfe; font-weight:bold; text-decoration:underline;">Sign Up Now</a>',
+                time: 'Just now'
+            });
+        }
+        renderNotifications(notifications);
       }
     } catch (e) { console.error('Failed to load notifications', e); }
   }
@@ -614,6 +650,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  window.pendingUploadData = null;
   let pendingUploadData = null;
 
   function handleFiles(files) {
@@ -646,26 +683,84 @@ document.addEventListener('DOMContentLoaded', () => {
     if (userEmail) formData.append('email', userEmail);
 
     pendingUploadData = { formData, files };
+    window.pendingUploadData = pendingUploadData;
     
-    // Switch browse button for send button
-    const startUploadBtn = document.getElementById('start-upload-btn');
+    // Show upload and P2P actions
+    const uploadActions = document.getElementById('upload-actions');
     const bBtn = document.getElementById('browse-btn');
-    if (startUploadBtn) {
-      startUploadBtn.style.display = 'flex';
+    
+    // Also show the target username select for P2P
+    const p2pTargetSelect = document.getElementById('p2p-target-username');
+    const p2pTargetInput = document.getElementById('p2p-target-guest');
+    
+    if (isGuest) {
+        if (p2pTargetSelect) p2pTargetSelect.style.display = 'none';
+        if (p2pTargetInput) p2pTargetInput.style.display = 'block';
+    } else {
+        if (p2pTargetInput) p2pTargetInput.style.display = 'none';
+        if (p2pTargetSelect) p2pTargetSelect.style.display = 'block';
+    }
+
+    if (uploadActions) {
+      uploadActions.style.display = 'flex';
       if (bBtn) bBtn.style.display = 'none';
     }
   }
 
   // Handle the manual Send button click
   const startUploadBtn = document.getElementById('start-upload-btn');
-  if (startUploadBtn) {
+  const startP2pBtn = document.getElementById('start-p2p-btn');
+  const uploadActions = document.getElementById('upload-actions');
+  
+  // Hide cloud upload for guests completely
+  if (isGuest && startUploadBtn) {
+      startUploadBtn.style.display = 'none';
+  }
+
+  if (startUploadBtn && !isGuest) {
     startUploadBtn.addEventListener('click', () => {
       if (pendingUploadData) {
         uploadFiles(pendingUploadData.formData, pendingUploadData.files);
-        startUploadBtn.style.display = 'none';
+        if (uploadActions) uploadActions.style.display = 'none';
         const bBtn = document.getElementById('browse-btn');
         if (bBtn) bBtn.style.display = 'flex';
         pendingUploadData = null;
+        window.pendingUploadData = null;
+      }
+    });
+  }
+
+  if (startP2pBtn) {
+    startP2pBtn.addEventListener('click', () => {
+      if (pendingUploadData) {
+        let targetUsername;
+        if (isGuest) {
+            targetUsername = document.getElementById('p2p-target-guest').value.trim();
+        } else {
+            targetUsername = document.getElementById('p2p-target-username').value.trim();
+            if (!targetUsername) {
+              showToast({title: 'Error', message: 'Please select a friend for P2P transfer', type: 'error'});
+              return;
+            }
+        }
+        
+        if (!targetUsername) {
+           showToast({title: 'Error', message: 'Target username is required!', type: 'error'});
+           return;
+        }
+        
+        // Call the WebRTC start function
+        if (window.startP2PTransfer) {
+          window.startP2PTransfer(targetUsername, pendingUploadData.files);
+        } else {
+          showToast({title: 'Error', message: 'WebRTC system not initialized', type: 'error'});
+        }
+        
+        if (uploadActions) uploadActions.style.display = 'none';
+        const bBtn = document.getElementById('browse-btn');
+        if (bBtn) bBtn.style.display = 'flex';
+        pendingUploadData = null;
+        window.pendingUploadData = null;
       }
     });
   }
@@ -1245,24 +1340,15 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   function renderSuggestedFriends(friends) {
-    const container = document.getElementById('suggested-friends-container');
-    const list = document.getElementById('suggested-friends-list');
-    if (!container || !list) return;
-
-    if (friends.length === 0) {
-      container.style.display = 'none';
-      return;
+    const p2pSelect = document.getElementById('p2p-target-username');
+    if (p2pSelect) {
+      if (friends.length === 0) {
+        p2pSelect.innerHTML = '<option value="">No friends added yet</option>';
+      } else {
+        p2pSelect.innerHTML = '<option value="">Select a Friend...</option>' + 
+          friends.map(f => `<option value="${f.username}">${f.username}</option>`).join('');
+      }
     }
-
-    container.style.display = 'block';
-    list.innerHTML = friends.map(f => `
-      <div class="suggested-item" onclick="this.classList.toggle('selected')">
-        <div class="suggested-avatar">
-          ${f.profile_pic ? `<img src="${API_URL}${f.profile_pic}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : f.username.charAt(0).toUpperCase()}
-        </div>
-        <span class="suggested-name">${f.username}</span>
-      </div>
-    `).join('');
   }
 
 });
