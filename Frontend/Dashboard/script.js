@@ -559,6 +559,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const closeModal = () => {
+      // Don't close while an upload is in progress
+      const prog = document.getElementById('upload-progress');
+      if (prog && prog.style.display === 'block') return;
       uploadModal.classList.remove('active');
       const successList = document.getElementById('upload-success-list');
       if (successList) successList.innerHTML = '';
@@ -579,48 +582,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ================= RECEIVE MODAL LOGIC =================
-  const receiveFilesBtn = document.getElementById('receive-files-btn');
-  const receiveModal = document.getElementById('receive-modal');
-  const closeReceiveModal = document.getElementById('close-receive-modal');
-  const confirmReceiveBtn = document.getElementById('confirm-receive-btn');
-
-  if (receiveFilesBtn && receiveModal && closeReceiveModal) {
-    receiveFilesBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      receiveModal.classList.add('active');
-    });
-
-    const closeRecvModal = () => {
-      receiveModal.classList.remove('active');
-      const input = document.getElementById('receive-link-input');
-      if (input) input.value = '';
-    };
-
-    closeReceiveModal.addEventListener('click', closeRecvModal);
-
-    receiveModal.addEventListener('click', (e) => {
-      if (e.target === receiveModal) closeRecvModal();
-    });
-
-    if (confirmReceiveBtn) {
-      confirmReceiveBtn.addEventListener('click', () => {
-        showToast({
-          title: 'Coming Soon',
-          message: 'The direct receive feature is currently under development.',
-          type: 'info'
-        });
-        setTimeout(closeRecvModal, 1500);
-      });
-    }
-
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && receiveModal.classList.contains('active')) {
-        closeRecvModal();
-      }
-    });
-  }
-
   // ================= DRAG AND DROP UPLOAD =================
   const uploadDropzone = document.getElementById('upload-dropzone');
   const fileInput = document.getElementById('file-input');
@@ -630,9 +591,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const progressText = document.getElementById('progress-text');
 
   if (uploadDropzone) {
-    browseBtn.addEventListener('click', () => fileInput.click());
+    browseBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      fileInput.click();
+    });
 
     fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
+
+    // Stop all clicks inside upload-actions from bubbling to dropzone
+    const uploadActionsDiv = document.getElementById('upload-actions');
+    if (uploadActionsDiv) {
+      uploadActionsDiv.addEventListener('click', (e) => e.stopPropagation());
+    }
 
     uploadDropzone.addEventListener('dragover', (e) => {
       e.preventDefault();
@@ -710,15 +680,153 @@ document.addEventListener('DOMContentLoaded', () => {
   // Handle the manual Send button click
   const startUploadBtn = document.getElementById('start-upload-btn');
   const startP2pBtn = document.getElementById('start-p2p-btn');
+  const startOfflineBtn = document.getElementById('start-offline-btn');
   const uploadActions = document.getElementById('upload-actions');
-  
-  // Hide cloud upload for guests completely
-  if (isGuest && startUploadBtn) {
-      startUploadBtn.style.display = 'none';
+  const sendBox = document.getElementById('send-box');
+
+  // Hide cloud upload & send-box for guests
+  if (isGuest && startUploadBtn) startUploadBtn.style.display = 'none';
+  if (isGuest && sendBox) sendBox.style.display = 'none';
+
+  // ================= SEND BOX TAB SWITCHING =================
+  const sendTabs = document.querySelectorAll('.send-tab');
+  const sendPanels = document.querySelectorAll('.send-tab-content');
+
+  sendTabs.forEach(tab => {
+    tab.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const target = tab.dataset.tab;
+      sendTabs.forEach(t => t.classList.remove('active'));
+      sendPanels.forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      const panel = document.getElementById(`send-panel-${target}`);
+      if (panel) panel.classList.add('active');
+    });
+  });
+
+  // ================= LIVE USER SEARCH =================
+  let searchSelectedUser = null; // { username, email, profile_pic }
+  let searchTimeout = null;
+  const searchInput = document.getElementById('offline-recipient-username');
+  const searchResults = document.getElementById('live-search-results');
+  const selectedCard = document.getElementById('selected-user-card');
+
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      e.stopPropagation();
+      const q = searchInput.value.trim();
+      if (q.length < 1) {
+        if (searchResults) searchResults.style.display = 'none';
+        return;
+      }
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => liveSearchUsers(q), 300);
+    });
+
+    searchInput.addEventListener('click', (e) => e.stopPropagation());
   }
 
+  async function liveSearchUsers(query) {
+    const email = localStorage.getItem('userEmail');
+    if (!email) return;
+    try {
+      const res = await fetch(`${API_URL}/users/search?q=${encodeURIComponent(query)}&email=${encodeURIComponent(email)}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      const users = data.results || [];
+
+      if (!searchResults) return;
+
+      if (users.length === 0) {
+        searchResults.innerHTML = '<div class="live-search-empty">No users found</div>';
+        searchResults.style.display = 'block';
+        return;
+      }
+
+      searchResults.innerHTML = users.map(u => {
+        const pic = u.profile_pic
+          ? `<img src="${API_URL}/${u.profile_pic}" alt="${u.username}" />`
+          : `<img src="https://ui-avatars.com/api/?name=${encodeURIComponent(u.username)}&background=4facfe&color=fff&size=30" alt="${u.username}" />`;
+        return `
+          <div class="live-search-item" data-username="${u.username}" data-email="${u.email}" data-pic="${u.profile_pic || ''}">
+            ${pic}
+            <div>
+              <div class="live-search-name">${u.username}</div>
+              <div class="live-search-email">${u.email}</div>
+            </div>
+          </div>`;
+      }).join('');
+
+      searchResults.style.display = 'block';
+
+      // Click handler for each result
+      searchResults.querySelectorAll('.live-search-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+          e.stopPropagation();
+          searchSelectedUser = {
+            username: item.dataset.username,
+            email: item.dataset.email,
+            profile_pic: item.dataset.pic,
+          };
+          showSelectedUser(searchSelectedUser);
+          searchResults.style.display = 'none';
+          searchInput.value = '';
+        });
+      });
+
+    } catch (e) {
+      console.error('Live search failed', e);
+    }
+  }
+
+  function showSelectedUser(user) {
+    if (!selectedCard) return;
+    const pic = user.profile_pic
+      ? `<img src="${API_URL}/${user.profile_pic}" alt="${user.username}" />`
+      : `<img src="https://ui-avatars.com/api/?name=${encodeURIComponent(user.username)}&background=4facfe&color=fff&size=32" alt="${user.username}" />`;
+    selectedCard.innerHTML = `
+      ${pic}
+      <div class="selected-user-info">
+        <div class="selected-user-name">${user.username}</div>
+        <div class="selected-user-email">${user.email}</div>
+      </div>
+      <button class="selected-user-clear" title="Clear"><i class="fa-solid fa-xmark"></i></button>`;
+    selectedCard.style.display = 'flex';
+
+    selectedCard.querySelector('.selected-user-clear').addEventListener('click', (e) => {
+      e.stopPropagation();
+      searchSelectedUser = null;
+      selectedCard.style.display = 'none';
+    });
+  }
+
+  // ================= GET TARGET USERNAME (from active tab) =================
+  function getTargetUsername() {
+    const activeTab = document.querySelector('.send-tab.active');
+    if (!activeTab) return null;
+
+    if (activeTab.dataset.tab === 'friends') {
+      // Friends tab
+      if (isGuest) {
+        const guestInput = document.getElementById('p2p-target-guest');
+        return guestInput ? guestInput.value.trim() : null;
+      }
+      const select = document.getElementById('p2p-target-username');
+      return select ? select.value.trim() : null;
+    } else {
+      // Search tab → use selected user card
+      if (searchSelectedUser) {
+        return searchSelectedUser.username;
+      }
+      return null;
+    }
+  }
+
+  // ================= CLOUD UPLOAD =================
   if (startUploadBtn && !isGuest) {
-    startUploadBtn.addEventListener('click', () => {
+    startUploadBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
       if (pendingUploadData) {
         uploadFiles(pendingUploadData.formData, pendingUploadData.files);
         if (uploadActions) uploadActions.style.display = 'none';
@@ -730,40 +838,258 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // ================= P2P SEND =================
   if (startP2pBtn) {
-    startP2pBtn.addEventListener('click', () => {
-      if (pendingUploadData) {
-        let targetUsername;
-        if (isGuest) {
-            targetUsername = document.getElementById('p2p-target-guest').value.trim();
-        } else {
-            targetUsername = document.getElementById('p2p-target-username').value.trim();
-            if (!targetUsername) {
-              showToast({title: 'Error', message: 'Please select a friend for P2P transfer', type: 'error'});
-              return;
-            }
-        }
-        
-        if (!targetUsername) {
-           showToast({title: 'Error', message: 'Target username is required!', type: 'error'});
-           return;
-        }
-        
-        // Call the WebRTC start function
-        if (window.startP2PTransfer) {
-          window.startP2PTransfer(targetUsername, pendingUploadData.files);
-        } else {
-          showToast({title: 'Error', message: 'WebRTC system not initialized', type: 'error'});
-        }
-        
-        if (uploadActions) uploadActions.style.display = 'none';
-        const bBtn = document.getElementById('browse-btn');
-        if (bBtn) bBtn.style.display = 'flex';
-        pendingUploadData = null;
-        window.pendingUploadData = null;
+    startP2pBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!pendingUploadData) return;
+
+      const target = getTargetUsername();
+      if (!target) {
+        showToast({title: 'Error', message: 'Select a user to send to', type: 'error'});
+        return;
       }
+
+      if (window.startP2PTransfer) {
+        window.startP2PTransfer(target, pendingUploadData.files);
+      } else {
+        showToast({title: 'Error', message: 'WebRTC system not initialized', type: 'error'});
+      }
+
+      if (uploadActions) uploadActions.style.display = 'none';
+      const bBtn = document.getElementById('browse-btn');
+      if (bBtn) bBtn.style.display = 'flex';
+      pendingUploadData = null;
+      window.pendingUploadData = null;
     });
   }
+
+  // ================= OFFLINE CHUNKED TRANSFER =================
+  const CHUNK_SIZE = 5 * 1024 * 1024; // 5 MB
+  const MAX_TRANSFER_SIZE = 100 * 1024 * 1024; // 100 MB
+
+  async function uploadChunkedTransfer(file, recipientUsername) {
+    if (file.size > MAX_TRANSFER_SIZE) {
+      showToast({
+        title: 'File Too Large',
+        message: `Max offline transfer size is 100 MB. Use P2P for larger files.`,
+        type: 'error', duration: 5000
+      });
+      return;
+    }
+
+    const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+    const senderEmail = localStorage.getItem('userEmail');
+
+    // Show progress
+    const uploadProgress = document.getElementById('upload-progress');
+    const progressFill = document.getElementById('progress-fill');
+    const progressText = document.getElementById('progress-text');
+    if (uploadProgress) uploadProgress.style.display = 'block';
+    if (progressFill) progressFill.style.width = '0%';
+    if (progressText) progressText.textContent = 'Initializing...';
+
+    try {
+      console.log('[Transfer] Step 1: Init', { file: file.name, recipientUsername, totalChunks });
+      // Step 1: Init transfer
+      const initRes = await fetch(`${API_URL}/transfer/init`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sender_email: senderEmail,
+          recipient_username: recipientUsername,
+          filename: file.name,
+          file_size: file.size,
+          total_chunks: totalChunks,
+        })
+      });
+
+      if (!initRes.ok) {
+        const err = await initRes.json();
+        throw new Error(err.detail || 'Failed to initialize transfer');
+      }
+
+      const { transfer_id } = await initRes.json();
+      console.log('[Transfer] Step 1 OK, transfer_id:', transfer_id);
+      if (progressText) progressText.textContent = 'Uploading...';
+
+      // Step 2: Upload chunks
+      for (let i = 0; i < totalChunks; i++) {
+        const start = i * CHUNK_SIZE;
+        const chunk = file.slice(start, start + CHUNK_SIZE);
+
+        const form = new FormData();
+        form.append('sender_email', senderEmail);
+        form.append('chunk_index', i);
+        form.append('chunk', chunk, `chunk_${i}`);
+
+        console.log(`[Transfer] Uploading chunk ${i + 1}/${totalChunks}`);
+        const chunkRes = await fetch(`${API_URL}/transfer/chunk/${transfer_id}`, {
+          method: 'POST',
+          body: form,
+        });
+
+        if (!chunkRes.ok) {
+          const err = await chunkRes.json();
+          throw new Error(err.detail || `Chunk ${i} upload failed`);
+        }
+        console.log(`[Transfer] Chunk ${i + 1} OK`);
+
+        const pct = Math.round(((i + 1) / totalChunks) * 100);
+        if (progressFill) progressFill.style.width = pct + '%';
+        if (progressText) progressText.textContent = `Uploading... ${pct}%`;
+      }
+
+      // Step 3: Complete
+      console.log('[Transfer] Step 3: Complete');
+      if (progressText) progressText.textContent = 'Assembling...';
+      const completeRes = await fetch(
+        `${API_URL}/transfer/complete/${transfer_id}?email=${encodeURIComponent(senderEmail)}`,
+        { method: 'POST' }
+      );
+
+      if (!completeRes.ok) {
+        const err = await completeRes.json();
+        throw new Error(err.detail || 'Failed to complete transfer');
+      }
+
+      console.log('[Transfer] Complete OK!');
+      if (progressText) progressText.textContent = 'Sent successfully!';
+      showToast({
+        title: 'File Sent!',
+        message: `"${file.name}" will be delivered to ${recipientUsername} when they log in.`,
+        type: 'success', duration: 5000
+      });
+
+      loadNotifications();
+      loadUserProfile();
+
+      setTimeout(() => {
+        if (uploadProgress) uploadProgress.style.display = 'none';
+      }, 2000);
+
+    } catch (error) {
+      console.error('[Transfer] Error:', error);
+      const msg = error?.message || String(error) || 'Unknown error';
+      showToast({ title: 'Transfer Failed', message: msg, type: 'error', duration: 8000 });
+      if (uploadProgress) uploadProgress.style.display = 'none';
+    }
+  }
+
+  // Send Server button handler
+  if (startOfflineBtn && !isGuest) {
+    startOfflineBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!pendingUploadData) return;
+
+      const target = getTargetUsername();
+      if (!target) {
+        showToast({ title: 'Error', message: 'Select a user first (from Friends or Search)', type: 'error' });
+        return;
+      }
+
+      const file = pendingUploadData.files[0];
+      uploadChunkedTransfer(file, target);
+
+      if (uploadActions) uploadActions.style.display = 'none';
+      const bBtn = document.getElementById('browse-btn');
+      if (bBtn) bBtn.style.display = 'flex';
+      pendingUploadData = null;
+      window.pendingUploadData = null;
+    });
+  }
+
+  // ================= INCOMING TRANSFERS INBOX =================
+  async function loadIncomingTransfers() {
+    const email = localStorage.getItem('userEmail');
+    if (!email || isGuest) return;
+
+    try {
+      const res = await fetch(`${API_URL}/transfer/incoming?email=${encodeURIComponent(email)}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      const transfers = data.transfers || [];
+
+      // Update inbox badge
+      const inboxBadge = document.getElementById('inbox-badge');
+      if (inboxBadge) {
+        if (transfers.length > 0) {
+          inboxBadge.textContent = transfers.length;
+          inboxBadge.style.display = 'flex';
+        } else {
+          inboxBadge.style.display = 'none';
+        }
+      }
+
+      // Render list
+      const listEl = document.getElementById('transfer-inbox-list');
+      if (!listEl) return;
+
+      if (transfers.length === 0) {
+        listEl.innerHTML = `
+          <div class="transfer-inbox-empty">
+            <i class="fa-solid fa-box-open"></i>
+            <p>No pending transfers.<br>Files sent to you will appear here.</p>
+          </div>`;
+        return;
+      }
+
+      listEl.innerHTML = transfers.map(t => `
+        <div class="transfer-item-card" data-transfer-id="${t.id}">
+          <div class="transfer-item-icon">
+            <i class="fa-solid fa-file-arrow-down"></i>
+          </div>
+          <div class="transfer-item-info">
+            <div class="transfer-item-name" title="${t.filename}">${t.filename}</div>
+            <div class="transfer-item-meta">
+              <span>From <strong>${t.sender_username}</strong></span>
+              <span class="separator"></span>
+              <span>${t.size_str}</span>
+              <span class="separator"></span>
+              <span>${t.sent_at}</span>
+            </div>
+          </div>
+          <div class="transfer-item-actions">
+            <button class="transfer-accept-btn" title="Accept & Download" onclick="acceptTransfer('${t.id}', this)">
+              <i class="fa-solid fa-check"></i>
+            </button>
+            <button class="transfer-decline-btn" title="Decline" onclick="declineTransfer('${t.id}', this)">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+        </div>`).join('');
+
+    } catch (e) {
+      console.error('Failed to load incoming transfers', e);
+    }
+  }
+
+  // Receive button → open inbox
+  const receiveFilesBtn = document.getElementById('receive-files-btn');
+  const transferInboxModal = document.getElementById('transfer-inbox-modal');
+  const closeTransferInbox = document.getElementById('close-transfer-inbox');
+
+  if (receiveFilesBtn && transferInboxModal) {
+    receiveFilesBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (isGuest) {
+        showToast({ title: 'Guest Mode', message: 'Create a full account to receive offline transfers.', type: 'info' });
+        return;
+      }
+      loadIncomingTransfers();
+      transferInboxModal.classList.add('active');
+    });
+  }
+
+  if (closeTransferInbox && transferInboxModal) {
+    closeTransferInbox.addEventListener('click', () => transferInboxModal.classList.remove('active'));
+    transferInboxModal.addEventListener('click', (e) => {
+      if (e.target === transferInboxModal) transferInboxModal.classList.remove('active');
+    });
+  }
+
+  // Expose globally
+  window.loadIncomingTransfers = loadIncomingTransfers;
 
   function uploadFiles(formData, files) {
     const fileCount = files.length;
@@ -1093,6 +1419,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initDemoNotifications();
     loadUserProfile();    // then sync live from API and update everything
     initFriendships();
+    loadIncomingTransfers(); // check for offline transfers
   }
 
   // Auto-initialize on any page that has dashboard elements
@@ -1413,4 +1740,112 @@ window.deleteFile = async function(id, name, btn) {
   } catch { 
     btn.disabled = false; 
   }
-};
+};
+
+// ================= GLOBAL TRANSFER ACTIONS =================
+window.acceptTransfer = async function(transferId, btn) {
+  const email = localStorage.getItem('userEmail');
+  if (!email) return;
+  
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+  
+  try {
+    // Accept the transfer
+    const res = await fetch(`http://127.0.0.1:8000/transfer/accept/${transferId}?email=${encodeURIComponent(email)}`, {
+      method: 'POST'
+    });
+    
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || 'Failed to accept transfer');
+    }
+    
+    const data = await res.json();
+    
+    // Trigger file download
+    const downloadUrl = `http://127.0.0.1:8000/transfer/download/${transferId}?email=${encodeURIComponent(email)}`;
+    const a = document.createElement('a');
+    a.href = downloadUrl;
+    a.download = data.filename || 'received_file';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    
+    // Animate card removal
+    const card = btn.closest('.transfer-item-card');
+    if (card) {
+      card.style.transition = 'all 0.3s ease';
+      card.style.opacity = '0';
+      card.style.transform = 'translateX(30px)';
+      setTimeout(() => card.remove(), 300);
+    }
+    
+    // Show toast
+    const tc = document.querySelector('.toast-container');
+    if (tc) {
+      const toast = document.createElement('div');
+      toast.className = 'toast success slideIn';
+      toast.innerHTML = `<div class="toast-icon success"><i class="fa-solid fa-check-circle"></i></div><div class="toast-content"><div class="toast-title">File Received!</div><div class="toast-message">${data.filename} downloaded successfully</div></div>`;
+      tc.appendChild(toast);
+      setTimeout(() => { toast.classList.replace('slideIn', 'slideOut'); setTimeout(() => toast.remove(), 300); }, 3000);
+    }
+    
+    // Refresh badge
+    if (window.loadIncomingTransfers) {
+      setTimeout(() => window.loadIncomingTransfers(), 500);
+    }
+    
+  } catch (error) {
+    const tc = document.querySelector('.toast-container');
+    if (tc) {
+      const toast = document.createElement('div');
+      toast.className = 'toast error slideIn';
+      toast.innerHTML = `<div class="toast-icon error"><i class="fa-solid fa-exclamation-triangle"></i></div><div class="toast-content"><div class="toast-title">Error</div><div class="toast-message">${error.message}</div></div>`;
+      tc.appendChild(toast);
+      setTimeout(() => { toast.classList.replace('slideIn', 'slideOut'); setTimeout(() => toast.remove(), 300); }, 3000);
+    }
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-check"></i>';
+  }
+};
+
+window.declineTransfer = async function(transferId, btn) {
+  if (!confirm('Decline this transfer? The file will be permanently deleted.')) return;
+  
+  const email = localStorage.getItem('userEmail');
+  if (!email) return;
+  
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+  
+  try {
+    const res = await fetch(`http://127.0.0.1:8000/transfer/decline/${transferId}?email=${encodeURIComponent(email)}`, {
+      method: 'POST'
+    });
+    
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || 'Failed to decline transfer');
+    }
+    
+    // Animate card removal
+    const card = btn.closest('.transfer-item-card');
+    if (card) {
+      card.style.transition = 'all 0.3s ease';
+      card.style.opacity = '0';
+      card.style.transform = 'translateX(-30px)';
+      setTimeout(() => card.remove(), 300);
+    }
+    
+    // Refresh badge
+    if (window.loadIncomingTransfers) {
+      setTimeout(() => window.loadIncomingTransfers(), 500);
+    }
+    
+  } catch (error) {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+  }
+};
+

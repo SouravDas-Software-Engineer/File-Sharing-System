@@ -42,10 +42,20 @@ from Routes.files import (
     send_password_change_confirmation,
     send_delete_account_otp,
 )
+from Routes.transfer import (
+    init_transfer,
+    save_chunk,
+    complete_transfer,
+    get_incoming_transfers,
+    accept_transfer,
+    decline_transfer,
+    cleanup_expired_transfers,
+)
 
 # ─── Ensure upload directories exist ───────────────────────────────────────────
-os.makedirs("uploads/profiles", exist_ok=True)
-os.makedirs("uploads/files",    exist_ok=True)
+os.makedirs("uploads/profiles",   exist_ok=True)
+os.makedirs("uploads/files",      exist_ok=True)
+os.makedirs("uploads/transfers",  exist_ok=True)
 
 
 async def cleanup_inactive_guests(db):
@@ -83,11 +93,13 @@ async def lifespan(app: FastAPI):
                 {"$set": {"password": hashed}}
             )
             
-    # Start guest cleanup task
+    # Start background cleanup tasks
     cleanup_task = asyncio.create_task(cleanup_inactive_guests(app.db))
+    transfer_cleanup_task = asyncio.create_task(cleanup_expired_transfers(app.db))
     
     yield
     cleanup_task.cancel()
+    transfer_cleanup_task.cancel()
     app.mongodb_client.close()
 
 
@@ -146,6 +158,13 @@ class ResetRequest(BaseModel):
     email: str
     otp: str
     new_password: str
+
+class TransferInitRequest(BaseModel):
+    sender_email: str
+    recipient_username: str
+    filename: str
+    file_size: int
+    total_chunks: int
 
 
 # ─────────────────────────────────────────────────────────
@@ -485,6 +504,29 @@ async def clear_activity(email: str = Query(...)):
     await clear_user_events(app.db, email)
     return {"message": "Activity history cleared"}
 
+
+# ─── User Search (Live Autocomplete) ──────────────────────────────────────────
+@app.get("/users/search")
+async def search_users(q: str = Query(..., min_length=1), email: str = Query(...)):
+    """Live search users by partial username match. Returns up to 5 results."""
+    import re
+    pattern = re.compile(re.escape(q), re.IGNORECASE)
+    cursor = app.db.users.find({
+        "username": {"$regex": pattern},
+        "email": {"$ne": email},
+        "is_guest": {"$ne": True},
+    }, {"username": 1, "email": 1, "profile_pic_url": 1, "_id": 0}).limit(5)
+
+    results = []
+    async for user in cursor:
+        results.append({
+            "username": user.get("username"),
+            "email": user.get("email"),
+            "profile_pic": user.get("profile_pic_url"),
+        })
+    return {"results": results}
+
+
 # ─── Friendship Endpoints ──────────────────────────────────────────────────────
 @app.get("/friends/search")
 async def search_friend(username: str, current_email: str):
@@ -514,6 +556,96 @@ async def friend_respond(req: FriendActionRequest):
     if not success:
         raise HTTPException(status_code=400, detail="Could not process request")
     return {"message": f"Request {req.action}ed"}
+
+# ─── Offline File Transfer Endpoints ───────────────────────────────────────────
+
+@app.post("/transfer/init")
+async def transfer_init(req: TransferInitRequest):
+    """Initialize a new chunked file transfer."""
+    success, result = await init_transfer(
+        app.db,
+        sender_email=req.sender_email,
+        recipient_username=req.recipient_username,
+        filename=req.filename,
+        file_size=req.file_size,
+        total_chunks=req.total_chunks,
+    )
+    if not success:
+        raise HTTPException(status_code=400, detail=result)
+    return result
+
+
+@app.post("/transfer/chunk/{transfer_id}")
+async def transfer_chunk(
+    transfer_id: str,
+    sender_email: str = Form(...),
+    chunk_index: int = Form(...),
+    chunk: UploadFile = File(...),
+):
+    """Upload a single chunk of a file transfer."""
+    chunk_data = await chunk.read()
+    success, result = await save_chunk(app.db, transfer_id, sender_email, chunk_index, chunk_data)
+    if not success:
+        raise HTTPException(status_code=400, detail=result)
+    return result
+
+
+@app.post("/transfer/complete/{transfer_id}")
+async def transfer_complete(transfer_id: str, email: str = Query(...)):
+    """Finalize a chunked transfer — reassemble chunks and notify recipient."""
+    success, result = await complete_transfer(app.db, transfer_id, email)
+    if not success:
+        raise HTTPException(status_code=400, detail=result)
+    return result
+
+
+@app.get("/transfer/incoming")
+async def transfer_incoming(email: str = Query(...)):
+    """List all pending incoming transfers for a user."""
+    transfers = await get_incoming_transfers(app.db, email)
+    return {"transfers": transfers, "count": len(transfers)}
+
+
+@app.post("/transfer/accept/{transfer_id}")
+async def transfer_accept(transfer_id: str, email: str = Query(...)):
+    """Accept an incoming transfer and get the download path."""
+    success, result = await accept_transfer(app.db, transfer_id, email)
+    if not success:
+        raise HTTPException(status_code=400, detail=result)
+    return result
+
+
+@app.get("/transfer/download/{transfer_id}")
+async def transfer_download(transfer_id: str, email: str = Query(...)):
+    """Stream-download an accepted transfer file."""
+    from fastapi.responses import FileResponse
+    transfer = await app.db.file_transfers.find_one({
+        "transfer_id": transfer_id,
+        "recipient_email": email,
+        "status": {"$in": ["pending", "completed"]},
+    })
+    if not transfer:
+        raise HTTPException(status_code=404, detail="Transfer not found")
+    
+    file_path = transfer.get("file_path")
+    if not file_path or not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="File no longer available")
+    
+    return FileResponse(
+        path=file_path,
+        filename=transfer["filename"],
+        media_type="application/octet-stream",
+    )
+
+
+@app.post("/transfer/decline/{transfer_id}")
+async def transfer_decline(transfer_id: str, email: str = Query(...)):
+    """Decline an incoming transfer."""
+    success, result = await decline_transfer(app.db, transfer_id, email)
+    if not success:
+        raise HTTPException(status_code=400, detail=result)
+    return {"message": result}
+
 
 # ─── WebRTC Signaling (WebSockets) ─────────────────────────────────────────────
 class ConnectionManager:

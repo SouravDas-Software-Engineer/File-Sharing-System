@@ -58,6 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 localStorage.setItem('userFilesSent',  data.files_sent    ?? 0);
                 localStorage.setItem('userFilesRecv',  data.files_received ?? 0);
                 localStorage.setItem('userStorageMB',  data.storage_used_mb ?? 0);
+                localStorage.removeItem('isGuest');
                 if (data.profile_pic_url) {
                     localStorage.setItem('profilePicUrl', data.profile_pic_url);
                 }

@@ -154,7 +154,10 @@
         </div>
         <div class="transfer-item">
           <a href="#" style="text-decoration:none;" id="receive-files-btn">
-            <div class="transfer-circle"><i class="fa-solid fa-download" style="color:#4facfe;"></i></div>
+            <div class="transfer-circle" style="position:relative;">
+              <i class="fa-solid fa-download" style="color:#4facfe;"></i>
+              <span class="inbox-badge" id="inbox-badge" style="display:none;">0</span>
+            </div>
           </a>
           <p>Receive</p>
         </div>
@@ -195,40 +198,72 @@
       <button class="modal-close-btn" id="close-upload-modal"><i class="fa-solid fa-xmark"></i></button>
       <div class="upload-dropzone" id="upload-dropzone" style="margin-top:0;">
         <i class="fa-solid fa-cloud-arrow-up"></i>
-        <h3>Drag & Drop Files Here</h3>
+        <h3>Drag &amp; Drop Files Here</h3>
         <p>Or click to browse your device</p>
         <input type="file" id="file-input" multiple>
-        <button class="browse-btn" id="browse-btn"><i class="fa-solid fa-folder-open"></i> Browse Files</button>
+        <button type="button" class="browse-btn" id="browse-btn"><i class="fa-solid fa-folder-open"></i> Browse Files</button>
+      </div>
+      
+      <div id="upload-actions" style="display:none; flex-direction:column; gap:10px; margin-top: 15px;">
+        <button type="button" class="browse-btn" id="start-upload-btn" style="background:linear-gradient(135deg, #a855f7, #6366f1); width:100%;">
+          <i class="fa-solid fa-cloud-arrow-up"></i> Upload to Cloud
+        </button>
         
-        <div id="upload-actions" style="display:none; flex-direction:column; gap:10px; margin-top: 15px;">
-          <button class="browse-btn" id="start-upload-btn" style="background:linear-gradient(135deg, #a855f7, #6366f1); width:100%;">
-            <i class="fa-solid fa-cloud-arrow-up"></i> Upload to Cloud
-          </button>
-          
-          <div style="border-top: 1px dashed var(--border-glass); margin: 5px 0;"></div>
-          
-          <select id="p2p-target-username" style="padding:10px; border-radius:8px; border:1px solid var(--border-glass); background:var(--bg-glass); color:var(--text-main); font-family: inherit; width: 100%;">
-            <option value="">Select a Friend...</option>
-          </select>
-          <input class="guest-p2p" type="text" id="p2p-target-guest" placeholder="Enter Recipient's Username" style="display:none; padding:10px; border-radius:8px; border:1px solid var(--border-glass); background:var(--bg-glass); color:var(--text-main); font-family: inherit; width: 100%;" />
-          <button class="browse-btn" id="start-p2p-btn" style="background:linear-gradient(135deg, #10b981, #059669); width:100%;">
-            <i class="fa-solid fa-bolt"></i> Send Directly (P2P)
-          </button>
-        </div>
-        <div class="upload-progress" id="upload-progress" style="display:none;">
-          <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
-          <span id="progress-text">0%</span>
-        </div>
-        <!-- Success file list appears here -->
-        <div class="upload-success-list" id="upload-success-list"></div>
+        <div style="border-top: 1px dashed var(--border-glass); margin: 5px 0;"></div>
+        
+        <!-- Send to user - tabbed box -->
+        <div class="send-box" id="send-box">
+          <div class="send-box-tabs">
+            <button type="button" class="send-tab active" data-tab="friends" id="send-tab-friends">
+              <i class="fa-solid fa-user-group"></i> Friends
+            </button>
+            <button type="button" class="send-tab" data-tab="search" id="send-tab-search">
+              <i class="fa-solid fa-magnifying-glass"></i> Search User
+            </button>
+          </div>
 
-        <!-- Suggested Friends for quick sharing -->
-        <div class="suggested-friends" id="suggested-friends-container" style="display:none; margin-top:20px;">
+          <!-- Tab 1: Friends list -->
+          <div class="send-tab-content active" id="send-panel-friends">
+            <select id="p2p-target-username" style="padding:10px; border-radius:8px; border:1px solid var(--border-glass); background:var(--bg-glass); color:var(--text-main); font-family: inherit; width: 100%;">
+              <option value="">Select a Friend...</option>
+            </select>
+            <!-- Guest P2P input (hidden for non-guests) -->
+            <input class="guest-p2p" type="text" id="p2p-target-guest" placeholder="Enter Recipient's Username" style="display:none; padding:10px; border-radius:8px; border:1px solid var(--border-glass); background:var(--bg-glass); color:var(--text-main); font-family: inherit; width: 100%;" />
+          </div>
+
+          <!-- Tab 2: Search any user -->
+          <div class="send-tab-content" id="send-panel-search">
+            <div class="recipient-search-wrap" id="offline-recipient-wrap">
+              <i class="fa-solid fa-at"></i>
+              <input type="text" id="offline-recipient-username" placeholder="Type a username..." autocomplete="off" />
+            </div>
+            <!-- Live search results -->
+            <div class="live-search-results" id="live-search-results" style="display:none;"></div>
+            <!-- Selected user card -->
+            <div class="selected-user-card" id="selected-user-card" style="display:none;"></div>
+          </div>
+
+          <!-- Shared send buttons -->
+          <div class="send-box-buttons">
+            <button type="button" class="browse-btn" id="start-p2p-btn" style="background:linear-gradient(135deg, #10b981, #059669); flex:1;">
+              <i class="fa-solid fa-bolt"></i> Send Direct
+            </button>
+            <button type="button" class="browse-btn btn-offline-send" id="start-offline-btn" style="flex:1;">
+              <i class="fa-solid fa-paper-plane"></i> Send Server
+            </button>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
+      <div class="upload-progress" id="upload-progress" style="display:none;">
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+        <span id="progress-text">0%</span>
+      </div>
+      <!-- Success file list appears here -->
+      <div class="upload-success-list" id="upload-success-list"></div>
 
+      <!-- Suggested Friends for quick sharing -->
+      <div class="suggested-friends" id="suggested-friends-container" style="display:none; margin-top:20px;">
+      </div>
     </div>
   </div>
 
@@ -290,6 +325,24 @@
         <button id="dismiss-upgrade-btn" style="background:transparent; border:none; color:var(--text-muted); font-size:12px; margin-top:15px; cursor:pointer; text-decoration:underline;">
           Maybe Later
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Incoming Transfers Modal -->
+  <div class="modal-overlay" id="transfer-inbox-modal">
+    <div class="modal-content upload-modal-content transfer-inbox-content" style="padding-top:40px;">
+      <button class="modal-close-btn" id="close-transfer-inbox"><i class="fa-solid fa-xmark"></i></button>
+      <div style="text-align:center;">
+        <i class="fa-solid fa-inbox" style="font-size:40px; color:#4facfe; margin-bottom:12px;"></i>
+        <h3 style="margin-bottom:6px; font-weight:700;">Incoming Transfers</h3>
+        <p style="font-size:13px; color:var(--text-muted); margin-bottom:20px;">Files sent to you while you were offline</p>
+      </div>
+      <div class="transfer-inbox-scroll" id="transfer-inbox-list">
+        <div class="transfer-inbox-empty">
+          <i class="fa-solid fa-box-open"></i>
+          <p>No pending transfers</p>
+        </div>
       </div>
     </div>
   </div>

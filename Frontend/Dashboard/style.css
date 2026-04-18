@@ -1331,3 +1331,422 @@ body.dark-mode .upload-progress {
 }
 #receive-link-input { text-align: center; background: rgba(255, 255, 255, 0.08); border-color: var(--border-glass); font-weight: 500; margin-top: 10px; }
 #receive-link-input:focus { background: rgba(255, 255, 255, 0.15); box-shadow: 0 0 20px var(--neon-glow), var(--reflection); }
+
+/* ================= SEND BOX TABS ================= */
+.send-box {
+  border: 1px solid var(--border-glass);
+  border-radius: 14px;
+  background: var(--bg-glass);
+  overflow: hidden;
+}
+
+.send-box-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border-glass);
+}
+
+.send-tab {
+  flex: 1;
+  padding: 10px 0;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 12.5px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.send-tab:hover {
+  color: var(--text-main);
+  background: rgba(79, 172, 254, 0.05);
+}
+
+.send-tab.active {
+  color: #4facfe;
+  background: rgba(79, 172, 254, 0.08);
+}
+
+.send-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 20%;
+  width: 60%;
+  height: 2px;
+  background: linear-gradient(90deg, #4facfe, #00f2fe);
+  border-radius: 2px;
+}
+
+.send-tab-content {
+  display: none;
+  padding: 12px;
+}
+
+.send-tab-content.active {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.send-box-buttons {
+  display: flex;
+  gap: 8px;
+  padding: 0 12px 12px;
+}
+
+.send-box-buttons .browse-btn {
+  font-size: 12.5px;
+  padding: 9px 10px;
+}
+
+/* ================= LIVE SEARCH DROPDOWN ================= */
+.live-search-results {
+  background: var(--bg-glass-heavy);
+  border: 1px solid var(--border-glass);
+  border-radius: 10px;
+  max-height: 180px;
+  overflow-y: auto;
+  animation: slideInUp 0.2s ease;
+}
+
+.live-search-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  border-bottom: 1px solid rgba(0,0,0,0.03);
+}
+
+body.dark-mode .live-search-item {
+  border-bottom-color: rgba(255,255,255,0.04);
+}
+
+.live-search-item:last-child {
+  border-bottom: none;
+}
+
+.live-search-item:hover {
+  background: rgba(79, 172, 254, 0.08);
+}
+
+.live-search-item img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--border-glass);
+}
+
+.live-search-item .live-search-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.live-search-item .live-search-email {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.live-search-empty {
+  padding: 14px;
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+/* Selected user card */
+.selected-user-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: rgba(79, 172, 254, 0.06);
+  border: 1px solid rgba(79, 172, 254, 0.2);
+  border-radius: 10px;
+  animation: slideInUp 0.2s ease;
+}
+
+.selected-user-card img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.selected-user-card .selected-user-info {
+  flex: 1;
+}
+
+.selected-user-card .selected-user-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.selected-user-card .selected-user-email {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.selected-user-card .selected-user-clear {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px;
+  transition: color 0.15s;
+}
+
+.selected-user-card .selected-user-clear:hover {
+  color: #ef4444;
+}
+
+/* ================= TRANSFER INBOX STYLES ================= */
+
+
+/* Inbox badge on Receive circle */
+.inbox-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: linear-gradient(135deg, #f43f5e, #ef4444);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  min-width: 22px;
+  height: 22px;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.5);
+  animation: inboxPulse 2s ease-in-out infinite;
+  z-index: 2;
+}
+
+@keyframes inboxPulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 2px 8px rgba(239, 68, 68, 0.5); }
+  50% { transform: scale(1.15); box-shadow: 0 4px 16px rgba(239, 68, 68, 0.7); }
+}
+
+/* Transfer list items */
+.transfer-item-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: var(--bg-glass);
+  border: 1px solid var(--border-glass);
+  border-radius: 14px;
+  margin-bottom: 10px;
+  transition: all 0.2s ease;
+  animation: slideInUp 0.3s ease;
+}
+
+.transfer-item-card:hover {
+  border-color: rgba(79, 172, 254, 0.3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+body.dark-mode .transfer-item-card:hover {
+  box-shadow: 0 4px 20px rgba(79, 172, 254, 0.1);
+}
+
+.transfer-item-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  background: linear-gradient(135deg, rgba(79, 172, 254, 0.12), rgba(168, 85, 247, 0.12));
+  color: #4facfe;
+  flex-shrink: 0;
+  border: 1px solid var(--border-glass);
+}
+
+body.dark-mode .transfer-item-icon {
+  box-shadow: 0 0 12px rgba(79, 172, 254, 0.15);
+}
+
+.transfer-item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.transfer-item-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.transfer-item-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 3px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.transfer-item-meta .separator {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  opacity: 0.5;
+}
+
+.transfer-item-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.transfer-accept-btn,
+.transfer-decline-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid var(--border-glass);
+  background: var(--bg-glass);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.transfer-accept-btn {
+  color: #22c55e;
+}
+
+.transfer-accept-btn:hover {
+  background: #22c55e;
+  color: white;
+  border-color: #22c55e;
+  box-shadow: 0 0 14px rgba(34, 197, 94, 0.4);
+  transform: scale(1.08);
+}
+
+.transfer-decline-btn {
+  color: #ef4444;
+}
+
+.transfer-decline-btn:hover {
+  background: #ef4444;
+  color: white;
+  border-color: #ef4444;
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.4);
+  transform: scale(1.08);
+}
+
+/* Offline send button gradient */
+.btn-offline-send {
+  background: linear-gradient(135deg, #f59e0b, #f97316) !important;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
+}
+
+.btn-offline-send:hover {
+  box-shadow: 0 8px 22px rgba(245, 158, 11, 0.5) !important;
+}
+
+/* Transfer inbox modal - wider */
+.transfer-inbox-content {
+  width: 520px !important;
+  max-height: 70vh;
+}
+
+.transfer-inbox-scroll {
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.transfer-inbox-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+
+.transfer-inbox-scroll::-webkit-scrollbar-thumb {
+  background: rgba(79, 172, 254, 0.3);
+  border-radius: 3px;
+}
+
+.transfer-inbox-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-muted);
+}
+
+.transfer-inbox-empty i {
+  font-size: 42px;
+  margin-bottom: 14px;
+  opacity: 0.25;
+  display: block;
+}
+
+.transfer-inbox-empty p {
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+/* Expiry tag */
+.transfer-expiry-tag {
+  font-size: 10.5px;
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Recipient search input in upload modal */
+.recipient-search-wrap {
+  position: relative;
+  margin-top: 8px;
+}
+
+.recipient-search-wrap input {
+  width: 100%;
+  padding: 10px 10px 10px 36px;
+  border-radius: 8px;
+  border: 1px solid var(--border-glass);
+  background: var(--bg-glass);
+  color: var(--text-main);
+  font-family: inherit;
+  font-size: 13.5px;
+  outline: none;
+  transition: all 0.25s ease;
+}
+
+.recipient-search-wrap input:focus {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+}
+
+.recipient-search-wrap i {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 13px;
+}
