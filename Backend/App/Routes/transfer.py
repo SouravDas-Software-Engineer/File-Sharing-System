@@ -6,7 +6,7 @@ from datetime import datetime, timezone, timedelta
 
 
 # ─── Constants ──────────────────────────────────────────────────────────────────
-MAX_FILE_SIZE_MB = 100                      # Max single transfer: 100 MB
+MAX_FILE_SIZE_MB = 200                      # Max single transfer: 200 MB
 MAX_PENDING_QUOTA_MB = 500                  # Max total pending per sender: 500 MB
 CHUNK_SIZE_MB = 5                           # Expected chunk size: 5 MB
 TRANSFER_EXPIRY_DAYS = 2                    # Auto-delete unclaimed after 2 days
@@ -51,7 +51,7 @@ async def init_transfer(
     # Check file size limit
     file_size_mb = file_size / (1024 * 1024)
     if file_size_mb > MAX_FILE_SIZE_MB:
-        return False, f"File too large ({file_size_mb:.1f} MB). Maximum is {MAX_FILE_SIZE_MB} MB. Use P2P for larger files."
+        return False, f"File too large ({file_size_mb:.1f} MB). Maximum is {MAX_FILE_SIZE_MB} MB. Use P2P for very large files."
 
     # Check sender's pending quota
     pipeline = [

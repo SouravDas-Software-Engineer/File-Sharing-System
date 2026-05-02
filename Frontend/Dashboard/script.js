@@ -866,13 +866,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ================= OFFLINE CHUNKED TRANSFER =================
   const CHUNK_SIZE = 5 * 1024 * 1024; // 5 MB
-  const MAX_TRANSFER_SIZE = 100 * 1024 * 1024; // 100 MB
+  const MAX_TRANSFER_SIZE = 200 * 1024 * 1024; // 200 MB
 
   async function uploadChunkedTransfer(file, recipientUsername) {
     if (file.size > MAX_TRANSFER_SIZE) {
       showToast({
         title: 'File Too Large',
-        message: `Max offline transfer size is 100 MB. Use P2P for larger files.`,
+        message: `Max offline transfer size is 200 MB. Use P2P for larger files.`,
         type: 'error', duration: 5000
       });
       return;
@@ -978,7 +978,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Send Server button handler
   if (startOfflineBtn && !isGuest) {
-    startOfflineBtn.addEventListener('click', (e) => {
+    startOfflineBtn.addEventListener('click', async (e) => {
       e.stopPropagation();
       if (!pendingUploadData) return;
 
@@ -988,14 +988,24 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
+      // Capture file reference and reset UI immediately so modal can close later
       const file = pendingUploadData.files[0];
-      uploadChunkedTransfer(file, target);
 
+      // Hide the action buttons and reset the drop zone so the user can't re-submit
       if (uploadActions) uploadActions.style.display = 'none';
       const bBtn = document.getElementById('browse-btn');
       if (bBtn) bBtn.style.display = 'flex';
       pendingUploadData = null;
       window.pendingUploadData = null;
+
+      // Disable the send button during upload to prevent double-sends
+      startOfflineBtn.disabled = true;
+
+      try {
+        await uploadChunkedTransfer(file, target);
+      } finally {
+        startOfflineBtn.disabled = false;
+      }
     });
   }
 
